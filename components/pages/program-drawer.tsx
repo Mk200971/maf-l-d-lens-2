@@ -105,31 +105,34 @@ export function ProgramDrawer({
     })
   }, [rows])
 
+  const slugifyRole = (role: string) => role.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+
+  const roleList = useMemo(
+    () => Array.from(new Set(rows.map((r) => r.role))).sort(),
+    [rows],
+  )
+  const roleKeys = useMemo(() => roleList.map(slugifyRole), [roleList])
+
   const countryRole = useMemo(() => {
-    const roles = Array.from(new Set(rows.map((r) => r.role))).sort()
     const countries = Array.from(new Set(rows.map((r) => r.country))).sort()
     return countries.map((country) => {
       const entry: Record<string, string | number> = { country }
-      for (const role of roles) {
-        entry[role] = Math.round(
+      for (const role of roleList) {
+        entry[slugifyRole(role)] = Math.round(
           sumBy(rows.filter((r) => r.country === country && r.role === role), (r) => r.hours),
         )
       }
       return entry
     })
-  }, [rows])
+  }, [rows, roleList])
 
-  const roleKeys = useMemo(
-    () => Array.from(new Set(rows.map((r) => r.role))).sort(),
-    [rows],
-  )
   const roleConfig = useMemo(() => {
     const cfg: ChartConfig = {}
-    roleKeys.forEach((role, i) => {
-      cfg[role] = { label: role, color: `var(--chart-${(i % 5) + 1})` }
+    roleList.forEach((role, i) => {
+      cfg[slugifyRole(role)] = { label: role, color: `var(--chart-${(i % 5) + 1})` }
     })
     return cfg
-  }, [roleKeys])
+  }, [roleList])
 
   const feedbackFiltersActive =
     filters.bus.length > 0 || filters.countries.length > 0 || filters.roles.length > 0

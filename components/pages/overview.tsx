@@ -55,6 +55,7 @@ export function OverviewPage() {
 
   const totalHours = sumBy(hours, (r) => r.hours)
   const totalCompletions = sumBy(hours, (r) => r.completions)
+  const completionsByBU = groupSum(hours, (r) => r.bu, (r) => r.completions)
   const uniqueLearners = sumBy(reach, (r) => r.uniqueLearners)
   const avgSat = avgBy(fb, (r) => r.satisfaction, (r) => r.responses)
   const responses = sumBy(fb, (r) => r.responses)
@@ -138,7 +139,7 @@ export function OverviewPage() {
         <KpiTile
           label="Completions"
           value={formatNumber(totalCompletions)}
-          sub={`AMBU ${formatNumber(kpis.completionsByBU.AMBU)} / DBU ${formatNumber(kpis.completionsByBU.DBU)}`}
+          sub={`AMBU ${formatNumber(Math.round(completionsByBU.get('AMBU') ?? 0))} / DBU ${formatNumber(Math.round(completionsByBU.get('DBU') ?? 0))}`}
         />
         <KpiTile
           label="Unique Learners"
