@@ -49,10 +49,10 @@ function DisabledWrap({
   if (!disabled) return <>{children}</>
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <span className="cursor-not-allowed opacity-40" aria-disabled="true">
-          <span className="pointer-events-none">{children}</span>
-        </span>
+      <TooltipTrigger
+        render={<span className="cursor-not-allowed opacity-40" aria-disabled="true" />}
+      >
+        <span className="pointer-events-none">{children}</span>
       </TooltipTrigger>
       <TooltipContent side="bottom" className="max-w-56 text-pretty">
         {disabledFilterTooltip}
@@ -79,18 +79,23 @@ function MultiSelect({
   return (
     <DisabledWrap disabled={disabled}>
       <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            className={cn('h-8 gap-1.5 bg-card text-xs', selected.length > 0 && 'border-primary')}
-          >
-            {label}
-            {selected.length > 0 && (
-              <Badge className="h-4 min-w-4 rounded-full px-1 text-[10px]">{selected.length}</Badge>
-            )}
-            <ChevronDown className="size-3.5 opacity-60" aria-hidden="true" />
-          </Button>
+        <PopoverTrigger
+          render={
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn(
+                'h-8 gap-1.5 bg-card text-xs',
+                selected.length > 0 && 'border-primary',
+              )}
+            />
+          }
+        >
+          {label}
+          {selected.length > 0 && (
+            <Badge className="h-4 min-w-4 rounded-full px-1 text-[10px]">{selected.length}</Badge>
+          )}
+          <ChevronDown className="size-3.5 opacity-60" aria-hidden="true" />
         </PopoverTrigger>
         <PopoverContent align="start" className="max-h-80 w-64 overflow-y-auto p-2">
           <div className="flex flex-col gap-1">
@@ -127,7 +132,7 @@ export function FilterBar() {
     : [0, ALL_MONTHS.length - 1]
 
   return (
-    <TooltipProvider delayDuration={200}>
+    <TooltipProvider delay={200}>
       <div className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
         <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 md:px-6">
           {/* Year chips */}
@@ -200,20 +205,22 @@ export function FilterBar() {
           {/* Month range */}
           <DisabledWrap disabled={!allowed.has('month')}>
             <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className={cn(
-                    'h-8 gap-1.5 bg-card text-xs',
-                    filters.monthRange && 'border-primary',
-                  )}
-                >
-                  {filters.monthRange
-                    ? `${filters.monthRange[0]} → ${filters.monthRange[1]}`
-                    : 'Month range'}
-                  <ChevronDown className="size-3.5 opacity-60" aria-hidden="true" />
-                </Button>
+              <PopoverTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={cn(
+                      'h-8 gap-1.5 bg-card text-xs',
+                      filters.monthRange && 'border-primary',
+                    )}
+                  />
+                }
+              >
+                {filters.monthRange
+                  ? `${filters.monthRange[0]} → ${filters.monthRange[1]}`
+                  : 'Month range'}
+                <ChevronDown className="size-3.5 opacity-60" aria-hidden="true" />
               </PopoverTrigger>
               <PopoverContent align="start" className="w-72 p-4">
                 <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
