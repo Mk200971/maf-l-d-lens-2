@@ -1,5 +1,12 @@
 // dashboard-data.ts — AMBU & DBU Learning Dashboard (2025-2026)
 // GENERATED — do not hand-edit. PII-free aggregates only.
+// Source: AMBU & DBU Master 2025-2026 (Fixed).xlsx
+// Fixes applied 2026-07-11:
+//   • SLP satisfaction: "Somewhat Satisfied" now correctly maps to 4 (was 3) → Top-2-Box 78.3% → 98.6%
+//   • SLII/L2H: Excellent/Good/Satisfactory/Poor scale mapping fixed (missing "2" bucket)
+//   • Psychological Safety: migrated from broken 1-5 rescale to native 0-10 with proper NPS
+//   • New fields: kpis.avgNPS_PS, kpis.npsByProgram, feedback[].nps, feedback[].scale
+
 export const meta = {
   "yearsCovered": [
     2024,
@@ -8,16 +15,18 @@ export const meta = {
   ],
   "source": "Consolidated master (LMS learning hours + Forms/Qualtrics feedback)",
   "grainNote": "learningHours attribute-sliceable; feedback anonymous session-level (do NOT slice by BU/person).",
-  "note": "VIP feedback pending."
+  "note": "Feedback pipeline corrected 2026-07-11: SLP satisfaction remapped (98.6% top-2-box); SLII/L2H scale fixed; Psychological Safety migrated to native 0-10 with NPS. NPS is only present for 0-10 scale programs (currently: Psychological Safety)."
 } as const;
+
 export const kpis = {
   "totalLearningHours": 9918.0,
   "totalCompletions": 1557,
   "uniqueLearners": 912,
   "programsCount": 12,
-  "feedbackResponses": 1305,
-  "avgSatisfaction": 4.6,
-  "completionRatePct": 76.3,
+  "feedbackResponses": 1304,
+  "avgSatisfaction": 4.72,
+  "avgNPS_PS": 71.6,
+  "completionRatePct": 76.5,
   "learningHoursByBU": {
     "AMBU": 5884.0,
     "DBU": 4010.0,
@@ -32,8 +41,12 @@ export const kpis = {
     "AMBU": 559,
     "DBU": 350,
     "Unknown": 3
+  },
+  "npsByProgram": {
+    "2026:MAFP_Psychological_Safety": 71.6
   }
 } as const;
+
 export const programs = [
   {
     "code": "SLP",
@@ -144,6 +157,7 @@ export const programs = [
     "hasExtras": false
   }
 ];
+
 export const learningHours = [
   {
     "programCode": "2026:MAFP_Psychological_Safety",
@@ -2456,6 +2470,7 @@ export const learningHours = [
     "totalHours": 70.0
   }
 ];
+
 export const feedback = [
   {
     "programCode": "2026:MAFP_Psychological_Safety",
@@ -2463,12 +2478,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2026-04",
     "responses": 15,
-    "satisfaction": 4.6,
+    "satisfaction": 9.1,
     "objectivesClarity": null,
-    "facilitatorEffectiveness": 4.6,
-    "confidenceApplication": null,
-    "recommendation": null,
-    "recommendationRatePct": null
+    "facilitatorEffectiveness": 9.1,
+    "confidenceApplication": 8.9,
+    "recommendation": 9.0,
+    "recommendationRatePct": 90.9,
+    "nps": 64.3,
+    "scale": "0-10"
   },
   {
     "programCode": "2026:MAFP_Psychological_Safety",
@@ -2476,25 +2493,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2026-04",
     "responses": 13,
-    "satisfaction": 4.6,
+    "satisfaction": 9.1,
     "objectivesClarity": null,
-    "facilitatorEffectiveness": 4.8,
-    "confidenceApplication": null,
-    "recommendation": null,
-    "recommendationRatePct": null
-  },
-  {
-    "programCode": "2026:MAFP_Psychological_Safety",
-    "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 3 - AMBU UAE",
-    "sessionPart": "Full session",
-    "month": "2026-05",
-    "responses": 11,
-    "satisfaction": 4.7,
-    "objectivesClarity": null,
-    "facilitatorEffectiveness": 4.9,
-    "confidenceApplication": null,
-    "recommendation": null,
-    "recommendationRatePct": null
+    "facilitatorEffectiveness": 9.5,
+    "confidenceApplication": 9.2,
+    "recommendation": 9.4,
+    "recommendationRatePct": 100.0,
+    "nps": 84.6,
+    "scale": "0-10"
   },
   {
     "programCode": "2026:MAFP_Psychological_Safety",
@@ -2502,25 +2508,29 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2026-04",
     "responses": 11,
-    "satisfaction": 4.6,
+    "satisfaction": 9.1,
     "objectivesClarity": null,
-    "facilitatorEffectiveness": 4.6,
-    "confidenceApplication": null,
-    "recommendation": null,
-    "recommendationRatePct": null
+    "facilitatorEffectiveness": 9.1,
+    "confidenceApplication": 9.1,
+    "recommendation": 9.5,
+    "recommendationRatePct": 100.0,
+    "nps": 90.0,
+    "scale": "0-10"
   },
   {
     "programCode": "2026:MAFP_Psychological_Safety",
-    "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 4 - AMBU Oman",
+    "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 3 - AMBU UAE",
     "sessionPart": "Full session",
-    "month": "2026-06",
-    "responses": 16,
-    "satisfaction": 4.8,
+    "month": "2026-05",
+    "responses": 11,
+    "satisfaction": 9.4,
     "objectivesClarity": null,
-    "facilitatorEffectiveness": 4.8,
-    "confidenceApplication": null,
-    "recommendation": null,
-    "recommendationRatePct": null
+    "facilitatorEffectiveness": 9.7,
+    "confidenceApplication": 9.7,
+    "recommendation": 9.6,
+    "recommendationRatePct": 100.0,
+    "nps": 90.9,
+    "scale": "0-10"
   },
   {
     "programCode": "2026:MAFP_Psychological_Safety",
@@ -2528,64 +2538,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2026-05",
     "responses": 12,
-    "satisfaction": 4.2,
+    "satisfaction": 8.2,
     "objectivesClarity": null,
-    "facilitatorEffectiveness": 4.1,
-    "confidenceApplication": null,
-    "recommendation": null,
-    "recommendationRatePct": null
-  },
-  {
-    "programCode": "2026:MAFP_Psychological_Safety",
-    "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 5 - AMBU UAE",
-    "sessionPart": "Full session",
-    "month": "2026-06",
-    "responses": 13,
-    "satisfaction": 4.6,
-    "objectivesClarity": null,
-    "facilitatorEffectiveness": 4.8,
-    "confidenceApplication": null,
-    "recommendation": null,
-    "recommendationRatePct": null
-  },
-  {
-    "programCode": "2026:MAFP_Psychological_Safety",
-    "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 5 - DBU UAE",
-    "sessionPart": "Full session",
-    "month": "2026-06",
-    "responses": 15,
-    "satisfaction": 4.1,
-    "objectivesClarity": null,
-    "facilitatorEffectiveness": 4.3,
-    "confidenceApplication": null,
-    "recommendation": null,
-    "recommendationRatePct": null
-  },
-  {
-    "programCode": "2026:MAFP_Psychological_Safety",
-    "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 6 - AMBU UAE",
-    "sessionPart": "Full session",
-    "month": "2026-06",
-    "responses": 10,
-    "satisfaction": 4.4,
-    "objectivesClarity": null,
-    "facilitatorEffectiveness": 4.8,
-    "confidenceApplication": null,
-    "recommendation": null,
-    "recommendationRatePct": null
-  },
-  {
-    "programCode": "2026:MAFP_Psychological_Safety",
-    "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 6 - DBU UAE",
-    "sessionPart": "Full session",
-    "month": "2026-06",
-    "responses": 12,
-    "satisfaction": 4.4,
-    "objectivesClarity": null,
-    "facilitatorEffectiveness": 4.7,
-    "confidenceApplication": null,
-    "recommendation": null,
-    "recommendationRatePct": null
+    "facilitatorEffectiveness": 8.0,
+    "confidenceApplication": 9.0,
+    "recommendation": 8.7,
+    "recommendationRatePct": 100.0,
+    "nps": 50.0,
+    "scale": "0-10"
   },
   {
     "programCode": "2026:MAFP_Psychological_Safety",
@@ -2593,12 +2553,89 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2026-05",
     "responses": 11,
-    "satisfaction": 4.9,
+    "satisfaction": 9.7,
     "objectivesClarity": null,
-    "facilitatorEffectiveness": 5.0,
-    "confidenceApplication": null,
-    "recommendation": null,
-    "recommendationRatePct": null
+    "facilitatorEffectiveness": 9.9,
+    "confidenceApplication": 9.4,
+    "recommendation": 9.6,
+    "recommendationRatePct": 100.0,
+    "nps": 81.8,
+    "scale": "0-10"
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 4 - AMBU Oman",
+    "sessionPart": "Full session",
+    "month": "2026-06",
+    "responses": 16,
+    "satisfaction": 9.4,
+    "objectivesClarity": null,
+    "facilitatorEffectiveness": 9.6,
+    "confidenceApplication": 9.1,
+    "recommendation": 9.6,
+    "recommendationRatePct": 100.0,
+    "nps": 87.5,
+    "scale": "0-10"
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 5 - AMBU UAE",
+    "sessionPart": "Full session",
+    "month": "2026-06",
+    "responses": 13,
+    "satisfaction": 9.0,
+    "objectivesClarity": null,
+    "facilitatorEffectiveness": 9.5,
+    "confidenceApplication": 9.3,
+    "recommendation": 9.2,
+    "recommendationRatePct": 100.0,
+    "nps": 76.9,
+    "scale": "0-10"
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 5 - DBU UAE",
+    "sessionPart": "Full session",
+    "month": "2026-06",
+    "responses": 15,
+    "satisfaction": 7.5,
+    "objectivesClarity": null,
+    "facilitatorEffectiveness": 8.4,
+    "confidenceApplication": 8.6,
+    "recommendation": 7.5,
+    "recommendationRatePct": 66.7,
+    "nps": 21.4,
+    "scale": "0-10"
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 6 - AMBU UAE",
+    "sessionPart": "Full session",
+    "month": "2026-06",
+    "responses": 10,
+    "satisfaction": 8.7,
+    "objectivesClarity": null,
+    "facilitatorEffectiveness": 9.6,
+    "confidenceApplication": 8.9,
+    "recommendation": 9.4,
+    "recommendationRatePct": 100.0,
+    "nps": 90.0,
+    "scale": "0-10"
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 6 - DBU UAE",
+    "sessionPart": "Full session",
+    "month": "2026-06",
+    "responses": 12,
+    "satisfaction": 8.6,
+    "objectivesClarity": null,
+    "facilitatorEffectiveness": 9.4,
+    "confidenceApplication": 9.3,
+    "recommendation": 8.8,
+    "recommendationRatePct": 100.0,
+    "nps": 66.7,
+    "scale": "0-10"
   },
   {
     "programCode": "2026:MAFP_Psychological_Safety",
@@ -2606,12 +2643,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2026-07",
     "responses": 10,
-    "satisfaction": 4.6,
+    "satisfaction": 9.1,
     "objectivesClarity": null,
-    "facilitatorEffectiveness": 4.5,
-    "confidenceApplication": null,
-    "recommendation": null,
-    "recommendationRatePct": null
+    "facilitatorEffectiveness": 8.9,
+    "confidenceApplication": 9.1,
+    "recommendation": 9.2,
+    "recommendationRatePct": 100.0,
+    "nps": 70.0,
+    "scale": "0-10"
   },
   {
     "programCode": "2026:MAFP_Rise_Mall_management",
@@ -2624,7 +2663,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.7,
     "confidenceApplication": 4.6,
     "recommendation": 4.8,
-    "recommendationRatePct": 95.0
+    "recommendationRatePct": 95.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "2026:MAFP_Rise_Mall_management",
@@ -2637,7 +2678,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.6,
     "confidenceApplication": 4.5,
     "recommendation": 4.7,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "2026:MAFP_Rise_Mall_management",
@@ -2650,7 +2693,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.5,
     "confidenceApplication": 4.4,
     "recommendation": 4.7,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "2026:MAFP_Rise_Mall_management",
@@ -2663,7 +2708,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.8,
     "confidenceApplication": 4.8,
     "recommendation": 4.8,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "2026:MAFP_Rise_Mall_management",
@@ -2676,7 +2723,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.5,
     "confidenceApplication": 4.5,
     "recommendation": 4.6,
-    "recommendationRatePct": 89.5
+    "recommendationRatePct": 89.5,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "2026:MAFP_Rise_Mall_management",
@@ -2689,7 +2738,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.7,
     "confidenceApplication": 4.7,
     "recommendation": 4.9,
-    "recommendationRatePct": 95.2
+    "recommendationRatePct": 95.2,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "2026:MAFP_Rise_Mall_management",
@@ -2702,7 +2753,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.7,
     "confidenceApplication": 4.7,
     "recommendation": 4.7,
-    "recommendationRatePct": 95.0
+    "recommendationRatePct": 95.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "2026:MAFP_Rise_Mall_management",
@@ -2715,7 +2768,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.6,
     "confidenceApplication": 4.6,
     "recommendation": 4.7,
-    "recommendationRatePct": 95.5
+    "recommendationRatePct": 95.5,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "2026:MAFP_Rise_Mall_management",
@@ -2728,7 +2783,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.8,
     "confidenceApplication": 4.8,
     "recommendation": 4.8,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "2026:MAFP_Rise_Mall_management",
@@ -2741,20 +2798,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.9,
     "confidenceApplication": 4.9,
     "recommendation": 5.0,
-    "recommendationRatePct": 100.0
-  },
-  {
-    "programCode": "2026:MAF_AMBU_Path",
-    "sessionLabel": "PATH Employees Session 1 - 2026-05-18",
-    "sessionPart": "Full session",
-    "month": "2026-05",
-    "responses": 5,
-    "satisfaction": 4.8,
-    "objectivesClarity": 4.6,
-    "facilitatorEffectiveness": 4.8,
-    "confidenceApplication": 4.8,
-    "recommendation": 4.8,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "2026:MAF_AMBU_Path",
@@ -2767,7 +2813,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.7,
     "confidenceApplication": 4.8,
     "recommendation": 4.9,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "2026:MAF_AMBU_Path",
@@ -2780,7 +2828,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.9,
     "confidenceApplication": 4.7,
     "recommendation": 4.8,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "2026:MAF_AMBU_Path",
@@ -2793,7 +2843,24 @@ export const feedback = [
     "facilitatorEffectiveness": 4.9,
     "confidenceApplication": 4.7,
     "recommendation": 4.8,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Path",
+    "sessionLabel": "PATH Employees Session 1 - 2026-05-18",
+    "sessionPart": "Full session",
+    "month": "2026-05",
+    "responses": 5,
+    "satisfaction": 4.8,
+    "objectivesClarity": 4.6,
+    "facilitatorEffectiveness": 4.8,
+    "confidenceApplication": 4.8,
+    "recommendation": 4.8,
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "2026:MAF_AMBU_Path",
@@ -2806,7 +2873,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.7,
     "confidenceApplication": 4.8,
     "recommendation": 4.7,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "2026:MAF_AMBU_Resilience_Sessions",
@@ -2819,7 +2888,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.9,
     "confidenceApplication": 4.6,
     "recommendation": 4.8,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "2026:MAF_AMBU_Resilience_Sessions",
@@ -2832,7 +2903,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.8,
     "confidenceApplication": 4.5,
     "recommendation": 4.8,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "2026:MAF_DBU_6Thinking_Hats",
@@ -2845,7 +2918,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.9,
     "confidenceApplication": 4.5,
     "recommendation": 4.9,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "2026:MAF_DBU_Lean_Fundamentals",
@@ -2858,7 +2933,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.9,
     "confidenceApplication": 4.7,
     "recommendation": 4.9,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "2026:Managing_Virtual_Effectively",
@@ -2871,7 +2948,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.6,
     "confidenceApplication": 4.5,
     "recommendation": 4.9,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "2026:Managing_Virtual_Effectively",
@@ -2884,63 +2963,238 @@ export const feedback = [
     "facilitatorEffectiveness": 4.8,
     "confidenceApplication": 4.9,
     "recommendation": 5.0,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "L2H",
-    "sessionLabel": "",
+    "sessionLabel": "License to Hire",
     "sessionPart": "Full session",
     "month": "2025-11",
     "responses": 9,
     "satisfaction": 4.7,
-    "objectivesClarity": 4.6,
+    "objectivesClarity": 4.7,
     "facilitatorEffectiveness": 4.8,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": null
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLII",
-    "sessionLabel": "",
+    "sessionLabel": "SLII Oman 2024-11-12",
     "sessionPart": "Full session",
     "month": "2024-11",
-    "responses": 102,
+    "responses": 17,
+    "satisfaction": 4.9,
+    "objectivesClarity": 4.8,
+    "facilitatorEffectiveness": 4.8,
+    "confidenceApplication": null,
+    "recommendation": null,
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
+  },
+  {
+    "programCode": "SLII",
+    "sessionLabel": "SLII Oman 2024-11-13",
+    "sessionPart": "Full session",
+    "month": "2024-11",
+    "responses": 18,
+    "satisfaction": 4.9,
+    "objectivesClarity": 4.9,
+    "facilitatorEffectiveness": 4.8,
+    "confidenceApplication": null,
+    "recommendation": null,
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
+  },
+  {
+    "programCode": "SLII",
+    "sessionLabel": "SLII United Arab Emirates 2024-11-14",
+    "sessionPart": "Full session",
+    "month": "2024-11",
+    "responses": 13,
+    "satisfaction": 3.8,
+    "objectivesClarity": 3.7,
+    "facilitatorEffectiveness": 3.7,
+    "confidenceApplication": null,
+    "recommendation": null,
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
+  },
+  {
+    "programCode": "SLII",
+    "sessionLabel": "SLII United Arab Emirates 2024-11-20",
+    "sessionPart": "Full session",
+    "month": "2024-11",
+    "responses": 10,
+    "satisfaction": 5.0,
+    "objectivesClarity": 5.0,
+    "facilitatorEffectiveness": 5.0,
+    "confidenceApplication": null,
+    "recommendation": null,
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
+  },
+  {
+    "programCode": "SLII",
+    "sessionLabel": "SLII United Arab Emirates 2024-11-21",
+    "sessionPart": "Full session",
+    "month": "2024-11",
+    "responses": 16,
+    "satisfaction": 5.0,
+    "objectivesClarity": 4.8,
+    "facilitatorEffectiveness": 4.8,
+    "confidenceApplication": null,
+    "recommendation": null,
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
+  },
+  {
+    "programCode": "SLII",
+    "sessionLabel": "SLII United Arab Emirates 2024-11-25",
+    "sessionPart": "Full session",
+    "month": "2024-11",
+    "responses": 14,
     "satisfaction": 4.7,
     "objectivesClarity": 4.7,
     "facilitatorEffectiveness": 4.6,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": null
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLII",
-    "sessionLabel": "",
+    "sessionLabel": "SLII United Arab Emirates 2024-11-28",
+    "sessionPart": "Full session",
+    "month": "2024-11",
+    "responses": 14,
+    "satisfaction": 4.6,
+    "objectivesClarity": 4.7,
+    "facilitatorEffectiveness": 4.6,
+    "confidenceApplication": null,
+    "recommendation": null,
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
+  },
+  {
+    "programCode": "SLII",
+    "sessionLabel": "SLII Bahrain 2024-12-11",
     "sessionPart": "Full session",
     "month": "2024-12",
-    "responses": 21,
-    "satisfaction": 4.8,
+    "responses": 8,
+    "satisfaction": 5.0,
+    "objectivesClarity": 5.0,
+    "facilitatorEffectiveness": 5.0,
+    "confidenceApplication": null,
+    "recommendation": null,
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
+  },
+  {
+    "programCode": "SLII",
+    "sessionLabel": "SLII United Arab Emirates 2024-12-11",
+    "sessionPart": "Full session",
+    "month": "2024-12",
+    "responses": 13,
+    "satisfaction": 4.7,
+    "objectivesClarity": 4.5,
+    "facilitatorEffectiveness": 4.7,
+    "confidenceApplication": null,
+    "recommendation": null,
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
+  },
+  {
+    "programCode": "SLII",
+    "sessionLabel": "SLII Egypt 2025-02-19",
+    "sessionPart": "Full session",
+    "month": "2025-02",
+    "responses": 20,
+    "satisfaction": 5.0,
+    "objectivesClarity": 5.0,
+    "facilitatorEffectiveness": 5.0,
+    "confidenceApplication": null,
+    "recommendation": null,
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
+  },
+  {
+    "programCode": "SLII",
+    "sessionLabel": "SLII Oman 2025-02-18",
+    "sessionPart": "Full session",
+    "month": "2025-02",
+    "responses": 9,
+    "satisfaction": 4.9,
     "objectivesClarity": 4.9,
+    "facilitatorEffectiveness": 5.0,
+    "confidenceApplication": null,
+    "recommendation": null,
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
+  },
+  {
+    "programCode": "SLII",
+    "sessionLabel": "SLII Oman 2025-02-19",
+    "sessionPart": "Full session",
+    "month": "2025-02",
+    "responses": 9,
+    "satisfaction": 5.0,
+    "objectivesClarity": 4.9,
+    "facilitatorEffectiveness": 5.0,
+    "confidenceApplication": null,
+    "recommendation": null,
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
+  },
+  {
+    "programCode": "SLII",
+    "sessionLabel": "SLII United Arab Emirates 2025-02-03",
+    "sessionPart": "Full session",
+    "month": "2025-02",
+    "responses": 12,
+    "satisfaction": 4.4,
+    "objectivesClarity": 4.5,
     "facilitatorEffectiveness": 4.8,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": null
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLII",
-    "sessionLabel": "",
+    "sessionLabel": "SLII United Arab Emirates 2025-02-13",
     "sessionPart": "Full session",
     "month": "2025-02",
-    "responses": 62,
+    "responses": 12,
     "satisfaction": 4.8,
-    "objectivesClarity": 4.8,
-    "facilitatorEffectiveness": 4.9,
+    "objectivesClarity": 4.9,
+    "facilitatorEffectiveness": 4.7,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": null
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLII",
-    "sessionLabel": "",
+    "sessionLabel": "SLII United Arab Emirates 2025-05-29",
     "sessionPart": "Full session",
     "month": "2025-05",
     "responses": 14,
@@ -2949,24 +3203,28 @@ export const feedback = [
     "facilitatorEffectiveness": 4.8,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": null
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLII",
-    "sessionLabel": "",
+    "sessionLabel": "SLII Egypt 2025-06-03",
     "sessionPart": "Full session",
     "month": "2025-06",
     "responses": 19,
     "satisfaction": 4.8,
-    "objectivesClarity": 4.8,
+    "objectivesClarity": 4.9,
     "facilitatorEffectiveness": 4.9,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": null
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLII",
-    "sessionLabel": "",
+    "sessionLabel": "SLII United Arab Emirates 2025-11-24",
     "sessionPart": "Full session",
     "month": "2025-11",
     "responses": 8,
@@ -2975,7 +3233,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.9,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": null
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -2983,12 +3243,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-06",
     "responses": 18,
-    "satisfaction": 4.0,
+    "satisfaction": 4.4,
     "objectivesClarity": 4.5,
     "facilitatorEffectiveness": 4.8,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -2996,12 +3258,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-06",
     "responses": 24,
-    "satisfaction": 4.7,
+    "satisfaction": 4.9,
     "objectivesClarity": 4.5,
     "facilitatorEffectiveness": 4.8,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3009,12 +3273,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-06",
     "responses": 13,
-    "satisfaction": 4.1,
+    "satisfaction": 4.5,
     "objectivesClarity": 4.7,
     "facilitatorEffectiveness": 4.9,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 90.9
+    "recommendationRatePct": 90.9,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3022,12 +3288,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-06",
     "responses": 11,
-    "satisfaction": 4.6,
+    "satisfaction": 4.8,
     "objectivesClarity": 4.8,
     "facilitatorEffectiveness": 5.0,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3035,12 +3303,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-06",
     "responses": 21,
-    "satisfaction": 4.4,
+    "satisfaction": 4.7,
     "objectivesClarity": 4.8,
     "facilitatorEffectiveness": 4.8,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 90.0
+    "recommendationRatePct": 90.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3048,12 +3318,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-07",
     "responses": 13,
-    "satisfaction": 4.5,
+    "satisfaction": 4.7,
     "objectivesClarity": 4.2,
     "facilitatorEffectiveness": 4.7,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3061,12 +3333,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-07",
     "responses": 21,
-    "satisfaction": 4.5,
+    "satisfaction": 4.8,
     "objectivesClarity": 4.7,
     "facilitatorEffectiveness": 5.0,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3074,12 +3348,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-07",
     "responses": 13,
-    "satisfaction": 4.8,
+    "satisfaction": 4.9,
     "objectivesClarity": 4.9,
     "facilitatorEffectiveness": 4.9,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3087,12 +3363,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-07",
     "responses": 22,
-    "satisfaction": 4.7,
+    "satisfaction": 4.8,
     "objectivesClarity": 4.4,
     "facilitatorEffectiveness": 4.7,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3100,12 +3378,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-07",
     "responses": 16,
-    "satisfaction": 4.3,
+    "satisfaction": 4.4,
     "objectivesClarity": 4.8,
     "facilitatorEffectiveness": 4.7,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 93.3
+    "recommendationRatePct": 93.3,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3113,12 +3393,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-07",
     "responses": 27,
-    "satisfaction": 4.8,
+    "satisfaction": 4.9,
     "objectivesClarity": 4.9,
     "facilitatorEffectiveness": 5.0,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3131,7 +3413,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.9,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3139,12 +3423,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-07",
     "responses": 8,
-    "satisfaction": 4.8,
+    "satisfaction": 4.9,
     "objectivesClarity": 4.6,
     "facilitatorEffectiveness": 5.0,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3152,12 +3438,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-08",
     "responses": 21,
-    "satisfaction": 4.0,
+    "satisfaction": 4.4,
     "objectivesClarity": 4.9,
     "facilitatorEffectiveness": 4.8,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 94.4
+    "recommendationRatePct": 94.4,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3165,12 +3453,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-08",
     "responses": 13,
-    "satisfaction": 4.2,
+    "satisfaction": 4.6,
     "objectivesClarity": 4.5,
     "facilitatorEffectiveness": 4.5,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 90.9
+    "recommendationRatePct": 90.9,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3178,12 +3468,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-08",
     "responses": 33,
-    "satisfaction": 4.6,
+    "satisfaction": 4.8,
     "objectivesClarity": 4.6,
     "facilitatorEffectiveness": 4.6,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 93.8
+    "recommendationRatePct": 93.8,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3191,12 +3483,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-08",
     "responses": 18,
-    "satisfaction": 4.4,
+    "satisfaction": 4.6,
     "objectivesClarity": 4.4,
     "facilitatorEffectiveness": 4.8,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3204,12 +3498,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-08",
     "responses": 23,
-    "satisfaction": 4.5,
+    "satisfaction": 4.8,
     "objectivesClarity": 4.7,
     "facilitatorEffectiveness": 4.9,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3217,12 +3513,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-08",
     "responses": 20,
-    "satisfaction": 4.9,
+    "satisfaction": 5.0,
     "objectivesClarity": 4.8,
     "facilitatorEffectiveness": 5.0,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3230,12 +3528,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-09",
     "responses": 7,
-    "satisfaction": 4.7,
+    "satisfaction": 4.9,
     "objectivesClarity": 4.6,
     "facilitatorEffectiveness": 4.9,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3243,12 +3543,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-09",
     "responses": 14,
-    "satisfaction": 4.2,
+    "satisfaction": 4.5,
     "objectivesClarity": 4.6,
     "facilitatorEffectiveness": 4.6,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 84.6
+    "recommendationRatePct": 84.6,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3256,25 +3558,29 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-09",
     "responses": 18,
-    "satisfaction": 4.3,
+    "satisfaction": 4.7,
     "objectivesClarity": 4.7,
     "facilitatorEffectiveness": 4.8,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
     "sessionLabel": "MAFP_Self_Leadership_Workshop|2025-10-23|United Arab Emirates",
     "sessionPart": "Full session",
     "month": "2025-10",
-    "responses": 8,
-    "satisfaction": 4.5,
+    "responses": 7,
+    "satisfaction": 4.8,
     "objectivesClarity": 4.7,
     "facilitatorEffectiveness": 4.9,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 66.7
+    "recommendationRatePct": 66.7,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3282,12 +3588,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-10",
     "responses": 14,
-    "satisfaction": 4.6,
+    "satisfaction": 4.8,
     "objectivesClarity": 4.6,
     "facilitatorEffectiveness": 4.7,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3295,12 +3603,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-11",
     "responses": 28,
-    "satisfaction": 4.9,
+    "satisfaction": 5.0,
     "objectivesClarity": 4.8,
     "facilitatorEffectiveness": 4.8,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3313,7 +3623,9 @@ export const feedback = [
     "facilitatorEffectiveness": 5.0,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3321,12 +3633,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2025-11",
     "responses": 14,
-    "satisfaction": 4.5,
+    "satisfaction": 4.8,
     "objectivesClarity": 4.9,
     "facilitatorEffectiveness": 4.9,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "SLP",
@@ -3334,12 +3648,14 @@ export const feedback = [
     "sessionPart": "Full session",
     "month": "2026-06",
     "responses": 7,
-    "satisfaction": 4.4,
+    "satisfaction": 4.7,
     "objectivesClarity": 4.7,
     "facilitatorEffectiveness": 5.0,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "VIP",
@@ -3352,7 +3668,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.5,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "VIP",
@@ -3365,7 +3683,9 @@ export const feedback = [
     "facilitatorEffectiveness": 5.0,
     "confidenceApplication": null,
     "recommendation": null,
-    "recommendationRatePct": 100.0
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "VIP",
@@ -3378,7 +3698,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.4,
     "confidenceApplication": null,
     "recommendation": 3.9,
-    "recommendationRatePct": null
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "VIP",
@@ -3391,7 +3713,9 @@ export const feedback = [
     "facilitatorEffectiveness": 4.2,
     "confidenceApplication": null,
     "recommendation": 4.1,
-    "recommendationRatePct": null
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
   },
   {
     "programCode": "VIP",
@@ -3404,9 +3728,69 @@ export const feedback = [
     "facilitatorEffectiveness": 4.9,
     "confidenceApplication": null,
     "recommendation": 4.9,
-    "recommendationRatePct": null
+    "recommendationRatePct": null,
+    "nps": null,
+    "scale": "1-5"
   }
 ];
+
+export const completion = [
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "eligible": 209,
+    "completedEligible": 155,
+    "completionRatePct": 74.2
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "eligible": 27,
+    "completedEligible": 27,
+    "completionRatePct": 100.0
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Path",
+    "eligible": 109,
+    "completedEligible": 36,
+    "completionRatePct": 33.0
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "eligible": 285,
+    "completedEligible": 115,
+    "completionRatePct": 40.4
+  },
+  {
+    "programCode": "2026:MAF_DBU_6Thinking_Hats",
+    "eligible": 27,
+    "completedEligible": 16,
+    "completionRatePct": 59.3
+  },
+  {
+    "programCode": "2026:MAF_DBU_Lean_Fundamentals",
+    "eligible": 19,
+    "completedEligible": 8,
+    "completionRatePct": 42.1
+  },
+  {
+    "programCode": "2026:Managing_Virtual_Effectively",
+    "eligible": 37,
+    "completedEligible": 37,
+    "completionRatePct": 100.0
+  },
+  {
+    "programCode": "SLII",
+    "eligible": 337,
+    "completedEligible": 315,
+    "completionRatePct": 93.5
+  },
+  {
+    "programCode": "SLP",
+    "eligible": 609,
+    "completedEligible": 560,
+    "completionRatePct": 92.0
+  }
+];
+
 export const extras = [
   {
     "programCode": "L2H",
@@ -3548,70 +3932,6 @@ export const extras = [
   }
 ];
 
-// =============================================================================
-// completion[] — post-walk-ins completion numbers (SLP, SLII, etc.)
-// =============================================================================
-export const completion = [
-  {
-    "programCode": "2026:MAFP_Psychological_Safety",
-    "eligible": 209,
-    "completedEligible": 155,
-    "completionRatePct": 74.2
-  },
-  {
-    "programCode": "2026:MAFP_Rise_Mall_management",
-    "eligible": 27,
-    "completedEligible": 27,
-    "completionRatePct": 100.0
-  },
-  {
-    "programCode": "2026:MAF_AMBU_Path",
-    "eligible": 109,
-    "completedEligible": 36,
-    "completionRatePct": 33.0
-  },
-  {
-    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
-    "eligible": 285,
-    "completedEligible": 115,
-    "completionRatePct": 40.4
-  },
-  {
-    "programCode": "2026:MAF_DBU_6Thinking_Hats",
-    "eligible": 27,
-    "completedEligible": 16,
-    "completionRatePct": 59.3
-  },
-  {
-    "programCode": "2026:MAF_DBU_Lean_Fundamentals",
-    "eligible": 19,
-    "completedEligible": 8,
-    "completionRatePct": 42.1
-  },
-  {
-    "programCode": "Managing_Virtual_Effectively",
-    "eligible": 37,
-    "completedEligible": 37,
-    "completionRatePct": 100.0
-  },
-  {
-    "programCode": "SLII",
-    "eligible": 337,
-    "completedEligible": 315,
-    "completionRatePct": 93.5
-  },
-  {
-    "programCode": "SLP",
-    "eligible": 609,
-    "completedEligible": 560,
-    "completionRatePct": 91.9
-  }
-];
-
-// =============================================================================
-// learnerReach[] — distinct learner counts per (program, month, BU, country, role)
-// Used for Learners & Reach and Eligibility deep-dives
-// =============================================================================
 export const learnerReach = [
   {
     "programCode": "2026:MAFP_Psychological_Safety",
@@ -3693,5 +4013,1796 @@ export const learnerReach = [
     "country": "United Arab Emirates",
     "role": "Team Leader",
     "uniqueLearners": 12
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "uniqueLearners": 14
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 13
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 11
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "DBU",
+    "country": "Egypt",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 26
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "year": 2026,
+    "month": "2026-07",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "year": 2026,
+    "month": "2026-07",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 8
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Individual Contributor",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Individual Contributor",
+    "uniqueLearners": 5
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "Lebanon",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 10
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-05",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Individual Contributor",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-05",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Individual Contributor",
+    "uniqueLearners": 5
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-05",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-05",
+    "bu": "AMBU",
+    "country": "Lebanon",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-05",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-05",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-05",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 6
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-05",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Individual Contributor",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Individual Contributor",
+    "uniqueLearners": 5
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Team Leader",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "Lebanon",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "uniqueLearners": 4
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 6
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-07",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Individual Contributor",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-07",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Individual Contributor",
+    "uniqueLearners": 5
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-07",
+    "bu": "AMBU",
+    "country": "Lebanon",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-07",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-07",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-07",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 6
+  },
+  {
+    "programCode": "2026:MAFP_Rise_Mall_management",
+    "year": 2026,
+    "month": "2026-07",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Path",
+    "year": 2026,
+    "month": "2026-01",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 4
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Path",
+    "year": 2026,
+    "month": "2026-01",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 8
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Path",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Path",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 9
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Path",
+    "year": 2026,
+    "month": "2026-05",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 13
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Path",
+    "year": 2026,
+    "month": "2026-05",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "N/A",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Path",
+    "year": 2026,
+    "month": "2026-05",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 10
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Expert",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Individual Contributor",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Team Leader",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Individual Contributor",
+    "uniqueLearners": 5
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Team Leader",
+    "uniqueLearners": 5
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "Lebanon",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "uniqueLearners": 6
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 6
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 12
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "N/A",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Individual Contributor",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Team Leader",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Individual Contributor",
+    "uniqueLearners": 6
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "uniqueLearners": 13
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "N/A",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "uniqueLearners": 6
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Customer Ambassador",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 26
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "N/A",
+    "uniqueLearners": 4
+  },
+  {
+    "programCode": "2026:MAF_AMBU_Resilience_Sessions",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 6
+  },
+  {
+    "programCode": "2026:MAF_DBU_6Thinking_Hats",
+    "year": 2026,
+    "month": "2026-05",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 8
+  },
+  {
+    "programCode": "2026:MAF_DBU_6Thinking_Hats",
+    "year": 2026,
+    "month": "2026-05",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 9
+  },
+  {
+    "programCode": "2026:MAF_DBU_Lean_Fundamentals",
+    "year": 2026,
+    "month": "2026-05",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAF_DBU_Lean_Fundamentals",
+    "year": 2026,
+    "month": "2026-05",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 6
+  },
+  {
+    "programCode": "2026:MAF_DBU_Lean_Fundamentals",
+    "year": 2026,
+    "month": "2026-05",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:Managing_Virtual_Effectively",
+    "year": 2026,
+    "month": "2026-03",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:Managing_Virtual_Effectively",
+    "year": 2026,
+    "month": "2026-03",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "2026:Managing_Virtual_Effectively",
+    "year": 2026,
+    "month": "2026-03",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 6
+  },
+  {
+    "programCode": "2026:Managing_Virtual_Effectively",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Expert",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:Managing_Virtual_Effectively",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Team Leader",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "2026:Managing_Virtual_Effectively",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Individual Contributor",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "2026:Managing_Virtual_Effectively",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Team Leader",
+    "uniqueLearners": 4
+  },
+  {
+    "programCode": "2026:Managing_Virtual_Effectively",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:Managing_Virtual_Effectively",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "uniqueLearners": 4
+  },
+  {
+    "programCode": "2026:Managing_Virtual_Effectively",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 4
+  },
+  {
+    "programCode": "2026:Managing_Virtual_Effectively",
+    "year": 2026,
+    "month": "2026-04",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 9
+  },
+  {
+    "programCode": "L2H",
+    "year": 2025,
+    "month": "2025-11",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "L2H",
+    "year": 2025,
+    "month": "2025-11",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 6
+  },
+  {
+    "programCode": "L2H",
+    "year": 2025,
+    "month": "2025-11",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 6
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-10",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 11
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-10",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Business Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-10",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 17
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-11",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-11",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Business Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-11",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "uniqueLearners": 5
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-11",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "uniqueLearners": 12
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-11",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Business Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-11",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 23
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-11",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 45
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-11",
+    "bu": "DBU",
+    "country": "Egypt",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-11",
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Business Leader",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-11",
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Expert",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-11",
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "uniqueLearners": 6
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-11",
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "uniqueLearners": 5
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-11",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 7
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-11",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 39
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-12",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-12",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Team Leader",
+    "uniqueLearners": 6
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-12",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 4
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-12",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 5
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-12",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "SLII",
+    "year": 2024,
+    "month": "2024-12",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 4
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-02",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Individual Contributor",
+    "uniqueLearners": 5
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-02",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Team Leader",
+    "uniqueLearners": 10
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-02",
+    "bu": "AMBU",
+    "country": "Lebanon",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-02",
+    "bu": "AMBU",
+    "country": "Lebanon",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-02",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-02",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-02",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 8
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-02",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 8
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-02",
+    "bu": "DBU",
+    "country": "Egypt",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-02",
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Business Leader",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-02",
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Expert",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-02",
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "uniqueLearners": 7
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-02",
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "uniqueLearners": 5
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-02",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 4
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-02",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 13
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-05",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-05",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-05",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-05",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-05",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-05",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-05",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 6
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-06",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-06",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Individual Contributor",
+    "uniqueLearners": 5
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-06",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Team Leader",
+    "uniqueLearners": 12
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-06",
+    "bu": "AMBU",
+    "country": "Lebanon",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-11",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Expert",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-11",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-11",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLII",
+    "year": 2025,
+    "month": "2025-11",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 5
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-06",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Customer Ambassador",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-06",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 55
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-06",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "N/A",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-06",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 6
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-06",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 54
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-07",
+    "bu": "AMBU",
+    "country": "Lebanon",
+    "role": "Individual Contributor",
+    "uniqueLearners": 10
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-07",
+    "bu": "AMBU",
+    "country": "Lebanon",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-07",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "uniqueLearners": 37
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-07",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-07",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Customer Ambassador",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-07",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 55
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-07",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "N/A",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-07",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-07",
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "uniqueLearners": 24
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-07",
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-07",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 19
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-07",
+    "bu": "Unknown",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-08",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Individual Contributor",
+    "uniqueLearners": 47
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-08",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "N/A",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-08",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Team Leader",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-08",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 39
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-08",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 8
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-08",
+    "bu": "DBU",
+    "country": "Egypt",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-08",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 27
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-08",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-08",
+    "bu": "Unknown",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-09",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 27
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-09",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-09",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 28
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-09",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 3
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-09",
+    "bu": "Unknown",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-10",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Customer Ambassador",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-10",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 11
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-10",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-10",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 23
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-11",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Individual Contributor",
+    "uniqueLearners": 25
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-11",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "N/A",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-11",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Team Leader",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-11",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Individual Contributor",
+    "uniqueLearners": 8
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-11",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-11",
+    "bu": "DBU",
+    "country": "Egypt",
+    "role": "Individual Contributor",
+    "uniqueLearners": 15
+  },
+  {
+    "programCode": "SLP",
+    "year": 2025,
+    "month": "2025-11",
+    "bu": "DBU",
+    "country": "Egypt",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "SLP",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 6
+  },
+  {
+    "programCode": "SLP",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "TEN",
+    "year": 2025,
+    "month": "2025-11",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "TEN",
+    "year": 2025,
+    "month": "2025-11",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "TEN",
+    "year": 2025,
+    "month": "2025-11",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "TEN",
+    "year": 2025,
+    "month": "2025-11",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "TEN",
+    "year": 2025,
+    "month": "2025-11",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 12
+  },
+  {
+    "programCode": "TEN",
+    "year": 2025,
+    "month": "2025-11",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 8
+  },
+  {
+    "programCode": "VIP",
+    "year": 2024,
+    "month": "2024-10",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 14
+  },
+  {
+    "programCode": "VIP",
+    "year": 2024,
+    "month": "2024-10",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 6
+  },
+  {
+    "programCode": "VIP",
+    "year": 2025,
+    "month": "2025-02",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 12
+  },
+  {
+    "programCode": "VIP",
+    "year": 2025,
+    "month": "2025-02",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 4
+  },
+  {
+    "programCode": "VIP",
+    "year": 2025,
+    "month": "2025-05",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 11
+  },
+  {
+    "programCode": "VIP",
+    "year": 2025,
+    "month": "2025-05",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 5
+  },
+  {
+    "programCode": "VIP",
+    "year": 2025,
+    "month": "2025-09",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "uniqueLearners": 17
+  },
+  {
+    "programCode": "VIP",
+    "year": 2025,
+    "month": "2025-09",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "uniqueLearners": 5
   }
 ];
