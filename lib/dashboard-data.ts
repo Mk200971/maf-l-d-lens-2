@@ -10,8 +10,7 @@ import {
   feedback as rawFeedback,
   extras as rawExtras,
 } from './dashboard-data.raw'
-import { learnerReach } from './dashboard-data.extended'
-import { completion as realCompletion } from './dashboard-data.completion'
+import { learnerReach, completion as realCompletion } from './dashboard-data.raw'
 import type {
   ExtrasMetric,
   FeedbackRow,
