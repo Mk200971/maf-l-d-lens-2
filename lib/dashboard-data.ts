@@ -3,11 +3,12 @@
 // Replace this file's exports with your real dashboard-data.ts when ready.
 // learningHours[] and feedback[] below are DERIVED/SYNTHESIZED from the
 // extended grain + spec totals so the app is fully functional today.
-// completion[] is aggregated from the REAL eligibilityByProgram[] grain.
+// completion[] is REAL — imported from dashboard-data.completion.ts.
 // kpis are the exact contract values from the spec.
 // =============================================================================
 
-import { learnerReach, eligibilityByProgram } from './dashboard-data.extended'
+import { learnerReach } from './dashboard-data.extended'
+import { completion as realCompletion } from './dashboard-data.completion'
 import type {
   CompletionRow,
   ExtrasMetric,
@@ -131,24 +132,9 @@ if (!buSums.Unknown) {
 }
 
 // ---------------------------------------------------------------------------
-// completion[] — REAL: aggregated from eligibilityByProgram grain
+// completion[] — REAL: from dashboard-data.completion.ts (post SLP walk-ins)
 // ---------------------------------------------------------------------------
-const completionMap = new Map<string, { eligible: number; completed: number }>()
-for (const r of eligibilityByProgram) {
-  const c = completionMap.get(r.programCode) ?? { eligible: 0, completed: 0 }
-  c.eligible += r.eligible
-  c.completed += r.completedEligible
-  completionMap.set(r.programCode, c)
-}
-
-export const completion: CompletionRow[] = Array.from(completionMap.entries()).map(
-  ([programCode, c]) => ({
-    programCode,
-    eligible: c.eligible,
-    completedEligible: c.completed,
-    completionRatePct: c.eligible > 0 ? Math.round((c.completed / c.eligible) * 1000) / 10 : 0,
-  }),
-)
+export const completion: CompletionRow[] = realCompletion
 
 // ---------------------------------------------------------------------------
 // feedback[] — SYNTHESIZED session-level rows (replace with real file)
