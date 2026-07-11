@@ -318,7 +318,7 @@ export function ProgramDrawer({
                   {/* C — Eligibility */}
                   {program.hasEligibility && (
                     <TabsContent value="eligibility" className="mt-4 flex flex-col gap-4">
-                      <InfoBanner>{meta.completionNote}</InfoBanner>
+                      <InfoBanner>Completion rate is computed against the eligibility list per program. Slice by program only.</InfoBanner>
                       {comp ? (
                         <div className="flex flex-col items-center gap-4 rounded-lg border bg-card p-8">
                           <span className="text-6xl font-semibold text-accent tabular-nums">

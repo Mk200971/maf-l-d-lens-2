@@ -25,7 +25,7 @@ import {
   programName,
   sumBy,
 } from '@/lib/aggregate'
-import { kpis, meta } from '@/lib/dashboard-data'
+import { kpis } from '@/lib/dashboard-data'
 import { ChartCard, InfoBanner, KpiTile, PageHeader } from '@/components/dashboard/shared'
 
 const rateChartConfig = {
@@ -115,7 +115,7 @@ export function EligibilityPage() {
         description="Completion measured strictly against per-program eligibility lists."
       />
 
-      <InfoBanner>{meta.completionNote}</InfoBanner>
+      <InfoBanner>Completion rate is computed against the eligibility list per program. Slice by program only.</InfoBanner>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <KpiTile

@@ -230,8 +230,10 @@ export function FilterBar() {
                   min={0}
                   max={ALL_MONTHS.length - 1}
                   step={1}
-                  value={monthIdx}
-                  onValueChange={([lo, hi]) => {
+                  value={monthIdx as number[]}
+                  onValueChange={(value) => {
+                    const vals = Array.isArray(value) ? (value as number[]) : [value as number]
+                    const [lo, hi] = [vals[0] ?? 0, vals[1] ?? ALL_MONTHS.length - 1]
                     if (lo === 0 && hi === ALL_MONTHS.length - 1) setMonthRange(null)
                     else setMonthRange([ALL_MONTHS[lo], ALL_MONTHS[hi]])
                   }}

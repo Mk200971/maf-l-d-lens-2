@@ -1,8 +1,8 @@
 // Filtering + aggregation selectors. Every chart pulls data through these so
 // filter behavior stays consistent with lib/filter-rules.ts.
 
-import { eligibilityByProgram, learnerReach } from './dashboard-data.extended'
-import { completion, extras, feedback, learningHours, programs } from './dashboard-data'
+import { eligibilityByProgram } from './dashboard-data.extended'
+import { completion, extras, feedback, learningHours, programs, learnerReach } from './dashboard-data'
 import type {
   EligibilityRow,
   FeedbackRow,
