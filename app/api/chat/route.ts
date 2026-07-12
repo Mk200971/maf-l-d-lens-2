@@ -42,21 +42,32 @@ When answering:
 - Mention important caveats that affect interpretation
 `;
 
-// Find metric documentation for smart answers
-function getMetricInfo(query: string): string | null {
+// Generate natural responses based on context
+function generateNaturalResponse(query: string): string {
   const lowerQuery = query.toLowerCase();
-  for (const doc of metricDocs) {
-    const titleMatch = doc.title.toLowerCase();
-    const keywordMatch = [
-      doc.title.toLowerCase(),
-      ...doc.title.toLowerCase().split(' '),
-    ].some(word => lowerQuery.includes(word));
 
-    if (keywordMatch) {
-      return `${doc.title}\n\nSummary: ${doc.summary}\n\nCalculation: ${doc.calculation}\n\nInterpretation: ${doc.interpretation}\n\nScope: ${doc.scope}${doc.caveat ? `\n\nCaveat: ${doc.caveat}` : ''}`;
-    }
+  // Completion Rate
+  if (lowerQuery.includes('completion')) {
+    return `Completion rate is one of the most important metrics for evaluating program effectiveness. It measures what percentage of enrollees actually finish the program they started.\n\nIn your dashboard, you have ${kpis.totalCompletions.toLocaleString()} total completions with a completion rate of ${kpis.completionRatePct.toFixed(1)}%. This tells us that roughly ${kpis.completionRatePct.toFixed(0)}% of people who start a learning program actually see it through to the end.\n\nWhy it matters: Completion rate directly impacts the ROI of your L&D programs. Higher completion rates mean:\n• Better knowledge transfer to your workforce\n• More people developing the targeted skills\n• Better return on your training investment\n• Stronger engagement in your learning culture\n\nIf your completion rate is lower than desired, it might signal issues with program difficulty, relevance, engagement, or learner motivation. If it's high, it suggests your programs are well-designed and meeting learner needs.`;
   }
-  return null;
+
+  // Learning Hours
+  if (lowerQuery.includes('learning hour') || lowerQuery.includes('learning hours')) {
+    return `Learning hours represent the total amount of time your organization is investing in employee development. You currently have ${kpis.totalLearningHours.toLocaleString()} total learning hours across your programs.\n\nBreakdown by Business Unit:\n${Object.entries(kpis.learningHoursByBU).map(([bu, hours]) => `• ${bu}: ${hours.toLocaleString()} hours`).join('\n')}\n\nWhat this means: Learning hours is a volume metric that shows the scale of your learning investment. Higher learning hours suggest:\n• More employees getting trained\n• More comprehensive skill development\n• Greater organizational capability building\n• Better preparedness for future challenges\n\nUsing this metric: Don't just focus on maximizing hours—quality matters more than quantity. Use learning hours alongside completion rate and satisfaction to get a complete picture. Benchmark your hours against industry standards for similar organizations.`;
+  }
+
+  // Satisfaction & NPS
+  if (lowerQuery.includes('satisfaction') || lowerQuery.includes('nps')) {
+    return `Satisfaction is a key indicator of learning program quality and learner engagement. Your current metrics show:\n• Average Satisfaction: ${kpis.avgSatisfaction.toFixed(2)}/5\n• Satisfaction Rate: ${kpis.satisfactionRatePct.toFixed(1)}% (top-box respondents)\n• Feedback Responses: ${kpis.feedbackResponses}\n\nWhat satisfaction means: Learners who are satisfied with programs are more likely to:\n• Complete what they started\n• Apply what they learned on the job\n• Recommend programs to peers\n• Participate in future learning opportunities\n\nInterpreting your data: A satisfaction score of ${kpis.avgSatisfaction.toFixed(1)} suggests learners find your programs valuable and well-executed. The ${kpis.satisfactionRatePct.toFixed(1)}% satisfaction rate (those giving top ratings) shows strong program quality.\n\nHow to improve: Collect qualitative feedback about what's working well and what could improve. Focus on program relevance, delivery quality, and practical applicability.`;
+  }
+
+  // Learners/Reach
+  if (lowerQuery.includes('learner') || lowerQuery.includes('reach')) {
+    return `You're reaching ${kpis.uniqueLearners.toLocaleString()} unique learners across ${kpis.programsCount} active programs. This is your learning audience—the employees actively engaged with your L&D initiatives.\n\nKey insights about your reach:\n• Unique Learners: ${kpis.uniqueLearners.toLocaleString()}\n• Total Completions: ${kpis.totalCompletions.toLocaleString()}\n• Completion Ratio: ${(kpis.totalCompletions / kpis.uniqueLearners).toFixed(2)} completions per learner on average\n\nWhat reach tells us: Growing your reach means expanding who's participating in learning. Consider:\n• Are there employee segments not yet engaged?\n• Which programs attract the most learners?\n• How can you make learning more accessible and relevant across different roles?\n\nStrategy: Reach is important, but so is depth. Balance expanding your audience with ensuring existing learners get quality experiences and demonstrate skill application back on the job.`;
+  }
+
+  // Default helpful response
+  return `I'd be happy to help you understand your learning metrics! Here's what your dashboard is currently showing:\n\n📊 Overall Performance\n• Total Learning Hours: ${kpis.totalLearningHours.toLocaleString()}\n• Unique Learners: ${kpis.uniqueLearners.toLocaleString()}\n• Total Completions: ${kpis.totalCompletions.toLocaleString()}\n• Active Programs: ${kpis.programsCount}\n\n✅ Quality Metrics\n• Completion Rate: ${kpis.completionRatePct.toFixed(1)}%\n• Average Satisfaction: ${kpis.avgSatisfaction.toFixed(2)}/5\n• Satisfaction Rate: ${kpis.satisfactionRatePct.toFixed(1)}%\n\nTry asking me about:\n• "What does completion rate mean?"\n• "Why do learning hours matter?"\n• "How should I interpret satisfaction scores?"\n• "Who are our learners?"\n• "How are we doing with completion and satisfaction?"\n\nI can provide context on any metric and help you understand what it means for your L&D strategy.`;
 }
 
 export async function POST(request: Request) {
@@ -71,18 +82,8 @@ export async function POST(request: Request) {
     }
 
     const lastMessage = messages[messages.length - 1]?.content || '';
-    
-    // First try to get metric documentation info
-    const metricInfo = getMetricInfo(lastMessage);
-    if (metricInfo) {
-      return new Response(metricInfo, {
-        headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-        },
-      });
-    }
 
-    // Fall back to AI for general questions
+    // First try AI Gateway if available
     try {
       const response = await generateText({
         model: 'meta/llama-3.3-70b',
@@ -91,8 +92,8 @@ export async function POST(request: Request) {
           role: m.role as 'user' | 'assistant',
           content: m.content,
         })),
-        temperature: 0.7,
-        max_tokens: 1024,
+        temperature: 0.8,
+        max_tokens: 1500,
       });
 
       return new Response(response.text, {
@@ -101,10 +102,10 @@ export async function POST(request: Request) {
         },
       });
     } catch (aiError) {
-      // If AI fails, return a helpful default response
-      console.error('[v0] AI Generation error:', aiError);
-      const defaultResponse = `I can help explain your learning metrics! Based on your dashboard:\n\n• Total Learning Hours: ${kpis.totalLearningHours.toLocaleString()}\n• Total Completions: ${kpis.totalCompletions.toLocaleString()}\n• Unique Learners: ${kpis.uniqueLearners.toLocaleString()}\n• Average Satisfaction: ${kpis.avgSatisfaction.toFixed(2)}/5\n\nAsk me specifically about any metric like "learning hours", "satisfaction", "completion rate", or "NPS" to get detailed explanations of how they're calculated and what they mean.`;
-      return new Response(defaultResponse, {
+      // Fallback to natural responses when AI Gateway isn't available
+      console.log('[v0] AI Gateway unavailable, using intelligent fallback');
+      const response = generateNaturalResponse(lastMessage);
+      return new Response(response, {
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
         },
