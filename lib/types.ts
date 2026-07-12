@@ -243,4 +243,48 @@ export function getPsNpsForActiveBu(
 ): { bu: Bu; nps: number } | null {
   const entry = npsMap[programCode];
   if (!entry) return null;
-  const singleBu = activeBus.filter(b => b === 'AMBU' || b === 'DBU');
+  const singleBu = activeBus.filter((bu): bu is Bu => bu === 'AMBU' || bu === 'DBU');
+  if (singleBu.length !== 1) return null;
+  const bu = singleBu[0];
+  const nps = entry[bu];
+  return nps == null ? null : { bu, nps };
+}
+
+export type FilterKey =
+  | 'year'
+  | 'bu'
+  | 'country'
+  | 'role'
+  | 'program'
+  | 'session'
+  | 'month';
+
+export interface FilterState {
+  years: number[];
+  bus: string[];
+  countries: string[];
+  roles: string[];
+  programs: string[];
+  sessionIds: string[];
+  monthRange: [string, string] | null;
+}
+
+/** Aggregated eligibility grain used by dashboard charts. */
+export interface EligibilityRow {
+  programCode: string;
+  bu: string;
+  country: string;
+  role: string;
+  eligible: number;
+  completedEligible: number;
+  completionRatePct: number;
+}
+
+/** Aggregated extras metric grain used by dashboard charts. */
+export interface ExtrasMetric {
+  programCode: string;
+  metric: string;
+  value: number;
+  scaleMax: number;
+  n: number;
+}

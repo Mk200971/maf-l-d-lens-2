@@ -33,7 +33,6 @@ import {
   avgBy,
   avgNormalizedConfidence,
   avgNormalizedFacilitator,
-  avgNps,
   avgSatRatePct,
   filterFeedback,
   formatNumber,
@@ -41,6 +40,7 @@ import {
   programName,
   sumBy,
 } from '@/lib/aggregate'
+import { kpis } from '@/lib/dashboard-data'
 import { useFilters } from '@/lib/filters-context'
 import { pageBanners } from '@/lib/filter-rules'
 import { formatSatisfaction, normalizedFacilitator, normalizedSatisfaction } from '@/lib/types'
@@ -73,7 +73,23 @@ export function FeedbackPage() {
   // Use normalizedAvgSat for cross-scale average; keep native for per-program display
   const avgSat = normalizedAvgSat(fb)
   const satRatePct = avgSatRatePct(fb)
-  const npsValue = avgNps(fb)
+  const psNpsTiles = useMemo(() => {
+    const selectedPrograms = filters.programs.length > 0
+      ? filters.programs
+      : Object.keys(kpis.npsByProgramBU)
+    const selectedBus = filters.bus.filter((bu): bu is 'AMBU' | 'DBU' =>
+      bu === 'AMBU' || bu === 'DBU',
+    )
+    const bus = selectedBus.length > 0 ? selectedBus : (['AMBU', 'DBU'] as const)
+
+    return selectedPrograms.flatMap((programCode) => {
+      const values = kpis.npsByProgramBU[programCode]
+      if (!values) return []
+      return bus.flatMap((bu) =>
+        values[bu] == null ? [] : [{ programCode, bu, nps: values[bu] }],
+      )
+    })
+  }, [filters.bus, filters.programs])
   // Normalize sub-metrics to 1-5 before averaging so PS (0-10) rows don't skew results
   const avgFac = avgNormalizedFacilitator(fb)
   const avgConf = avgNormalizedConfidence(fb)
@@ -163,7 +179,7 @@ export function FeedbackPage() {
 
       <InfoBanner>{pageBanners.feedback}</InfoBanner>
 
-      <section className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7" aria-label="Feedback KPIs">
+      <section className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8" aria-label="Feedback KPIs">
         <KpiTile label="Total Responses" docId="feedback-responses" value={formatNumber(responses)} />
         <KpiTile
           label="Avg Satisfaction"
@@ -179,15 +195,16 @@ export function FeedbackPage() {
           sub="top-2-box on native scale"
           emphasis
         />
-        {npsValue != null && (
+        {psNpsTiles.map(({ programCode, bu, nps }) => (
           <KpiTile
-            label="PS NPS"
+            key={`${programCode}-${bu}`}
+            label={`PS NPS · ${bu}`}
             docId="nps"
-            value={`${npsValue.toFixed(1)}%`}
-            sub="Psychological Safety (0-10)"
+            value={`${nps.toFixed(1)}%`}
+            sub={`${programName(programCode)} · per-BU only`}
             emphasis
           />
-        )}
+        ))}
         <KpiTile label="Facilitator" docId="facilitator" value={avgFac > 0 ? `${avgFac.toFixed(2)} / 5` : '—'} />
         <KpiTile label="Confidence / Commitment" docId="confidence" value={avgConf > 0 ? `${avgConf.toFixed(2)} / 5` : '—'} />
         <KpiTile label="Recommend Rate" docId="recommend-rate" value={recRate > 0 ? `${recRate.toFixed(0)}%` : '—'} />

@@ -232,8 +232,8 @@ export function FilterBar() {
             <MultiSelect
               label="Session"
               options={availableSessions.map((session) => session.sessionId)}
-              selected={filters.sessions}
-              onToggle={(v) => toggle('sessions', v)}
+              selected={filters.sessionIds}
+              onToggle={(v) => toggle('sessionIds', v)}
               disabled={false}
               getLabel={(sessionId) =>
                 availableSessions.find((session) => session.sessionId === sessionId)?.label ?? sessionId

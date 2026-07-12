@@ -48,11 +48,10 @@ export const kpis: Kpis = {
   avgSatisfaction_PS_native: rawKpis.avgSatisfaction_PS_native,
   avgSatisfaction_PS_normalized: rawKpis.avgSatisfaction_PS_normalized,
   satisfactionRatePct_PS: rawKpis.satisfactionRatePct_PS,
-  avgNPS_PS: rawKpis.avgNPS_PS,
   // Per-program breakdowns
   satisfactionRateByProgram: rawKpis.satisfactionRateByProgram as Record<string, number>,
   avgSatisfactionByProgram: rawKpis.avgSatisfactionByProgram as Record<string, number>,
-  npsByProgram: rawKpis.npsByProgram as Record<string, number>,
+  npsByProgramBU: rawKpis.npsByProgramBU as Kpis['npsByProgramBU'],
 }
 
 // ---------------------------------------------------------------------------

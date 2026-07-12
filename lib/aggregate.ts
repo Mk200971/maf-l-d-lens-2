@@ -3,6 +3,7 @@
 
 import { eligibilityByProgram } from './dashboard-data.extended'
 import { completion, extras, feedback, learningHours, programs, learnerReach } from './dashboard-data'
+import { matchesBuFilter } from './types'
 import type {
   EligibilityRow,
   FeedbackRow,
@@ -18,7 +19,7 @@ export const emptyFilters: FilterState = {
   countries: [],
   roles: [],
   programs: [],
-  sessions: [],
+  sessionIds: [],
   monthRange: null,
 }
 
@@ -70,10 +71,6 @@ export function filterReach(
   )
 }
 
-function feedbackBuMatches(rowBu: FeedbackRow['bu'], selectedBus: string[]): boolean {
-  return selectedBus.length === 0 || rowBu === 'Mixed' || selectedBus.includes(rowBu)
-}
-
 function feedbackMatches(
   r: FeedbackRow,
   f: FilterState,
@@ -85,9 +82,9 @@ function feedbackMatches(
   return (
     (skip.has('year') || f.years.length === 0 || year === null || f.years.includes(year)) &&
     (skip.has('program') || f.programs.length === 0 || f.programs.includes(r.programCode)) &&
-    (skip.has('bu') || feedbackBuMatches(r.bu, f.bus)) &&
+    (skip.has('bu') || matchesBuFilter(r, f.bus)) &&
     (skip.has('country') || f.countries.length === 0 || f.countries.includes(r.country)) &&
-    (skip.has('session') || f.sessions.length === 0 || f.sessions.includes(r.sessionId)) &&
+    (skip.has('session') || f.sessionIds.length === 0 || f.sessionIds.includes(r.sessionId)) &&
     (skip.has('month') || r.month === null || inMonthRange(r.month, f.monthRange))
   )
 }
@@ -332,11 +329,11 @@ export function getAvailableMonths(f: FilterState): string[] {
 export function getAvailableSessions(
   f: FilterState,
 ): Array<{ sessionId: string; label: string; programCode: string; bu: string }> {
-  const sessions = new Map<string, { sessionId: string; label: string; programCode: string; bu: string }>()
+  const sessionIds = new Map<string, { sessionId: string; label: string; programCode: string; bu: string }>()
 
   for (const r of feedback.filter((row) => feedbackMatches(row, f, ['session']))) {
-    if (!r.sessionId || sessions.has(r.sessionId)) continue
-    sessions.set(r.sessionId, {
+    if (!r.sessionId || sessionIds.has(r.sessionId)) continue
+    sessionIds.set(r.sessionId, {
       sessionId: r.sessionId,
       label: `${r.sessionLabel}${r.sessionPart ? ` (${r.sessionPart})` : ''}`,
       programCode: r.programCode,
@@ -344,7 +341,7 @@ export function getAvailableSessions(
     })
   }
 
-  return Array.from(sessions.values()).sort((a, b) => a.label.localeCompare(b.label))
+  return Array.from(sessionIds.values()).sort((a, b) => a.label.localeCompare(b.label))
 }
 
 export function getAvailableFeedbackBus(f: FilterState): string[] {
