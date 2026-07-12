@@ -11,10 +11,10 @@ export function PageHeader({
   description?: string
 }) {
   return (
-    <header className="flex flex-col gap-1">
-      <h1 className="text-2xl font-semibold text-balance text-accent">{title}</h1>
+    <header className="flex flex-col gap-1 lg:gap-2">
+      <h1 className="text-2xl font-semibold text-balance text-accent lg:text-3xl xl:text-4xl">{title}</h1>
       {description && (
-        <p className="text-sm text-pretty text-muted-foreground">{description}</p>
+        <p className="text-sm text-pretty text-muted-foreground lg:text-base">{description}</p>
       )}
     </header>
   )
@@ -48,23 +48,23 @@ export function KpiTile({
   docId?: string
 }) {
   return (
-    <Card className="gap-2 py-4">
-      <CardContent className="flex flex-col gap-1 px-4">
+    <Card className="gap-2 py-4 lg:py-5">
+      <CardContent className="flex flex-col gap-1 px-4 lg:gap-1.5">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground lg:text-xs">
             {label}
           </span>
           {docId && <MetricHelp id={docId} />}
         </div>
         <span
           className={cn(
-            'text-3xl font-semibold tabular-nums',
+            'text-3xl font-semibold tabular-nums lg:text-4xl xl:text-5xl',
             emphasis ? 'text-accent' : 'text-primary',
           )}
         >
           {value}
         </span>
-        {sub && <span className="text-xs text-muted-foreground">{sub}</span>}
+        {sub && <span className="text-xs text-muted-foreground lg:text-sm">{sub}</span>}
         {children}
       </CardContent>
     </Card>
@@ -89,9 +89,9 @@ export function ChartCard({
       <CardHeader>
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-1">
-            <CardTitle className="text-base">{title}</CardTitle>
+            <CardTitle className="text-base lg:text-lg">{title}</CardTitle>
             {description && (
-              <p className="text-xs text-pretty text-muted-foreground">{description}</p>
+              <p className="text-xs text-pretty text-muted-foreground lg:text-sm">{description}</p>
             )}
           </div>
           {docId && <MetricHelp id={docId} />}

@@ -140,7 +140,7 @@ export function OverviewPage() {
       {/* Hero KPI strip — 8 tiles, 2 rows of 4 */}
       <section
         aria-label="Key performance indicators"
-        className="grid grid-cols-2 gap-3 md:grid-cols-4"
+        className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:gap-4 xl:gap-5"
       >
         {/* Row 1 — Delivery */}
         <KpiTile
@@ -197,7 +197,7 @@ export function OverviewPage() {
         />
       </section>
 
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <section className="grid grid-cols-1 gap-4 lg:gap-5 xl:gap-6 lg:grid-cols-2">
         {/* Donut / single BU big number */}
         <ChartCard
           title="Learning Hours by BU"
@@ -205,14 +205,14 @@ export function OverviewPage() {
           description={singleBU ? 'Single BU in scope — showing total.' : 'Share of total hours per business unit.'}
         >
           {singleBU ? (
-            <div className="flex h-64 flex-col items-center justify-center gap-1">
+            <div className="flex h-56 flex-col items-center justify-center gap-1 lg:h-72 xl:h-80">
               <span className="text-5xl font-semibold text-primary tabular-nums">
                 {formatNumber(donutData[0].hours)}
               </span>
               <span className="text-sm text-muted-foreground">{donutData[0].bu} hours</span>
             </div>
           ) : (
-            <ChartContainer config={buConfig} className="mx-auto h-64 w-full">
+            <ChartContainer config={buConfig} className="mx-auto h-56 w-full lg:h-72 xl:h-80">
               <PieChart>
                 <ChartTooltip content={<ChartTooltipContent nameKey="bu" />} />
                 <Pie
@@ -250,7 +250,7 @@ export function OverviewPage() {
 
         {/* Stacked area */}
         <ChartCard title="Hours by Month" docId="hours-by-month" description="AMBU vs DBU, stacked across 2024–2026.">
-          <ChartContainer config={buConfig} className="h-64 w-full">
+          <ChartContainer config={buConfig} className="h-56 w-full lg:h-72 xl:h-80">
             <AreaChart data={areaData} margin={{ left: 0, right: 8 }}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis dataKey="month" tickLine={false} axisLine={false} fontSize={11} />
@@ -279,7 +279,7 @@ export function OverviewPage() {
 
       {/* Program contribution */}
       <ChartCard title="Program Contribution" docId="program-contribution" description="Learning hours by program, sorted descending.">
-        <ChartContainer config={hoursConfig} className="h-80 w-full">
+        <ChartContainer config={hoursConfig} className="h-64 w-full lg:h-80 xl:h-96">
           <BarChart data={programBars} layout="vertical" margin={{ left: 8, right: 16 }}>
             <CartesianGrid horizontal={false} strokeDasharray="3 3" />
             <XAxis type="number" tickLine={false} axisLine={false} fontSize={11} />
@@ -298,7 +298,7 @@ export function OverviewPage() {
       </ChartCard>
 
       {/* Country heat cards */}
-      <section aria-label="Country breakdown" className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+      <section aria-label="Country breakdown" className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:gap-4 xl:grid-cols-5 xl:gap-5">
         {countryCards.map((c) => (
           <Card key={c.country} className="gap-2 py-4">
             <CardContent className="flex flex-col gap-1 px-4">

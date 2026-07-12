@@ -121,16 +121,16 @@ export function LearnersPage() {
         description="Who are we reaching? Distinct learner counts from the PII-free learnerReach grain — filterable by every field."
       />
 
-      <section className="grid grid-cols-2 gap-3 md:grid-cols-4" aria-label="Reach KPIs">
+      <section className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:gap-4 xl:gap-5" aria-label="Reach KPIs">
         <KpiTile label="Unique Learners" docId="unique-learners" value={formatNumber(totalLearners)} sub="in current filter" />
         {byBU.map((b) => (
           <KpiTile key={b.bu} label={`${b.bu} Learners`} docId="unique-learners" value={formatNumber(b.learners)} />
         ))}
       </section>
 
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <section className="grid grid-cols-1 gap-4 lg:gap-5 xl:gap-6 lg:grid-cols-2">
         <ChartCard title="Role Mix" docId="role-mix" description="Unique learners by role; use this to see who the portfolio is reaching.">
-          <ChartContainer config={roleConfig} className="mx-auto h-64 w-full">
+          <ChartContainer config={roleConfig} className="mx-auto h-56 w-full lg:h-72 xl:h-80">
             <PieChart>
               <ChartTooltip content={<ChartTooltipContent nameKey="role" />} />
               <Pie data={roleMix} dataKey="learners" nameKey="role" innerRadius={55} outerRadius={90}>
@@ -143,7 +143,7 @@ export function LearnersPage() {
         </ChartCard>
 
         <ChartCard title="Monthly Reach Curve" docId="monthly-reach" description="Monthly reach, not a cumulative deduplicated audience.">
-          <ChartContainer config={reachConfig} className="h-64 w-full">
+          <ChartContainer config={reachConfig} className="h-56 w-full lg:h-72 xl:h-80">
             <LineChart data={monthly} margin={{ left: 0, right: 8 }}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis dataKey="month" tickLine={false} axisLine={false} fontSize={11} />
@@ -213,7 +213,7 @@ export function LearnersPage() {
         docId="learner-depth"
         description="Approximate hours per learner distribution (derived from reach × hours grain)."
       >
-        <ChartContainer config={depthConfig} className="h-56 w-full">
+        <ChartContainer config={depthConfig} className="h-56 w-full lg:h-72 xl:h-80">
           <BarChart data={depth} margin={{ left: 0, right: 8 }}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={11} />

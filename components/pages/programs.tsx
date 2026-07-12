@@ -33,7 +33,7 @@ export function ProgramsPage() {
         description="All programs with delivery, feedback, eligibility, and extras signals. Click a card for the full drill-down."
       />
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-5 xl:grid-cols-3 xl:gap-6">
         {visible.map((p) => (
           <ProgramCard key={p.code} program={p} onOpen={() => setSelected(p)} />
         ))}
@@ -120,7 +120,7 @@ function ProgramCard({ program, onOpen }: { program: Program; onOpen: () => void
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2 lg:gap-3">
           <MiniKpi label="Hours" value={formatNumber(hours)} docId="learning-hours" />
           <MiniKpi 
             label="Attendees" 
