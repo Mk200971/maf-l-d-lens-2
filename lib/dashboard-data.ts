@@ -89,7 +89,10 @@ export const learningHours: LearningHoursRow[] = rawLearningHours.map((r) => ({
 export const feedback: FeedbackRow[] = rawFeedback.map((r) => ({
   programCode: r.programCode,
   sessionLabel: r.sessionLabel,
-  sessionPart: (r as any).sessionPart ?? '',
+  sessionPart: r.sessionPart ?? '',
+  sessionId: r.sessionId,
+  bu: r.bu as FeedbackRow['bu'],
+  country: r.country,
   month: r.month,
   responses: r.responses,
   scale: r.scale as import('./types').Scale,

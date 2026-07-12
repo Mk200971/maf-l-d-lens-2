@@ -35,6 +35,7 @@ import {
   sumBy,
 } from '@/lib/aggregate'
 import { kpis, meta, programs } from '@/lib/dashboard-data'
+import { filterRules } from '@/lib/filter-rules'
 import { useFilters } from '@/lib/filters-context'
 
 const buConfig = {
@@ -52,7 +53,10 @@ export function OverviewPage() {
 
   const hours = useMemo(() => filterHours(filters), [filters])
   const reach = useMemo(() => filterReach(filters), [filters])
-  const fb = useMemo(() => filterFeedback(filters), [filters])
+  const fb = useMemo(
+    () => filterFeedback(filters, [...filterRules['overview.satisfactionKpi']]),
+    [filters],
+  )
   const comp = useMemo(() => filterCompletion(filters), [filters])
 
   const totalHours = sumBy(hours, (r) => r.totalHours)

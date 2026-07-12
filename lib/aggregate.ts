@@ -70,26 +70,36 @@ export function filterReach(
   )
 }
 
+function feedbackBuMatches(rowBu: FeedbackRow['bu'], selectedBus: string[]): boolean {
+  return selectedBus.length === 0 || rowBu === 'Mixed' || selectedBus.includes(rowBu)
+}
+
+function feedbackMatches(
+  r: FeedbackRow,
+  f: FilterState,
+  ignored: FilterKey[] = [],
+): boolean {
+  const skip = new Set(ignored)
+  const year = r.month ? Number(r.month.slice(0, 4)) : null
+
+  return (
+    (skip.has('year') || f.years.length === 0 || year === null || f.years.includes(year)) &&
+    (skip.has('program') || f.programs.length === 0 || f.programs.includes(r.programCode)) &&
+    (skip.has('bu') || feedbackBuMatches(r.bu, f.bus)) &&
+    (skip.has('country') || f.countries.length === 0 || f.countries.includes(r.country)) &&
+    (skip.has('session') || f.sessions.length === 0 || f.sessions.includes(r.sessionId)) &&
+    (skip.has('month') || r.month === null || inMonthRange(r.month, f.monthRange))
+  )
+}
+
 /** Feedback grain: year (via month), program, BU, country, session, month. */
-export function filterFeedback(f: FilterState): FeedbackRow[] {
-  return feedback.filter((r) => {
-    const year = r.month ? Number(r.month.slice(0, 4)) : null
-    
-    // BU filtering: when user selects 'AMBU', include 'AMBU' and 'Mixed' cohorts
-    const buMatches = f.bus.length === 0 || 
-      f.bus.some(bu => 
-        bu === r.bu || (bu === 'AMBU' && r.bu === 'Mixed') || (bu === 'DBU' && r.bu === 'Mixed')
-      )
-    
-    return (
-      (f.years.length === 0 || year === null || f.years.includes(year)) &&
-      (f.programs.length === 0 || f.programs.includes(r.programCode)) &&
-      buMatches &&
-      (f.countries.length === 0 || f.countries.includes(r.country)) &&
-      (f.sessions.length === 0 || f.sessions.includes(r.sessionId)) &&
-      (r.month === null || inMonthRange(r.month, f.monthRange))
-    )
-  })
+export function filterFeedback(
+  f: FilterState,
+  allowed: FilterKey[] = ['year', 'bu', 'country', 'program', 'session', 'month'],
+): FeedbackRow[] {
+  const ignored = (['year', 'bu', 'country', 'program', 'session', 'month'] as FilterKey[])
+    .filter((key) => !allowed.includes(key))
+  return feedback.filter((r) => feedbackMatches(r, f, ignored))
 }
 
 /** Eligibility grain (extended): program, bu, country, role. */
@@ -229,27 +239,6 @@ export function getAvailableYears(f: FilterState): number[] {
 }
 
 export function getAvailableBus(f: FilterState): string[] {
-  // Try feedback first if any feedback records exist with selected program, otherwise use learning hours
-  const feedbackBus = Array.from(
-    new Set(
-      feedback
-        .filter((r) => {
-          const year = r.month ? Number(r.month.slice(0, 4)) : null
-          return (
-            (f.years.length === 0 || year === null || f.years.includes(year)) &&
-            (f.programs.length === 0 || f.programs.includes(r.programCode)) &&
-            (r.month === null || inMonthRange(r.month, f.monthRange))
-          )
-        })
-        .map((r) => r.bu),
-    ),
-  ).filter((bu) => bu && bu !== 'Unknown')
-  
-  // If feedback data found with these filters, use it; otherwise fall back to learning hours
-  if (feedbackBus.length > 0) {
-    return feedbackBus.sort()
-  }
-  
   return Array.from(
     new Set(
       learningHours
@@ -261,40 +250,14 @@ export function getAvailableBus(f: FilterState): string[] {
             (f.programs.length === 0 || f.programs.includes(r.programCode)) &&
             (f.monthRange === null || inMonthRange(r.month, f.monthRange)),
         )
-        .map((r) => r.bu),
+        .map((r) => r.bu as string),
     ),
-  ).filter((bu) => bu && bu !== 'Unknown')
+  )
+    .filter((bu) => bu !== 'Unknown')
+    .sort()
 }
 
 export function getAvailableCountries(f: FilterState): string[] {
-  // Try feedback first if any feedback records exist with selected filters
-  const feedbackCountries = Array.from(
-    new Set(
-      feedback
-        .filter((r) => {
-          const year = r.month ? Number(r.month.slice(0, 4)) : null
-          const buMatches = f.bus.length === 0 || 
-            f.bus.some(bu => 
-              bu === r.bu || (bu === 'AMBU' && r.bu === 'Mixed') || (bu === 'DBU' && r.bu === 'Mixed')
-            )
-          return (
-            (f.years.length === 0 || year === null || f.years.includes(year)) &&
-            (f.programs.length === 0 || f.programs.includes(r.programCode)) &&
-            buMatches &&
-            (r.month === null || inMonthRange(r.month, f.monthRange))
-          )
-        })
-        .map((r) => r.country),
-    ),
-  )
-    .filter((c) => c && c !== 'Unknown')
-    .sort()
-  
-  // If feedback data found with these filters, use it; otherwise fall back to learning hours
-  if (feedbackCountries.length > 0) {
-    return feedbackCountries
-  }
-  
   return Array.from(
     new Set(
       learningHours
@@ -309,7 +272,7 @@ export function getAvailableCountries(f: FilterState): string[] {
         .map((r) => r.country),
     ),
   )
-    .filter((c) => c && c !== 'Unknown')
+    .filter((country): country is string => Boolean(country) && country !== 'Unknown')
     .sort()
 }
 
@@ -359,88 +322,85 @@ export function getAvailableMonths(f: FilterState): string[] {
             (f.roles.length === 0 || f.roles.includes(r.role)) &&
             (f.programs.length === 0 || f.programs.includes(r.programCode)),
         )
-        .map((r) => r.month),
+        .flatMap((r) => (r.month ? [r.month] : [])),
     ),
   ).sort()
 }
 
-// Feedback-specific dynamic filters
-export function getAvailableSessions(f: FilterState): Array<{ sessionId: string; label: string; programCode: string; bu: string }> {
-  const filtered = feedback.filter((r) => {
-    const year = r.month ? Number(r.month.slice(0, 4)) : null
-    
-    // BU filtering: when user selects 'AMBU', include 'AMBU' and 'Mixed' cohorts
-    const buMatches = f.bus.length === 0 || 
-      f.bus.some(bu => 
-        bu === r.bu || (bu === 'AMBU' && r.bu === 'Mixed') || (bu === 'DBU' && r.bu === 'Mixed')
-      )
-    
-    return (
-      (f.years.length === 0 || year === null || f.years.includes(year)) &&
-      (f.programs.length === 0 || f.programs.includes(r.programCode)) &&
-      buMatches &&
-      (f.countries.length === 0 || f.countries.includes(r.country)) &&
-      (r.month === null || inMonthRange(r.month, f.monthRange))
-    )
-  })
+// Feedback-specific dynamic filters. Each option ignores only its own active
+// selection, so combined filters remain stable and predictable.
+export function getAvailableSessions(
+  f: FilterState,
+): Array<{ sessionId: string; label: string; programCode: string; bu: string }> {
+  const sessions = new Map<string, { sessionId: string; label: string; programCode: string; bu: string }>()
 
-  // Deduplicate by sessionId and return sorted list
-  const seen = new Set<string>()
-  const result: Array<{ sessionId: string; label: string; programCode: string; bu: string }> = []
-  
-  for (const r of filtered) {
-    if (!seen.has(r.sessionId)) {
-      seen.add(r.sessionId)
-      result.push({
-        sessionId: r.sessionId,
-        label: `${r.sessionLabel}${r.sessionPart ? ` (${r.sessionPart})` : ''}`,
-        programCode: r.programCode,
-        bu: r.bu,
-      })
-    }
+  for (const r of feedback.filter((row) => feedbackMatches(row, f, ['session']))) {
+    if (!r.sessionId || sessions.has(r.sessionId)) continue
+    sessions.set(r.sessionId, {
+      sessionId: r.sessionId,
+      label: `${r.sessionLabel}${r.sessionPart ? ` (${r.sessionPart})` : ''}`,
+      programCode: r.programCode,
+      bu: r.bu,
+    })
   }
 
-  return result.sort((a, b) => a.label.localeCompare(b.label))
+  return Array.from(sessions.values()).sort((a, b) => a.label.localeCompare(b.label))
 }
 
 export function getAvailableFeedbackBus(f: FilterState): string[] {
+  const rows = feedback.filter((r) => feedbackMatches(r, f, ['bu']))
   const bus = new Set<string>()
-  const year = f.years.length === 0 ? null : f.years[0]
-  
-  for (const r of feedback) {
-    const feedYear = r.month ? Number(r.month.slice(0, 4)) : null
-    if ((year === null || feedYear === year) &&
-        (f.programs.length === 0 || f.programs.includes(r.programCode)) &&
-        (f.countries.length === 0 || f.countries.includes(r.country)) &&
-        (r.month === null || inMonthRange(r.month, f.monthRange))) {
+
+  for (const r of rows) {
+    if (r.bu === 'Mixed') {
+      bus.add('AMBU')
+      bus.add('DBU')
+    } else {
       bus.add(r.bu)
     }
   }
 
-  // Convert set to display array: keep distinct values
   return Array.from(bus).sort()
 }
 
 export function getAvailableFeedbackCountries(f: FilterState): string[] {
-  const countries = new Set<string>()
-  const year = f.years.length === 0 ? null : f.years[0]
-  
-  for (const r of feedback) {
-    const feedYear = r.month ? Number(r.month.slice(0, 4)) : null
-    
-    // Check BU matches for feedback
-    const buMatches = f.bus.length === 0 || 
-      f.bus.some(bu => 
-        bu === r.bu || (bu === 'AMBU' && r.bu === 'Mixed') || (bu === 'DBU' && r.bu === 'Mixed')
-      )
-    
-    if ((year === null || feedYear === year) &&
-        (f.programs.length === 0 || f.programs.includes(r.programCode)) &&
-        buMatches &&
-        (r.month === null || inMonthRange(r.month, f.monthRange))) {
-      countries.add(r.country)
-    }
-  }
+  return Array.from(
+    new Set(
+      feedback
+        .filter((r) => feedbackMatches(r, f, ['country']))
+        .map((r) => r.country)
+        .filter((country): country is string => Boolean(country) && country !== 'Unknown'),
+    ),
+  ).sort()
+}
 
-  return Array.from(countries).sort()
+export function getAvailableFeedbackPrograms(f: FilterState): string[] {
+  return Array.from(
+    new Set(
+      feedback
+        .filter((r) => feedbackMatches(r, f, ['program']))
+        .map((r) => r.programCode)
+        .filter(Boolean),
+    ),
+  ).sort()
+}
+
+export function getAvailableFeedbackYears(f: FilterState): number[] {
+  return Array.from(
+    new Set(
+      feedback
+        .filter((r) => feedbackMatches(r, f, ['year']))
+        .flatMap((r) => (r.month ? [Number(r.month.slice(0, 4))] : [])),
+    ),
+  ).sort((a, b) => a - b)
+}
+
+export function getAvailableFeedbackMonths(f: FilterState): string[] {
+  return Array.from(
+    new Set(
+      feedback
+        .filter((r) => feedbackMatches(r, f, ['month']))
+        .flatMap((r) => (r.month ? [r.month] : [])),
+    ),
+  ).sort()
 }

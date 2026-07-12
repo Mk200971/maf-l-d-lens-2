@@ -17,9 +17,15 @@ import {
 import {
   getAvailableBus,
   getAvailableCountries,
+  getAvailableFeedbackBus,
+  getAvailableFeedbackCountries,
+  getAvailableFeedbackMonths,
+  getAvailableFeedbackPrograms,
+  getAvailableFeedbackYears,
   getAvailableMonths,
   getAvailablePrograms,
   getAvailableRoles,
+  getAvailableSessions,
   getAvailableYears,
 } from '@/lib/aggregate'
 import { programs } from '@/lib/dashboard-data'
@@ -126,12 +132,24 @@ export function FilterBar() {
   const allowed = new Set<FilterKey>(pageFilterRules[pageId])
   const { filters, toggle, setMonthRange, reset, activeCount } = useFilters()
 
-  const availableYears = getAvailableYears(filters)
-  const availableBus = getAvailableBus(filters)
-  const availableCountries = getAvailableCountries(filters)
+  const isFeedback = pageId === 'feedback'
+  const availableYears = isFeedback
+    ? getAvailableFeedbackYears(filters)
+    : getAvailableYears(filters)
+  const availableBus = isFeedback
+    ? getAvailableFeedbackBus(filters)
+    : getAvailableBus(filters)
+  const availableCountries = isFeedback
+    ? getAvailableFeedbackCountries(filters)
+    : getAvailableCountries(filters)
   const availableRoles = getAvailableRoles(filters)
-  const availablePrograms = getAvailablePrograms(filters)
-  const availableMonths = getAvailableMonths(filters)
+  const availablePrograms = isFeedback
+    ? getAvailableFeedbackPrograms(filters)
+    : getAvailablePrograms(filters)
+  const availableMonths = isFeedback
+    ? getAvailableFeedbackMonths(filters)
+    : getAvailableMonths(filters)
+  const availableSessions = isFeedback ? getAvailableSessions(filters) : []
 
   const monthIdx: [number, number] = filters.monthRange
     ? [
@@ -210,6 +228,18 @@ export function FilterBar() {
             disabled={!allowed.has('program')}
             getLabel={(code) => programs.find((p) => p.code === code)?.displayName ?? code}
           />
+          {allowed.has('session') && (
+            <MultiSelect
+              label="Session"
+              options={availableSessions.map((session) => session.sessionId)}
+              selected={filters.sessions}
+              onToggle={(v) => toggle('sessions', v)}
+              disabled={false}
+              getLabel={(sessionId) =>
+                availableSessions.find((session) => session.sessionId === sessionId)?.label ?? sessionId
+              }
+            />
+          )}
 
           {/* Month range */}
           <DisabledWrap disabled={!allowed.has('month')}>
