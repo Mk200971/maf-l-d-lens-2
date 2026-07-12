@@ -164,15 +164,17 @@ export function FeedbackPage() {
       <InfoBanner>{pageBanners.feedback}</InfoBanner>
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7" aria-label="Feedback KPIs">
-        <KpiTile label="Total Responses" value={formatNumber(responses)} />
+        <KpiTile label="Total Responses" docId="feedback-responses" value={formatNumber(responses)} />
         <KpiTile
           label="Avg Satisfaction"
+          docId="avg-satisfaction"
           value={avgSat > 0 ? `${avgSat.toFixed(2)} / 5` : '—'}
           sub="normalized 1-5, cross-program"
           emphasis
         />
         <KpiTile
           label="Satisfaction Rate"
+          docId="satisfaction-rate"
           value={satRatePct > 0 ? `${satRatePct.toFixed(1)}%` : '—'}
           sub="top-2-box on native scale"
           emphasis
@@ -180,18 +182,19 @@ export function FeedbackPage() {
         {npsValue != null && (
           <KpiTile
             label="PS NPS"
+            docId="nps"
             value={`${npsValue.toFixed(1)}%`}
             sub="Psychological Safety (0-10)"
             emphasis
           />
         )}
-        <KpiTile label="Facilitator" value={avgFac > 0 ? `${avgFac.toFixed(2)} / 5` : '—'} />
-        <KpiTile label="Confidence / Commitment" value={avgConf > 0 ? `${avgConf.toFixed(2)} / 5` : '—'} />
-        <KpiTile label="Recommend Rate" value={recRate > 0 ? `${recRate.toFixed(0)}%` : '—'} />
+        <KpiTile label="Facilitator" docId="facilitator" value={avgFac > 0 ? `${avgFac.toFixed(2)} / 5` : '—'} />
+        <KpiTile label="Confidence / Commitment" docId="confidence" value={avgConf > 0 ? `${avgConf.toFixed(2)} / 5` : '—'} />
+        <KpiTile label="Recommend Rate" docId="recommend-rate" value={recRate > 0 ? `${recRate.toFixed(0)}%` : '—'} />
       </section>
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <ChartCard title="Satisfaction Distribution" description="Session count per satisfaction band.">
+        <ChartCard title="Satisfaction Distribution" docId="satisfaction-distribution" description="Session count per satisfaction band.">
           <ChartContainer config={histConfig} className="h-64 w-full">
             <BarChart data={hist} margin={{ left: 0, right: 8 }}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -205,6 +208,7 @@ export function FeedbackPage() {
 
         <ChartCard
           title="Facilitator vs Satisfaction"
+          docId="feedback-comparison"
           description="Each dot is a session; size = number of responses."
         >
           <ChartContainer config={scatterConfig} className="h-64 w-full">
@@ -239,6 +243,7 @@ export function FeedbackPage() {
 
       <ChartCard
         title="Program Benchmark"
+        docId="feedback-comparison"
         description="Average satisfaction per program with min–max whiskers."
       >
         <ChartContainer config={benchConfig} className="h-72 w-full">
@@ -272,7 +277,7 @@ export function FeedbackPage() {
         <SessionTable title="Needs Attention (Bottom 5)" rows={worst} tone="worst" />
       </section>
 
-      <ChartCard title="Monthly Satisfaction Trend" description="Response-weighted average per month.">
+      <ChartCard title="Monthly Satisfaction Trend" docId="satisfaction-trend" description="Response-weighted average per month.">
         <ChartContainer config={trendConfig} className="h-64 w-full">
           <LineChart data={trend} margin={{ left: 0, right: 8 }}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -293,6 +298,7 @@ export function FeedbackPage() {
       {undated.length > 0 && (
         <ChartCard
           title="Undated (VIP) Sessions"
+          docId="undated-sessions"
           description="VIP feedback rows carry no month — shown separately so they never silently disappear from time-based charts."
         >
           <SessionRows rows={undated} />

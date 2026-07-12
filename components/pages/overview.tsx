@@ -141,44 +141,52 @@ export function OverviewPage() {
         {/* Row 1 — Delivery */}
         <KpiTile
           label="Learning Hours"
+          docId="learning-hours"
           value={formatNumber(totalHours)}
           sub={`AMBU ${formatNumber(Math.round(completionsByBU.get('AMBU') ?? 0))} · DBU ${formatNumber(Math.round(completionsByBU.get('DBU') ?? 0))} completions`}
         />
         <KpiTile
           label="Total Completions"
+          docId="completions"
           value={formatNumber(totalCompletions)}
           sub={`AMBU ${formatNumber(Math.round(completionsByBU.get('AMBU') ?? 0))} · DBU ${formatNumber(Math.round(completionsByBU.get('DBU') ?? 0))}`}
         />
         <KpiTile
           label="Unique Learners"
+          docId="unique-learners"
           value={formatNumber(uniqueLearners)}
           sub="distinct learners (PII-free grain)"
         />
         <KpiTile
           label="Programs Active"
+          docId="active-programs"
           value={String(activePrograms.length)}
           sub={`${kpis.programsCount} total across 2024–2026`}
         />
         {/* Row 2 — Quality */}
         <KpiTile
           label="Avg Satisfaction"
+          docId="avg-satisfaction"
           value={avgSat > 0 ? `${avgSat.toFixed(2)} / 5` : '—'}
           sub="normalized to 1-5, cross-program weighted"
           emphasis
         />
         <KpiTile
           label="Satisfaction Rate"
+          docId="satisfaction-rate"
           value={satRatePct > 0 ? `${satRatePct.toFixed(1)}%` : '—'}
           sub="top-2-box on native scale"
           emphasis
         />
         <KpiTile
           label="Feedback Responses"
+          docId="feedback-responses"
           value={formatNumber(responses)}
           sub={`${formatNumber(kpis.feedbackResponses)} total across all programs`}
         />
         <KpiTile
           label="Completion Rate"
+          docId="completion-rate"
           value={`${completionRate.toFixed(1)}%`}
           sub={`${formatNumber(completed)} / ${formatNumber(eligible)} eligible`}
           emphasis
@@ -189,6 +197,7 @@ export function OverviewPage() {
         {/* Donut / single BU big number */}
         <ChartCard
           title="Learning Hours by BU"
+          docId="hours-by-bu"
           description={singleBU ? 'Single BU in scope — showing total.' : 'Share of total hours per business unit.'}
         >
           {singleBU ? (
@@ -236,7 +245,7 @@ export function OverviewPage() {
         </ChartCard>
 
         {/* Stacked area */}
-        <ChartCard title="Hours by Month" description="AMBU vs DBU, stacked across 2024–2026.">
+        <ChartCard title="Hours by Month" docId="hours-by-month" description="AMBU vs DBU, stacked across 2024–2026.">
           <ChartContainer config={buConfig} className="h-64 w-full">
             <AreaChart data={areaData} margin={{ left: 0, right: 8 }}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -265,7 +274,7 @@ export function OverviewPage() {
       </section>
 
       {/* Program contribution */}
-      <ChartCard title="Program Contribution" description="Learning hours by program, sorted descending.">
+      <ChartCard title="Program Contribution" docId="program-contribution" description="Learning hours by program, sorted descending.">
         <ChartContainer config={hoursConfig} className="h-80 w-full">
           <BarChart data={programBars} layout="vertical" margin={{ left: 8, right: 16 }}>
             <CartesianGrid horizontal={false} strokeDasharray="3 3" />

@@ -79,6 +79,7 @@ export function ExtrasPage() {
       {uplift !== null && skillBefore && skillAfter && (
         <ChartCard
           title="SLP self-reported skill uplift"
+          docId="skill-uplift"
           description={`Before vs after the Store Leadership Program (n=${skillBefore.n}).`}
         >
           <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:gap-6">
@@ -119,6 +120,7 @@ export function ExtrasPage() {
       {likert.length > 0 && (
         <ChartCard
           title="Session logistics & value (of 5)"
+          docId="likert-signals"
           description="Catering, venue, engagement, and perceived value by program."
         >
           <ChartContainer config={likertConfig} className="h-[360px] w-full">
@@ -152,6 +154,7 @@ export function ExtrasPage() {
             <KpiTile
               key={r.key}
               label={`${r.program} — ${r.metric}`}
+              docId="rate-signals"
               value={`${r.pct}%`}
               sub={`n=${r.n} respondents`}
               emphasis

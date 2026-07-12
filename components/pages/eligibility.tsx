@@ -120,16 +120,19 @@ export function EligibilityPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <KpiTile
           label="Eligible (filtered)"
+          docId="eligible"
           value={formatNumber(totals.eligible)}
           sub={`Total: ${formatNumber(completion.reduce((s, r) => s + r.eligible, 0))}`}
         />
         <KpiTile
           label="Completed (eligible)"
+          docId="completed-eligible"
           value={formatNumber(totals.completed)}
           sub={`Total: ${formatNumber(completion.reduce((s, r) => s + r.completedEligible, 0))}`}
         />
         <KpiTile
           label="Completion rate"
+          docId="completion-rate"
           value={`${totals.rate.toFixed(1)}%`}
           sub={`Contract: ${kpis.completionRatePct}%`}
           emphasis
@@ -139,6 +142,7 @@ export function EligibilityPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ChartCard
           title="Eligible vs completed by program"
+          docId="eligibility-funnel"
           description="Funnel per program — the completion denominator is the eligibility list."
         >
           <ChartContainer config={funnelConfig} className="h-[340px] w-full">
@@ -162,6 +166,7 @@ export function EligibilityPage() {
 
         <ChartCard
           title="Completion rate by program"
+          docId="completion-rate"
           description="Green ≥ 80%, amber 60–79%, red < 60%."
         >
           <ChartContainer config={rateChartConfig} className="h-[340px] w-full">
@@ -194,7 +199,7 @@ export function EligibilityPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <ChartCard title="Completion by business unit">
+        <ChartCard title="Completion by business unit" docId="eligibility-breakdowns">
           <div className="flex flex-col gap-4">
             {byBu.map((b) => (
               <div key={b.bu} className="flex flex-col gap-1.5">
@@ -213,7 +218,7 @@ export function EligibilityPage() {
           </div>
         </ChartCard>
 
-        <ChartCard title="Top roles by eligible population">
+        <ChartCard title="Top roles by eligible population" docId="eligibility-breakdowns">
           <div className="flex flex-col gap-3">
             {byRole.map((r) => (
               <div key={r.role} className="flex flex-col gap-1">
@@ -232,6 +237,7 @@ export function EligibilityPage() {
 
       <ChartCard
         title="Program detail"
+        docId="eligibility-breakdowns"
         description="Eligible, completed, and completion rate per program."
       >
         <Table>

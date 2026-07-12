@@ -5,6 +5,7 @@ import { CheckCircle2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { MetricHelp } from '@/components/dashboard/metric-help'
 import { PageHeader } from '@/components/dashboard/shared'
 import { ProgramDrawer } from '@/components/pages/program-drawer'
 import { avgBy, filterHours, filterReach, formatNumber, normalizedAvgSat, sumBy } from '@/lib/aggregate'
@@ -103,14 +104,14 @@ function ProgramCard({ program, onOpen }: { program: Program; onOpen: () => void
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <div className="grid grid-cols-3 gap-2">
-          <MiniKpi label="Hours" value={formatNumber(hours)} />
-          <MiniKpi label="Completions" value={formatNumber(completions)} />
-          <MiniKpi label="Learners" value={formatNumber(learners)} />
+          <MiniKpi label="Hours" value={formatNumber(hours)} docId="learning-hours" />
+          <MiniKpi label="Completions" value={formatNumber(completions)} docId="completions" />
+          <MiniKpi label="Learners" value={formatNumber(learners)} docId="unique-learners" />
         </div>
         {program.hasEligibility && comp && (
           <div className="flex flex-col gap-1">
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Completion rate</span>
+            <div className="flex items-center justify-between gap-2 text-xs">
+              <span className="flex items-center gap-1 text-muted-foreground">Completion rate <MetricHelp id="completion-rate" /></span>
               <span className="font-medium tabular-nums">
                 {comp.completionRatePct.toFixed(1)}%
               </span>
@@ -132,10 +133,13 @@ function ProgramCard({ program, onOpen }: { program: Program; onOpen: () => void
   )
 }
 
-function MiniKpi({ label, value }: { label: string; value: string }) {
+function MiniKpi({ label, value, docId }: { label: string; value: string; docId: string }) {
   return (
     <div className="rounded-md bg-muted px-2 py-1.5">
-      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</p>
+      <div className="flex items-center justify-between gap-1">
+        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</p>
+        <MetricHelp id={docId} />
+      </div>
       <p className="text-sm font-semibold tabular-nums">{value}</p>
     </div>
   )

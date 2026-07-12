@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { ChevronDown, RotateCcw } from 'lucide-react'
+import { MetricGuide } from '@/components/dashboard/metric-help'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -246,6 +247,10 @@ export function FilterBar() {
               </PopoverContent>
             </Popover>
           </DisabledWrap>
+
+          <div className="ml-auto">
+            <MetricGuide />
+          </div>
 
           {activeCount > 0 && (
             <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-xs" onClick={reset}>

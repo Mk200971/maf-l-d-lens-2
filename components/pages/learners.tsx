@@ -122,14 +122,14 @@ export function LearnersPage() {
       />
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4" aria-label="Reach KPIs">
-        <KpiTile label="Unique Learners" value={formatNumber(totalLearners)} sub="in current filter" />
+        <KpiTile label="Unique Learners" docId="unique-learners" value={formatNumber(totalLearners)} sub="in current filter" />
         {byBU.map((b) => (
-          <KpiTile key={b.bu} label={`${b.bu} Learners`} value={formatNumber(b.learners)} />
+          <KpiTile key={b.bu} label={`${b.bu} Learners`} docId="unique-learners" value={formatNumber(b.learners)} />
         ))}
       </section>
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <ChartCard title="Role Mix" description="Unique learners by role.">
+        <ChartCard title="Role Mix" docId="role-mix" description="Unique learners by role; use this to see who the portfolio is reaching.">
           <ChartContainer config={roleConfig} className="mx-auto h-64 w-full">
             <PieChart>
               <ChartTooltip content={<ChartTooltipContent nameKey="role" />} />
@@ -142,7 +142,7 @@ export function LearnersPage() {
           </ChartContainer>
         </ChartCard>
 
-        <ChartCard title="Monthly Reach Curve" description="Unique learners reached per month.">
+        <ChartCard title="Monthly Reach Curve" docId="monthly-reach" description="Monthly reach, not a cumulative deduplicated audience.">
           <ChartContainer config={reachConfig} className="h-64 w-full">
             <LineChart data={monthly} margin={{ left: 0, right: 8 }}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -161,7 +161,7 @@ export function LearnersPage() {
         </ChartCard>
       </section>
 
-      <ChartCard title="Country × Role Heatmap" description="Learning hours by country and role.">
+      <ChartCard title="Country × Role Heatmap" docId="country-role-hours" description="Learning hours by country and role; darker cells indicate more hours in this view.">
         <div className="overflow-x-auto">
           <table className="w-full border-separate border-spacing-1 text-xs">
             <thead>
@@ -210,6 +210,7 @@ export function LearnersPage() {
 
       <ChartCard
         title="Learner Depth"
+        docId="learner-depth"
         description="Approximate hours per learner distribution (derived from reach × hours grain)."
       >
         <ChartContainer config={depthConfig} className="h-56 w-full">
