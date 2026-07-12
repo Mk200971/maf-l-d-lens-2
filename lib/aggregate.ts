@@ -22,8 +22,12 @@ export const emptyFilters: FilterState = {
 }
 
 export const ALL_YEARS = [2024, 2025, 2026]
-export const ALL_BUS = ['AMBU', 'DBU', 'Unknown']
-export const ALL_COUNTRIES = Array.from(new Set(learningHours.map((r) => r.country))).sort()
+export const ALL_BUS = ['AMBU', 'DBU'].filter((bu) =>
+  learningHours.some((r) => r.bu === bu),
+)
+export const ALL_COUNTRIES = Array.from(new Set(learningHours.map((r) => r.country)))
+  .filter((c) => c !== 'Unknown')
+  .sort()
 export const ALL_ROLES = Array.from(new Set(learningHours.map((r) => r.role))).sort()
 export const ALL_MONTHS = Array.from(new Set(learningHours.map((r) => r.month))).sort()
 
@@ -196,4 +200,106 @@ export function programName(code: string): string {
 
 export function formatNumber(n: number): string {
   return n.toLocaleString('en-US', { maximumFractionDigits: 0 })
+}
+
+// Dynamic filter options based on current filter state
+export function getAvailableYears(f: FilterState): number[] {
+  return ALL_YEARS.filter((year) =>
+    learningHours.some(
+      (r) =>
+        r.year === year &&
+        (f.bus.length === 0 || f.bus.includes(r.bu)) &&
+        (f.countries.length === 0 || f.countries.includes(r.country)) &&
+        (f.roles.length === 0 || f.roles.includes(r.role)) &&
+        (f.programs.length === 0 || f.programs.includes(r.programCode)) &&
+        (f.monthRange === null || inMonthRange(r.month, f.monthRange)),
+    ),
+  )
+}
+
+export function getAvailableBus(f: FilterState): string[] {
+  return Array.from(
+    new Set(
+      learningHours
+        .filter(
+          (r) =>
+            (f.years.length === 0 || f.years.includes(r.year)) &&
+            (f.countries.length === 0 || f.countries.includes(r.country)) &&
+            (f.roles.length === 0 || f.roles.includes(r.role)) &&
+            (f.programs.length === 0 || f.programs.includes(r.programCode)) &&
+            (f.monthRange === null || inMonthRange(r.month, f.monthRange)),
+        )
+        .map((r) => r.bu),
+    ),
+  ).filter((bu) => bu !== 'Unknown')
+}
+
+export function getAvailableCountries(f: FilterState): string[] {
+  return Array.from(
+    new Set(
+      learningHours
+        .filter(
+          (r) =>
+            (f.years.length === 0 || f.years.includes(r.year)) &&
+            (f.bus.length === 0 || f.bus.includes(r.bu)) &&
+            (f.roles.length === 0 || f.roles.includes(r.role)) &&
+            (f.programs.length === 0 || f.programs.includes(r.programCode)) &&
+            (f.monthRange === null || inMonthRange(r.month, f.monthRange)),
+        )
+        .map((r) => r.country),
+    ),
+  )
+    .filter((c) => c !== 'Unknown')
+    .sort()
+}
+
+export function getAvailableRoles(f: FilterState): string[] {
+  return Array.from(
+    new Set(
+      learningHours
+        .filter(
+          (r) =>
+            (f.years.length === 0 || f.years.includes(r.year)) &&
+            (f.bus.length === 0 || f.bus.includes(r.bu)) &&
+            (f.countries.length === 0 || f.countries.includes(r.country)) &&
+            (f.programs.length === 0 || f.programs.includes(r.programCode)) &&
+            (f.monthRange === null || inMonthRange(r.month, f.monthRange)),
+        )
+        .map((r) => r.role),
+    ),
+  ).sort()
+}
+
+export function getAvailablePrograms(f: FilterState): string[] {
+  return Array.from(
+    new Set(
+      learningHours
+        .filter(
+          (r) =>
+            (f.years.length === 0 || f.years.includes(r.year)) &&
+            (f.bus.length === 0 || f.bus.includes(r.bu)) &&
+            (f.countries.length === 0 || f.countries.includes(r.country)) &&
+            (f.roles.length === 0 || f.roles.includes(r.role)) &&
+            (f.monthRange === null || inMonthRange(r.month, f.monthRange)),
+        )
+        .map((r) => r.programCode),
+    ),
+  ).sort()
+}
+
+export function getAvailableMonths(f: FilterState): string[] {
+  return Array.from(
+    new Set(
+      learningHours
+        .filter(
+          (r) =>
+            (f.years.length === 0 || f.years.includes(r.year)) &&
+            (f.bus.length === 0 || f.bus.includes(r.bu)) &&
+            (f.countries.length === 0 || f.countries.includes(r.country)) &&
+            (f.roles.length === 0 || f.roles.includes(r.role)) &&
+            (f.programs.length === 0 || f.programs.includes(r.programCode)),
+        )
+        .map((r) => r.month),
+    ),
+  ).sort()
 }

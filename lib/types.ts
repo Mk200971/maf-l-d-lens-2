@@ -2,7 +2,7 @@
 // Updated 2026-07-12: added Scale union, satisfactionRatePct/nps fields,
 // PS-specific KPIs, and eligibilityByProgram grain.
 
-export type Bu = 'AMBU' | 'DBU' | 'Unknown';
+export type Bu = 'AMBU' | 'DBU';
 export type BuScope = 'AMBU' | 'DBU' | 'AMBU+DBU';
 export type Role =
   | 'Individual Contributor'
@@ -16,8 +16,7 @@ export type Country =
   | 'Egypt'
   | 'Oman'
   | 'Bahrain'
-  | 'Lebanon'
-  | 'Unknown';
+  | 'Lebanon';
 export type Scale = '1-5' | '0-10';
 
 export interface Meta {

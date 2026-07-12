@@ -15,11 +15,12 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import {
-  ALL_BUS,
-  ALL_COUNTRIES,
-  ALL_MONTHS,
-  ALL_ROLES,
-  ALL_YEARS,
+  getAvailableBus,
+  getAvailableCountries,
+  getAvailableMonths,
+  getAvailablePrograms,
+  getAvailableRoles,
+  getAvailableYears,
 } from '@/lib/aggregate'
 import { programs } from '@/lib/dashboard-data'
 import {
@@ -125,12 +126,19 @@ export function FilterBar() {
   const allowed = new Set<FilterKey>(pageFilterRules[pageId])
   const { filters, toggle, setMonthRange, reset, activeCount } = useFilters()
 
+  const availableYears = getAvailableYears(filters)
+  const availableBus = getAvailableBus(filters)
+  const availableCountries = getAvailableCountries(filters)
+  const availableRoles = getAvailableRoles(filters)
+  const availablePrograms = getAvailablePrograms(filters)
+  const availableMonths = getAvailableMonths(filters)
+
   const monthIdx: [number, number] = filters.monthRange
     ? [
-        Math.max(0, ALL_MONTHS.indexOf(filters.monthRange[0])),
-        Math.max(0, ALL_MONTHS.indexOf(filters.monthRange[1])),
+        Math.max(0, availableMonths.indexOf(filters.monthRange[0])),
+        Math.max(0, availableMonths.indexOf(filters.monthRange[1])),
       ]
-    : [0, ALL_MONTHS.length - 1]
+    : [0, availableMonths.length - 1]
 
   return (
     <TooltipProvider delay={200}>
@@ -139,7 +147,7 @@ export function FilterBar() {
           {/* Year chips */}
           <DisabledWrap disabled={!allowed.has('year')}>
             <div className="flex items-center gap-1" role="group" aria-label="Filter by year">
-              {ALL_YEARS.map((y) => (
+              {availableYears.map((y) => (
                 <button
                   key={y}
                   type="button"
@@ -161,7 +169,7 @@ export function FilterBar() {
           {/* BU chips */}
           <DisabledWrap disabled={!allowed.has('bu')}>
             <div className="flex items-center gap-1" role="group" aria-label="Filter by business unit">
-              {ALL_BUS.map((bu) => (
+              {availableBus.map((bu) => (
                 <button
                   key={bu}
                   type="button"
@@ -182,21 +190,21 @@ export function FilterBar() {
 
           <MultiSelect
             label="Country"
-            options={ALL_COUNTRIES}
+            options={availableCountries}
             selected={filters.countries}
             onToggle={(v) => toggle('countries', v)}
             disabled={!allowed.has('country')}
           />
           <MultiSelect
             label="Role"
-            options={ALL_ROLES}
+            options={availableRoles}
             selected={filters.roles}
             onToggle={(v) => toggle('roles', v)}
             disabled={!allowed.has('role')}
           />
           <MultiSelect
             label="Program"
-            options={programs.map((p) => p.code)}
+            options={availablePrograms}
             selected={filters.programs}
             onToggle={(v) => toggle('programs', v)}
             disabled={!allowed.has('program')}
@@ -229,20 +237,20 @@ export function FilterBar() {
                 </p>
                 <Slider
                   min={0}
-                  max={ALL_MONTHS.length - 1}
+                  max={availableMonths.length - 1}
                   step={1}
                   value={monthIdx as number[]}
                   onValueChange={(value) => {
                     const vals = Array.isArray(value) ? (value as number[]) : [value as number]
-                    const [lo, hi] = [vals[0] ?? 0, vals[1] ?? ALL_MONTHS.length - 1]
-                    if (lo === 0 && hi === ALL_MONTHS.length - 1) setMonthRange(null)
-                    else setMonthRange([ALL_MONTHS[lo] ?? ALL_MONTHS[0] ?? '', ALL_MONTHS[hi] ?? ALL_MONTHS[ALL_MONTHS.length - 1] ?? ''])
+                    const [lo, hi] = [vals[0] ?? 0, vals[1] ?? availableMonths.length - 1]
+                    if (lo === 0 && hi === availableMonths.length - 1) setMonthRange(null)
+                    else setMonthRange([availableMonths[lo] ?? availableMonths[0] ?? '', availableMonths[hi] ?? availableMonths[availableMonths.length - 1] ?? ''])
                   }}
                   aria-label="Month range"
                 />
                 <div className="mt-2 flex justify-between text-xs text-muted-foreground">
-                  <span>{ALL_MONTHS[monthIdx[0]]}</span>
-                  <span>{ALL_MONTHS[monthIdx[1]]}</span>
+                  <span>{availableMonths[monthIdx[0]]}</span>
+                  <span>{availableMonths[monthIdx[1]]}</span>
                 </div>
               </PopoverContent>
             </Popover>
