@@ -1,16 +1,20 @@
 'use client';
 
-import { useChat } from '@ai-sdk/react';
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Send, Loader2, BarChart3 } from 'lucide-react';
 import MetricsChart from '@/components/MetricsChart';
 
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export default function MetricsAIPage() {
   const [inputValue, setInputValue] = useState('');
-  const { messages, isLoading, append } = useChat({
-    api: '/api/chat',
-  });
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
@@ -22,6 +26,43 @@ export default function MetricsAIPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const sendMessage = async (content: string) => {
+    if (!content.trim()) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content,
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInputValue('');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+        }),
+      });
+
+      const text = await response.text();
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: text,
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error('[v0] Error sending message:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const suggestedQuestions = [
     'What does learning hours measure and how is it calculated?',
@@ -60,9 +101,7 @@ export default function MetricsAIPage() {
                 {suggestedQuestions.map((question, idx) => (
                   <button
                     key={idx}
-                    onClick={() => {
-                      append({ role: 'user', content: question });
-                    }}
+                    onClick={() => sendMessage(question)}
                     className="w-full text-left p-3 rounded-lg bg-card border border-border hover:bg-accent transition-colors text-sm"
                   >
                     {question}
@@ -106,10 +145,7 @@ export default function MetricsAIPage() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              if (inputValue.trim()) {
-                append({ role: 'user', content: inputValue });
-                setInputValue('');
-              }
+              sendMessage(inputValue);
             }}
             className="flex gap-2"
           >
