@@ -11,20 +11,20 @@ export type PageId =
   | 'eligibility'
   | 'extras'
 
-export const ALL_FILTERS: FilterKey[] = ['year', 'bu', 'country', 'role', 'program', 'month']
+export const ALL_FILTERS: FilterKey[] = ['year', 'bu', 'country', 'role', 'program', 'month', 'session']
 
 export const pageFilterRules: Record<PageId, FilterKey[]> = {
   overview: ['year', 'bu', 'country', 'role', 'program', 'month'],
   programs: ['year', 'bu', 'country', 'role', 'program', 'month'],
   learners: ['year', 'bu', 'country', 'role', 'program', 'month'],
-  feedback: ['year', 'program', 'month'],
+  feedback: ['year', 'bu', 'country', 'program', 'session', 'month'],
   eligibility: ['program'],
   extras: ['program'],
 }
 
 export const pageBanners: Partial<Record<PageId, string>> = {
   feedback:
-    'Feedback is anonymous session-level. BU, Country, and Role filters are disabled on this page.',
+    'Feedback is anonymous session-level. Filter by BU (includes Mixed cohorts), Country, Program, or Session.',
   eligibility:
     'Completion rate is computed against the eligibility list per program. Slice by program only.',
   extras: 'Extras are program-level rollups. Slice by program only.',

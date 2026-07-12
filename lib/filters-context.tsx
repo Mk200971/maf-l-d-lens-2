@@ -7,7 +7,7 @@ import { emptyFilters } from './aggregate'
 interface FiltersContextValue {
   filters: FilterState
   setFilters: (f: FilterState) => void
-  toggle: (key: 'years' | 'bus' | 'countries' | 'roles' | 'programs', value: string | number) => void
+  toggle: (key: 'years' | 'bus' | 'countries' | 'roles' | 'programs' | 'sessions', value: string | number) => void
   setMonthRange: (range: [string, string] | null) => void
   reset: () => void
   activeCount: number
@@ -19,7 +19,7 @@ export function FiltersProvider({ children }: { children: React.ReactNode }) {
   const [filters, setFilters] = useState<FilterState>(emptyFilters)
 
   const toggle = useCallback(
-    (key: 'years' | 'bus' | 'countries' | 'roles' | 'programs', value: string | number) => {
+    (key: 'years' | 'bus' | 'countries' | 'roles' | 'programs' | 'sessions', value: string | number) => {
       setFilters((prev) => {
         const list = prev[key] as (string | number)[]
         const next = list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
@@ -42,6 +42,7 @@ export function FiltersProvider({ children }: { children: React.ReactNode }) {
       filters.countries.length +
       filters.roles.length +
       filters.programs.length +
+      filters.sessions.length +
       (filters.monthRange ? 1 : 0),
     [filters],
   )

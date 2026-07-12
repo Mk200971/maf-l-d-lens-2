@@ -102,6 +102,11 @@ export interface FeedbackRow {
   nps: number | null;
 
   scale: Scale;
+
+  // BU & Session filtering
+  bu: 'AMBU' | 'DBU' | 'Mixed';             // Business Unit: single BU, or Mixed for shared cohorts
+  country: Country | string;                // Country of delivery
+  sessionId: string;                        // Stable ID: ${programCode}::${sessionLabel}::${month}
 }
 
 export interface CompletionRow {
@@ -196,7 +201,7 @@ export function normalizedRecommendation(row: FeedbackRow): number | null {
 /** @deprecated Use Bu */
 export type BU = Bu
 
-export type FilterKey = 'year' | 'bu' | 'country' | 'role' | 'program' | 'month'
+export type FilterKey = 'year' | 'bu' | 'country' | 'role' | 'program' | 'month' | 'session'
 
 export interface FilterState {
   years: number[]
@@ -204,6 +209,7 @@ export interface FilterState {
   countries: string[]
   roles: string[]
   programs: string[]
+  sessions: string[]
   monthRange: [string, string] | null
 }
 

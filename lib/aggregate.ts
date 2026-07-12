@@ -18,6 +18,7 @@ export const emptyFilters: FilterState = {
   countries: [],
   roles: [],
   programs: [],
+  sessions: [],
   monthRange: null,
 }
 
@@ -69,13 +70,23 @@ export function filterReach(
   )
 }
 
-/** Feedback grain: year (via month), program, month ONLY. */
+/** Feedback grain: year (via month), program, BU, country, session, month. */
 export function filterFeedback(f: FilterState): FeedbackRow[] {
   return feedback.filter((r) => {
     const year = r.month ? Number(r.month.slice(0, 4)) : null
+    
+    // BU filtering: when user selects 'AMBU', include 'AMBU' and 'Mixed' cohorts
+    const buMatches = f.bus.length === 0 || 
+      f.bus.some(bu => 
+        bu === r.bu || (bu === 'AMBU' && r.bu === 'Mixed') || (bu === 'DBU' && r.bu === 'Mixed')
+      )
+    
     return (
       (f.years.length === 0 || year === null || f.years.includes(year)) &&
       (f.programs.length === 0 || f.programs.includes(r.programCode)) &&
+      buMatches &&
+      (f.countries.length === 0 || f.countries.includes(r.country)) &&
+      (f.sessions.length === 0 || f.sessions.includes(r.sessionId)) &&
       (r.month === null || inMonthRange(r.month, f.monthRange))
     )
   })
@@ -302,4 +313,85 @@ export function getAvailableMonths(f: FilterState): string[] {
         .map((r) => r.month),
     ),
   ).sort()
+}
+
+// Feedback-specific dynamic filters
+export function getAvailableSessions(f: FilterState): Array<{ sessionId: string; label: string; programCode: string; bu: string }> {
+  const filtered = feedback.filter((r) => {
+    const year = r.month ? Number(r.month.slice(0, 4)) : null
+    
+    // BU filtering: when user selects 'AMBU', include 'AMBU' and 'Mixed' cohorts
+    const buMatches = f.bus.length === 0 || 
+      f.bus.some(bu => 
+        bu === r.bu || (bu === 'AMBU' && r.bu === 'Mixed') || (bu === 'DBU' && r.bu === 'Mixed')
+      )
+    
+    return (
+      (f.years.length === 0 || year === null || f.years.includes(year)) &&
+      (f.programs.length === 0 || f.programs.includes(r.programCode)) &&
+      buMatches &&
+      (f.countries.length === 0 || f.countries.includes(r.country)) &&
+      (r.month === null || inMonthRange(r.month, f.monthRange))
+    )
+  })
+
+  // Deduplicate by sessionId and return sorted list
+  const seen = new Set<string>()
+  const result: Array<{ sessionId: string; label: string; programCode: string; bu: string }> = []
+  
+  for (const r of filtered) {
+    if (!seen.has(r.sessionId)) {
+      seen.add(r.sessionId)
+      result.push({
+        sessionId: r.sessionId,
+        label: `${r.sessionLabel}${r.sessionPart ? ` (${r.sessionPart})` : ''}`,
+        programCode: r.programCode,
+        bu: r.bu,
+      })
+    }
+  }
+
+  return result.sort((a, b) => a.label.localeCompare(b.label))
+}
+
+export function getAvailableFeedbackBus(f: FilterState): string[] {
+  const bus = new Set<string>()
+  const year = f.years.length === 0 ? null : f.years[0]
+  
+  for (const r of feedback) {
+    const feedYear = r.month ? Number(r.month.slice(0, 4)) : null
+    if ((year === null || feedYear === year) &&
+        (f.programs.length === 0 || f.programs.includes(r.programCode)) &&
+        (f.countries.length === 0 || f.countries.includes(r.country)) &&
+        (r.month === null || inMonthRange(r.month, f.monthRange))) {
+      bus.add(r.bu)
+    }
+  }
+
+  // Convert set to display array: keep distinct values
+  return Array.from(bus).sort()
+}
+
+export function getAvailableFeedbackCountries(f: FilterState): string[] {
+  const countries = new Set<string>()
+  const year = f.years.length === 0 ? null : f.years[0]
+  
+  for (const r of feedback) {
+    const feedYear = r.month ? Number(r.month.slice(0, 4)) : null
+    
+    // Check BU matches for feedback
+    const buMatches = f.bus.length === 0 || 
+      f.bus.some(bu => 
+        bu === r.bu || (bu === 'AMBU' && r.bu === 'Mixed') || (bu === 'DBU' && r.bu === 'Mixed')
+      )
+    
+    if ((year === null || feedYear === year) &&
+        (f.programs.length === 0 || f.programs.includes(r.programCode)) &&
+        buMatches &&
+        (r.month === null || inMonthRange(r.month, f.monthRange))) {
+      countries.add(r.country)
+    }
+  }
+
+  return Array.from(countries).sort()
 }
