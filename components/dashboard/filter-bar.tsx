@@ -105,7 +105,7 @@ function MultiSelect({
           )}
           <ChevronDown className="size-3.5 opacity-60" aria-hidden="true" />
         </PopoverTrigger>
-        <PopoverContent align="start" className="max-h-80 w-64 overflow-y-auto p-2">
+        <PopoverContent align="start" className="max-h-80 w-80 overflow-y-auto p-2">
           <div className="flex flex-col gap-1">
             {options.map((opt) => (
               <label
@@ -116,7 +116,7 @@ function MultiSelect({
                   checked={selected.includes(opt)}
                   onCheckedChange={() => onToggle(opt)}
                 />
-                <span className="truncate">{getLabel ? getLabel(opt) : opt}</span>
+                <span className="line-clamp-2">{getLabel ? getLabel(opt) : opt}</span>
               </label>
             ))}
           </div>

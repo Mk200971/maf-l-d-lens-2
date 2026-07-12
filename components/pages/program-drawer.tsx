@@ -222,32 +222,34 @@ export function ProgramDrawer({
 
                     <div>
                       <h3 className="mb-2 text-sm font-medium">Sessions</h3>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Month</TableHead>
-                            <TableHead>Country</TableHead>
-                            <TableHead>Role</TableHead>
-                            <TableHead className="text-right">Completions</TableHead>
-                            <TableHead className="text-right">Hours</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {rows.slice(0, 40).map((r, i) => (
-                            <TableRow key={`${r.month}-${r.country}-${r.role}-${i}`}>
-                              <TableCell className="text-xs">{r.month}</TableCell>
-                              <TableCell className="text-xs">{r.country}</TableCell>
-                              <TableCell className="text-xs">{r.role}</TableCell>
-                              <TableCell className="text-right text-xs tabular-nums">
-                                {r.completions}
-                              </TableCell>
-                              <TableCell className="text-right text-xs tabular-nums">
-                                {r.totalHours}
-                              </TableCell>
+                      <div className="overflow-x-auto">
+                        <Table className="text-sm">
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="w-24">Month</TableHead>
+                              <TableHead className="w-32">Country</TableHead>
+                              <TableHead className="flex-1">Role</TableHead>
+                              <TableHead className="text-right w-24">Completions</TableHead>
+                              <TableHead className="text-right w-20">Hours</TableHead>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                          </TableHeader>
+                          <TableBody>
+                            {rows.slice(0, 40).map((r, i) => (
+                              <TableRow key={`${r.month}-${r.country}-${r.role}-${i}`}>
+                                <TableCell className="font-medium">{r.month}</TableCell>
+                                <TableCell>{r.country}</TableCell>
+                                <TableCell className="max-w-xs line-clamp-1">{r.role}</TableCell>
+                                <TableCell className="text-right tabular-nums font-medium">
+                                  {r.completions}
+                                </TableCell>
+                                <TableCell className="text-right tabular-nums">
+                                  {Math.round(r.totalHours)}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
                     </div>
                   </TabsContent>
 
@@ -355,28 +357,30 @@ export function ProgramDrawer({
                         </ChartContainer>
                       </div>
 
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Session</TableHead>
-                            <TableHead>Month</TableHead>
-                            <TableHead className="text-right">Responses</TableHead>
-                            <TableHead className="text-right">Satisfaction</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {fb.map((r) => (
-                            <TableRow key={r.sessionLabel}>
-                              <TableCell className="max-w-48 truncate text-xs">{r.sessionLabel}</TableCell>
-                              <TableCell className="text-xs">{r.month ?? 'Undated (VIP)'}</TableCell>
-                              <TableCell className="text-right text-xs tabular-nums">{r.responses}</TableCell>
-                              <TableCell className="text-right text-xs font-medium tabular-nums text-primary">
-                                {formatSatisfaction(r)}
-                              </TableCell>
+                      <div className="overflow-x-auto">
+                        <Table className="text-sm">
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="flex-1">Session</TableHead>
+                              <TableHead className="w-24">Month</TableHead>
+                              <TableHead className="text-right w-20">Responses</TableHead>
+                              <TableHead className="text-right w-28">Satisfaction</TableHead>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                          </TableHeader>
+                          <TableBody>
+                            {fb.map((r) => (
+                              <TableRow key={r.sessionLabel}>
+                                <TableCell className="line-clamp-2 font-medium">{r.sessionLabel}</TableCell>
+                                <TableCell>{r.month ?? 'Undated (VIP)'}</TableCell>
+                                <TableCell className="text-right tabular-nums">{r.responses}</TableCell>
+                                <TableCell className="text-right font-medium tabular-nums text-primary">
+                                  {formatSatisfaction(r)}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
                     </TabsContent>
                   )}
 
