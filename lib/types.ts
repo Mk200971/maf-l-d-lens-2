@@ -141,6 +141,12 @@ export interface ExtrasRow {
   n: number;
 }
 
+export interface ProgramDistinctReach {
+  programCode: string;
+  uniqueLearners: number;
+  scope: 'program-lifetime';
+}
+
 export interface LearnerReachRow {
   programCode: string;
   year: number;

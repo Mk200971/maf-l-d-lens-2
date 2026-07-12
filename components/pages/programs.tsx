@@ -9,7 +9,7 @@ import { MetricHelp } from '@/components/dashboard/metric-help'
 import { PageHeader } from '@/components/dashboard/shared'
 import { ProgramDrawer } from '@/components/pages/program-drawer'
 import { avgBy, filterHours, filterReach, formatNumber, normalizedAvgSat, sumBy } from '@/lib/aggregate'
-import { completion, feedback, programs } from '@/lib/dashboard-data'
+import { completion, feedback, programDistinctReach, programs } from '@/lib/dashboard-data'
 import { useFilters } from '@/lib/filters-context'
 import type { Program } from '@/lib/types'
 
@@ -58,11 +58,28 @@ function ProgramCard({ program, onOpen }: { program: Program; onOpen: () => void
 
   const hours = Math.round(sumBy(rows, (r) => r.totalHours))
   const completions = Math.round(sumBy(rows, (r) => r.completions))
-  const learners = sumBy(reach, (r) => r.uniqueLearners)
+  const hasGranularReachFilter =
+    filters.countries.length > 0 ||
+    filters.roles.length > 0 ||
+    filters.monthRange !== null
+  const authoritativeLearners = programDistinctReach[
+    program.code as keyof typeof programDistinctReach
+  ]
+  const learners =
+    authoritativeLearners !== undefined && !hasGranularReachFilter
+      ? authoritativeLearners
+      : sumBy(reach, (r) => r.uniqueLearners)
+  const learnerLabel = authoritativeLearners !== undefined && !hasGranularReachFilter
+    ? 'Distinct program learners'
+    : 'Learner reach in selected slice'
   const comp = completion.find((c) => c.programCode === program.code)
   const fb = feedback.filter((r) => r.programCode === program.code)
+  const isPsychologicalSafety = fb.some((r) => r.scale === '0-10')
   // Use normalizedAvgSat so 0-10 PS rows compare on 1-5 scale
   const sat = normalizedAvgSat(fb)
+  const nativeSat = isPsychologicalSafety
+    ? avgBy(fb, (r) => r.satisfaction, (r) => r.responses)
+    : null
 
   return (
     <Card
@@ -92,12 +109,30 @@ function ProgramCard({ program, onOpen }: { program: Program; onOpen: () => void
             {program.buScope}
           </Badge>
           {program.hasFeedback && sat > 0 && (
-            <span className="ml-auto flex items-center gap-1 text-xs font-medium text-brand-amber">
+            <span
+              className="ml-auto flex items-center gap-1 text-xs font-medium text-brand-amber"
+              aria-label={
+                isPsychologicalSafety && nativeSat !== null
+                  ? `Satisfaction ${sat.toFixed(2)} out of 5 normalized; ${nativeSat.toFixed(2)} out of 10 native`
+                  : `Satisfaction ${sat.toFixed(2)} out of 5`
+              }
+            >
               <span
                 className="inline-block size-2 rounded-full bg-brand-amber"
                 aria-hidden="true"
               />
-              {sat.toFixed(2)} / 5
+              <span className="text-right">
+                {isPsychologicalSafety && nativeSat !== null ? (
+                  <>
+                    <span className="block">{sat.toFixed(2)} / 5 normalized</span>
+                    <span className="block text-[10px] font-normal text-muted-foreground">
+                      {nativeSat.toFixed(2)} / 10 native
+                    </span>
+                  </>
+                ) : (
+                  `${sat.toFixed(2)} / 5`
+                )}
+              </span>
             </span>
           )}
         </div>
@@ -106,7 +141,12 @@ function ProgramCard({ program, onOpen }: { program: Program; onOpen: () => void
         <div className="grid grid-cols-3 gap-2">
           <MiniKpi label="Hours" value={formatNumber(hours)} docId="learning-hours" />
           <MiniKpi label="Completions" value={formatNumber(completions)} docId="completions" />
-          <MiniKpi label="Learners" value={formatNumber(learners)} docId="unique-learners" />
+          <MiniKpi
+            label="Learners"
+            value={formatNumber(learners)}
+            docId="unique-learners"
+            description={learnerLabel}
+          />
         </div>
         {program.hasEligibility && comp && (
           <div className="flex flex-col gap-1">
@@ -133,14 +173,25 @@ function ProgramCard({ program, onOpen }: { program: Program; onOpen: () => void
   )
 }
 
-function MiniKpi({ label, value, docId }: { label: string; value: string; docId: string }) {
+function MiniKpi({
+  label,
+  value,
+  docId,
+  description,
+}: {
+  label: string
+  value: string
+  docId: string
+  description?: string
+}) {
   return (
-    <div className="rounded-md bg-muted px-2 py-1.5">
+    <div className="rounded-md bg-muted px-2 py-1.5" title={description}>
       <div className="flex items-center justify-between gap-1">
         <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</p>
         <MetricHelp id={docId} />
       </div>
       <p className="text-sm font-semibold tabular-nums">{value}</p>
+      {description && <p className="sr-only">{description}</p>}
     </div>
   )
 }

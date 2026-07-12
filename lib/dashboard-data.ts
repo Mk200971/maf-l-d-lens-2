@@ -134,5 +134,12 @@ export const extras: ExtrasMetric[] = rawExtras.map((r) => ({
 // ---------------------------------------------------------------------------
 export const completion = realCompletion
 
+// Authoritative cross-session distinct reach. Monthly reach rows cannot be
+// summed for these recurring-cohort programs without double-counting people.
+export const programDistinctReach = {
+  VIP: 29,
+  '2026:MAFP_Rise_Mall_management': 29,
+} as const satisfies Record<string, number>
+
 // Re-export extended grain (aggregate.ts imports it from here)
 export { learnerReach }
