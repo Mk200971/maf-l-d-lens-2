@@ -12,6 +12,7 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
+  Sparkles,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useSidebar } from '@/lib/sidebar-context'
@@ -23,6 +24,7 @@ const nav = [
   { href: '/feedback', label: 'Feedback', icon: MessageSquare },
   { href: '/eligibility', label: 'Eligibility', icon: Target },
   { href: '/extras', label: 'Quality Signals', icon: Award },
+  { href: '/metrics-ai', label: 'Metrics AI', icon: Sparkles },
 ]
 
 export function DashboardSidebar() {
