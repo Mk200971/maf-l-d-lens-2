@@ -1,12 +1,14 @@
-// dashboard-data.extended.ts — SAFE aggregates only, PII-free
-// GENERATED — do not hand-edit.
-// Adds sliceable grain for the Learners & Reach and Eligibility & Completion pages,
-// while never exposing any user_id.
+// dashboard-data.extended.ts
+// GENERATED 2026-07-12. SAFE aggregates only, PII-free.
+// Derived from dashboard-data.raw.ts and the master's Eligibility sheet.
+//
+// Purpose: unlock filter power on Learners & Reach (Page 3) and
+//          Eligibility & Completion (Page 5) without exposing per-learner rows.
 
 // -----------------------------------------------------------------------------
 // learnerReach[] — distinct learner counts per (program, month, BU, country, role)
-// Source: Learning Hours sheet, grouped by distinct user_id then anonymized.
-// Safe to filter by any field.
+// Same array as exported from raw; duplicated here so pages can import a single
+// clear entry point. Safe to filter by ANY field.
 // -----------------------------------------------------------------------------
 export const learnerReach = [
   {
@@ -1886,8 +1888,8 @@ export const learnerReach = [
 // -----------------------------------------------------------------------------
 // eligibilityByProgram[] — eligible / completed counts per (program, BU, country, role)
 // Source: Eligibility sheet joined to user profile (mode of Learning Hours attributes).
-// Rolls up to the same overall totals as completion[].
-// Safe to filter by any field.
+// Sums back to the same totals as completion[].
+// Safe to filter by BU / country / role / program.
 // -----------------------------------------------------------------------------
 export const eligibilityByProgram = [
   {
