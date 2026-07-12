@@ -1,15 +1,7 @@
 // dashboard-data.extended.ts
-// GENERATED 2026-07-12. SAFE aggregates only, PII-free.
-// Derived from dashboard-data.raw.ts and the master's Eligibility sheet.
-//
-// Purpose: unlock filter power on Learners & Reach (Page 3) and
-//          Eligibility & Completion (Page 5) without exposing per-learner rows.
+// GENERATED 2026-07-12 v2. Sliceable aggregates for Learners & Reach + Eligibility pages.
+// PII-free.
 
-// -----------------------------------------------------------------------------
-// learnerReach[] — distinct learner counts per (program, month, BU, country, role)
-// Same array as exported from raw; duplicated here so pages can import a single
-// clear entry point. Safe to filter by ANY field.
-// -----------------------------------------------------------------------------
 export const learnerReach = [
   {
     "programCode": "2026:MAFP_Psychological_Safety",
@@ -1885,12 +1877,6 @@ export const learnerReach = [
   }
 ];
 
-// -----------------------------------------------------------------------------
-// eligibilityByProgram[] — eligible / completed counts per (program, BU, country, role)
-// Source: Eligibility sheet joined to user profile (mode of Learning Hours attributes).
-// Sums back to the same totals as completion[].
-// Safe to filter by BU / country / role / program.
-// -----------------------------------------------------------------------------
 export const eligibilityByProgram = [
   {
     "programCode": "2026:MAFP_Psychological_Safety",
