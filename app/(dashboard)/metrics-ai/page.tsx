@@ -36,7 +36,8 @@ export default function MetricsAIPage() {
       content,
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
     setInputValue('');
     setIsLoading(true);
 
@@ -45,20 +46,34 @@ export default function MetricsAIPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [...messages, userMessage],
+          messages: updatedMessages.map((m) => ({
+            role: m.role,
+            content: m.content,
+          })),
         }),
       });
+
+      if (!response.ok) {
+        console.error('[v0] API error:', response.status, response.statusText);
+        throw new Error(`API error: ${response.status}`);
+      }
 
       const text = await response.text();
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: text,
+        content: text || 'No response received',
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error('[v0] Error sending message:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 2).toString(),
+        role: 'assistant',
+        content: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`,
+      };
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
