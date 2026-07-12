@@ -8,8 +8,8 @@ import { Progress } from '@/components/ui/progress'
 import { MetricHelp } from '@/components/dashboard/metric-help'
 import { PageHeader } from '@/components/dashboard/shared'
 import { ProgramDrawer } from '@/components/pages/program-drawer'
-import { avgBy, filterHours, filterReach, formatNumber, normalizedAvgSat, sumBy } from '@/lib/aggregate'
-import { completion, feedback, programDistinctReach, programs } from '@/lib/dashboard-data'
+import { avgBy, filterHours, formatNumber, normalizedAvgSat, sumBy } from '@/lib/aggregate'
+import { completion, feedback, programs } from '@/lib/dashboard-data'
 import { useFilters } from '@/lib/filters-context'
 import type { Program } from '@/lib/types'
 
@@ -51,27 +51,9 @@ function ProgramCard({ program, onOpen }: { program: Program; onOpen: () => void
     () => filterHours({ ...filters, programs: [program.code] }),
     [filters, program.code],
   )
-  const reach = useMemo(
-    () => filterReach({ ...filters, programs: [program.code] }),
-    [filters, program.code],
-  )
 
   const hours = Math.round(sumBy(rows, (r) => r.totalHours))
   const completions = Math.round(sumBy(rows, (r) => r.completions))
-  const hasGranularReachFilter =
-    filters.countries.length > 0 ||
-    filters.roles.length > 0 ||
-    filters.monthRange !== null
-  const authoritativeLearners = programDistinctReach[
-    program.code as keyof typeof programDistinctReach
-  ]
-  const learners =
-    authoritativeLearners !== undefined && !hasGranularReachFilter
-      ? authoritativeLearners
-      : sumBy(reach, (r) => r.uniqueLearners)
-  const learnerLabel = authoritativeLearners !== undefined && !hasGranularReachFilter
-    ? 'Distinct program learners'
-    : 'Learner reach in selected slice'
   const comp = completion.find((c) => c.programCode === program.code)
   const fb = feedback.filter((r) => r.programCode === program.code)
   const isPsychologicalSafety = fb.some((r) => r.scale === '0-10')
@@ -140,13 +122,22 @@ function ProgramCard({ program, onOpen }: { program: Program; onOpen: () => void
       <CardContent className="flex flex-col gap-3">
         <div className="grid grid-cols-3 gap-2">
           <MiniKpi label="Hours" value={formatNumber(hours)} docId="learning-hours" />
-          <MiniKpi label="Completions" value={formatNumber(completions)} docId="completions" />
-          <MiniKpi
-            label="Learners"
-            value={formatNumber(learners)}
-            docId="unique-learners"
-            description={learnerLabel}
+          <MiniKpi 
+            label="Attendees" 
+            value={formatNumber(completions)} 
+            docId="completions" 
+            description={program.hasEligibility ? "Unique program completions" : "Session attendees"}
           />
+          {program.hasEligibility ? (
+            <MiniKpi
+              label="Eligible"
+              value={formatNumber(comp?.eligible ?? 0)}
+              docId="eligible"
+              description="Target audience"
+            />
+          ) : (
+            <div />
+          )}
         </div>
         {program.hasEligibility && comp && (
           <div className="flex flex-col gap-1">
@@ -166,6 +157,7 @@ function ProgramCard({ program, onOpen }: { program: Program; onOpen: () => void
         <div className="flex flex-wrap gap-1.5">
           {program.hasFeedback && <FlagChip label="Feedback" />}
           {program.hasEligibility && <FlagChip label="Eligibility" />}
+          {!program.hasEligibility && <FlagChip label="Nomination-based program" />}
           {program.hasExtras && <FlagChip label="Extras" />}
         </div>
       </CardContent>
