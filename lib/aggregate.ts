@@ -229,6 +229,27 @@ export function getAvailableYears(f: FilterState): number[] {
 }
 
 export function getAvailableBus(f: FilterState): string[] {
+  // Try feedback first if any feedback records exist with selected program, otherwise use learning hours
+  const feedbackBus = Array.from(
+    new Set(
+      feedback
+        .filter((r) => {
+          const year = r.month ? Number(r.month.slice(0, 4)) : null
+          return (
+            (f.years.length === 0 || year === null || f.years.includes(year)) &&
+            (f.programs.length === 0 || f.programs.includes(r.programCode)) &&
+            (r.month === null || inMonthRange(r.month, f.monthRange))
+          )
+        })
+        .map((r) => r.bu),
+    ),
+  ).filter((bu) => bu && bu !== 'Unknown')
+  
+  // If feedback data found with these filters, use it; otherwise fall back to learning hours
+  if (feedbackBus.length > 0) {
+    return feedbackBus.sort()
+  }
+  
   return Array.from(
     new Set(
       learningHours
@@ -242,10 +263,38 @@ export function getAvailableBus(f: FilterState): string[] {
         )
         .map((r) => r.bu),
     ),
-  ).filter((bu) => bu !== 'Unknown')
+  ).filter((bu) => bu && bu !== 'Unknown')
 }
 
 export function getAvailableCountries(f: FilterState): string[] {
+  // Try feedback first if any feedback records exist with selected filters
+  const feedbackCountries = Array.from(
+    new Set(
+      feedback
+        .filter((r) => {
+          const year = r.month ? Number(r.month.slice(0, 4)) : null
+          const buMatches = f.bus.length === 0 || 
+            f.bus.some(bu => 
+              bu === r.bu || (bu === 'AMBU' && r.bu === 'Mixed') || (bu === 'DBU' && r.bu === 'Mixed')
+            )
+          return (
+            (f.years.length === 0 || year === null || f.years.includes(year)) &&
+            (f.programs.length === 0 || f.programs.includes(r.programCode)) &&
+            buMatches &&
+            (r.month === null || inMonthRange(r.month, f.monthRange))
+          )
+        })
+        .map((r) => r.country),
+    ),
+  )
+    .filter((c) => c && c !== 'Unknown')
+    .sort()
+  
+  // If feedback data found with these filters, use it; otherwise fall back to learning hours
+  if (feedbackCountries.length > 0) {
+    return feedbackCountries
+  }
+  
   return Array.from(
     new Set(
       learningHours
@@ -260,7 +309,7 @@ export function getAvailableCountries(f: FilterState): string[] {
         .map((r) => r.country),
     ),
   )
-    .filter((c) => c !== 'Unknown')
+    .filter((c) => c && c !== 'Unknown')
     .sort()
 }
 
