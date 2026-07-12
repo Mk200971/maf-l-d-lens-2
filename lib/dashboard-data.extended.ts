@@ -1,5 +1,5 @@
 // dashboard-data.extended.ts
-// GENERATED 2026-07-12 v2. Sliceable aggregates for Learners & Reach + Eligibility pages.
+// GENERATED 2026-07-12 v5. Sliceable aggregates for Learners & Reach + Eligibility pages.
 // PII-free.
 
 export const learnerReach = [
@@ -1884,8 +1884,8 @@ export const eligibilityByProgram = [
     "country": "Bahrain",
     "role": "Expert",
     "eligible": 1,
-    "completedEligible": 0,
-    "completionRatePct": 0.0
+    "completedEligible": 1,
+    "completionRatePct": 100.0
   },
   {
     "programCode": "2026:MAFP_Psychological_Safety",
@@ -1893,8 +1893,8 @@ export const eligibilityByProgram = [
     "country": "Bahrain",
     "role": "Individual Contributor",
     "eligible": 2,
-    "completedEligible": 0,
-    "completionRatePct": 0.0
+    "completedEligible": 2,
+    "completionRatePct": 100.0
   },
   {
     "programCode": "2026:MAFP_Psychological_Safety",
@@ -1902,6 +1902,15 @@ export const eligibilityByProgram = [
     "country": "Bahrain",
     "role": "Team Leader",
     "eligible": 7,
+    "completedEligible": 6,
+    "completionRatePct": 85.7
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "bu": "AMBU",
+    "country": "Egypt",
+    "role": "Business Leader",
+    "eligible": 1,
     "completedEligible": 0,
     "completionRatePct": 0.0
   },
@@ -1955,27 +1964,36 @@ export const eligibilityByProgram = [
     "bu": "AMBU",
     "country": "Oman",
     "role": "Team Leader",
-    "eligible": 16,
-    "completedEligible": 14,
-    "completionRatePct": 87.5
+    "eligible": 17,
+    "completedEligible": 15,
+    "completionRatePct": 88.2
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Business Leader",
+    "eligible": 1,
+    "completedEligible": 0,
+    "completionRatePct": 0.0
   },
   {
     "programCode": "2026:MAFP_Psychological_Safety",
     "bu": "AMBU",
     "country": "United Arab Emirates",
     "role": "Individual Contributor",
-    "eligible": 34,
-    "completedEligible": 24,
-    "completionRatePct": 70.6
+    "eligible": 36,
+    "completedEligible": 30,
+    "completionRatePct": 83.3
   },
   {
     "programCode": "2026:MAFP_Psychological_Safety",
     "bu": "AMBU",
     "country": "United Arab Emirates",
     "role": "Team Leader",
-    "eligible": 52,
-    "completedEligible": 33,
-    "completionRatePct": 63.5
+    "eligible": 63,
+    "completedEligible": 46,
+    "completionRatePct": 73.0
   },
   {
     "programCode": "2026:MAFP_Psychological_Safety",
@@ -1998,29 +2016,74 @@ export const eligibilityByProgram = [
   {
     "programCode": "2026:MAFP_Psychological_Safety",
     "bu": "DBU",
-    "country": "United Arab Emirates",
-    "role": "Individual Contributor",
+    "country": "Oman",
+    "role": "Business Leader",
     "eligible": 4,
-    "completedEligible": 4,
+    "completedEligible": 1,
+    "completionRatePct": 25.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Expert",
+    "eligible": 2,
+    "completedEligible": 0,
+    "completionRatePct": 0.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "eligible": 11,
+    "completedEligible": 10,
+    "completionRatePct": 90.9
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "eligible": 8,
+    "completedEligible": 6,
+    "completionRatePct": 75.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Business Leader",
+    "eligible": 1,
+    "completedEligible": 1,
     "completionRatePct": 100.0
   },
   {
     "programCode": "2026:MAFP_Psychological_Safety",
     "bu": "DBU",
     "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "eligible": 5,
+    "completedEligible": 4,
+    "completionRatePct": 80.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
     "role": "Team Leader",
-    "eligible": 55,
-    "completedEligible": 48,
-    "completionRatePct": 87.3
+    "eligible": 67,
+    "completedEligible": 53,
+    "completionRatePct": 79.1
   },
   {
     "programCode": "2026:MAFP_Psychological_Safety",
     "bu": "Unknown",
     "country": "Unknown",
     "role": "N/A",
-    "eligible": 2,
-    "completedEligible": 0,
-    "completionRatePct": 0.0
+    "eligible": 16,
+    "completedEligible": 9,
+    "completionRatePct": 56.2
   },
   {
     "programCode": "2026:MAFP_Rise_Mall_management",
