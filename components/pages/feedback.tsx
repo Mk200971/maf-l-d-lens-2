@@ -29,9 +29,10 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { ChartCard, InfoBanner, KpiTile, PageHeader } from '@/components/dashboard/shared'
-import { avgBy, filterFeedback, formatNumber, programName, sumBy } from '@/lib/aggregate'
+import { avgBy, avgNps, avgSatRatePct, filterFeedback, formatNumber, normalizedAvgSat, programName, sumBy } from '@/lib/aggregate'
 import { useFilters } from '@/lib/filters-context'
 import { pageBanners } from '@/lib/filter-rules'
+import { formatSatisfaction, normalizedSatisfaction } from '@/lib/types'
 import type { FeedbackRow } from '@/lib/types'
 
 const histConfig = {
@@ -58,12 +59,15 @@ export function FeedbackPage() {
   const undated = fb.filter((r) => r.month === null)
 
   const responses = sumBy(fb, (r) => r.responses)
-  const avgSat = avgBy(fb, (r) => r.satisfaction, (r) => r.responses)
+  // Use normalizedAvgSat for cross-scale average; keep native for per-program display
+  const avgSat = normalizedAvgSat(fb)
+  const satRatePct = avgSatRatePct(fb)
+  const npsValue = avgNps(fb)
   const avgFac = avgBy(fb, (r) => r.facilitatorEffectiveness, (r) => r.responses)
   const avgConf = avgBy(fb, (r) => r.confidenceApplication, (r) => r.responses)
   const recRate = avgBy(fb, (r) => r.recommendationRatePct, (r) => r.responses)
 
-  // Histogram: satisfaction distribution across sessions
+  // Histogram: distribution on normalized 1-5 scale (so PS rows are comparable)
   const hist = useMemo(() => {
     const buckets = [
       { label: '<3.5', min: 0, max: 3.5, sessions: 0 },
@@ -74,56 +78,68 @@ export function FeedbackPage() {
       { label: '4.8–5.0', min: 4.8, max: 5.01, sessions: 0 },
     ]
     for (const r of fb) {
-      const b = buckets.find((b) => r.satisfaction >= b.min && r.satisfaction < b.max)
+      const v = normalizedSatisfaction(r)
+      if (v == null) continue
+      const b = buckets.find((b) => v >= b.min && v < b.max)
       if (b) b.sessions++
     }
     return buckets
   }, [fb])
 
-  // Scatter: facilitator vs satisfaction
+  // Scatter: facilitator vs satisfaction (both on 1-5 normalized scale)
   const scatter = useMemo(
     () =>
-      fb.map((r) => ({
-        x: r.facilitatorEffectiveness,
-        y: r.satisfaction,
-        z: r.responses,
-        label: r.sessionLabel,
-      })),
+      fb
+        .filter((r) => r.facilitatorEffectiveness != null && normalizedSatisfaction(r) != null)
+        .map((r) => ({
+          x: r.facilitatorEffectiveness,
+          y: normalizedSatisfaction(r),
+          z: r.responses,
+          label: r.sessionLabel,
+          scale: r.scale,
+        })),
     [fb],
   )
 
-  // Program benchmark: min/avg/max
+  // Program benchmark: uses normalizedSatisfaction so 0-10 PS rows are comparable
   const benchmark = useMemo(() => {
     const codes = Array.from(new Set(fb.map((r) => r.programCode)))
     return codes
       .map((code) => {
         const rows = fb.filter((r) => r.programCode === code)
-        const sats = rows.map((r) => r.satisfaction)
-        const avg = avgBy(rows, (r) => r.satisfaction, (r) => r.responses)
+        const normVals = rows.map((r) => normalizedSatisfaction(r)).filter((v): v is number => v != null)
+        const avg = normalizedAvgSat(rows)
         return {
           name: programName(code),
           avg: Math.round(avg * 100) / 100,
-          errLow: Math.round((avg - Math.min(...sats)) * 100) / 100,
-          errHigh: Math.round((Math.max(...sats) - avg) * 100) / 100,
+          errLow: normVals.length ? Math.round((avg - Math.min(...normVals)) * 100) / 100 : 0,
+          errHigh: normVals.length ? Math.round((Math.max(...normVals) - avg) * 100) / 100 : 0,
+          // native scale label for tooltip
+          scale: rows[0]?.scale ?? '1-5',
+          nativeAvg: rows[0]?.scale === '0-10'
+            ? avgBy(rows, (r) => r.satisfaction, (r) => r.responses)
+            : null,
         }
       })
       .sort((a, b) => b.avg - a.avg)
   }, [fb])
 
-  // Monthly trend with min/max band
+  // Monthly trend — normalized to 1-5 for cross-scale comparability
   const trend = useMemo(() => {
     const months = Array.from(new Set(dated.map((r) => r.month as string))).sort()
     return months.map((month) => {
       const rows = dated.filter((r) => r.month === month)
       return {
         month,
-        satisfaction:
-          Math.round(avgBy(rows, (r) => r.satisfaction, (r) => r.responses) * 100) / 100,
+        satisfaction: Math.round(normalizedAvgSat(rows) * 100) / 100,
       }
     })
   }, [dated])
 
-  const sorted = [...fb].sort((a, b) => b.satisfaction - a.satisfaction)
+  // Sort by normalized satisfaction so 0-10 PS rows rank correctly alongside 1-5 rows
+  const sorted = [...fb].sort(
+    (a, b) => (normalizedSatisfaction(b) ?? 0) - (normalizedSatisfaction(a) ?? 0),
+  )
   const best = sorted.slice(0, 5)
   const worst = sorted.slice(-5).reverse()
 
@@ -136,11 +152,30 @@ export function FeedbackPage() {
 
       <InfoBanner>{pageBanners.feedback}</InfoBanner>
 
-      <section className="grid grid-cols-2 gap-3 md:grid-cols-5" aria-label="Feedback KPIs">
+      <section className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7" aria-label="Feedback KPIs">
         <KpiTile label="Total Responses" value={formatNumber(responses)} />
-        <KpiTile label="Avg Satisfaction" value={avgSat > 0 ? avgSat.toFixed(2) : '—'} emphasis />
-        <KpiTile label="Facilitator" value={avgFac > 0 ? avgFac.toFixed(2) : '—'} />
-        <KpiTile label="Confidence" value={avgConf > 0 ? avgConf.toFixed(2) : '—'} />
+        <KpiTile
+          label="Avg Satisfaction"
+          value={avgSat > 0 ? `${avgSat.toFixed(2)} / 5` : '—'}
+          sub="normalized 1-5, cross-program"
+          emphasis
+        />
+        <KpiTile
+          label="Satisfaction Rate"
+          value={satRatePct > 0 ? `${satRatePct.toFixed(1)}%` : '—'}
+          sub="top-2-box on native scale"
+          emphasis
+        />
+        {npsValue != null && (
+          <KpiTile
+            label="PS NPS"
+            value={`${npsValue.toFixed(1)}%`}
+            sub="Psychological Safety (0-10)"
+            emphasis
+          />
+        )}
+        <KpiTile label="Facilitator" value={avgFac > 0 ? `${avgFac.toFixed(2)} / 5` : '—'} />
+        <KpiTile label="Confidence / Commitment" value={avgConf > 0 ? `${avgConf.toFixed(2)} / 5` : '—'} />
         <KpiTile label="Recommend Rate" value={recRate > 0 ? `${recRate.toFixed(0)}%` : '—'} />
       </section>
 
@@ -285,7 +320,7 @@ function SessionTable({
                   tone === 'best' ? 'text-primary' : 'text-destructive'
                 }`}
               >
-                {r.satisfaction.toFixed(2)}
+                {formatSatisfaction(r)}
               </TableCell>
             </TableRow>
           ))}
@@ -311,7 +346,7 @@ function SessionRows({ rows }: { rows: FeedbackRow[] }) {
             <TableCell className="text-xs">{r.sessionLabel}</TableCell>
             <TableCell className="text-right text-xs tabular-nums">{r.responses}</TableCell>
             <TableCell className="text-right text-xs font-semibold tabular-nums text-primary">
-              {r.satisfaction.toFixed(2)}
+              {formatSatisfaction(r)}
             </TableCell>
           </TableRow>
         ))}

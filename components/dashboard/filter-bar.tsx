@@ -199,7 +199,7 @@ export function FilterBar() {
             selected={filters.programs}
             onToggle={(v) => toggle('programs', v)}
             disabled={!allowed.has('program')}
-            getLabel={(code) => programs.find((p) => p.code === code)?.name ?? code}
+            getLabel={(code) => programs.find((p) => p.code === code)?.displayName ?? code}
           />
 
           {/* Month range */}
@@ -235,7 +235,7 @@ export function FilterBar() {
                     const vals = Array.isArray(value) ? (value as number[]) : [value as number]
                     const [lo, hi] = [vals[0] ?? 0, vals[1] ?? ALL_MONTHS.length - 1]
                     if (lo === 0 && hi === ALL_MONTHS.length - 1) setMonthRange(null)
-                    else setMonthRange([ALL_MONTHS[lo], ALL_MONTHS[hi]])
+                    else setMonthRange([ALL_MONTHS[lo] ?? ALL_MONTHS[0] ?? '', ALL_MONTHS[hi] ?? ALL_MONTHS[ALL_MONTHS.length - 1] ?? ''])
                   }}
                   aria-label="Month range"
                 />

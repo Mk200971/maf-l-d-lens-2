@@ -12,12 +12,12 @@ import {
 } from './dashboard-data.raw'
 import { learnerReach, completion as realCompletion } from './dashboard-data.raw'
 import type {
+  Bu,
   ExtrasMetric,
   FeedbackRow,
   Kpis,
   LearningHoursRow,
   Program,
-  BU,
 } from './types'
 
 // ---------------------------------------------------------------------------
@@ -30,28 +30,37 @@ export const meta = rawMeta
 // Kpis interface needs (eligible / completedEligible / programsActive / newIn2026)
 // ---------------------------------------------------------------------------
 export const kpis: Kpis = {
+  // Delivery
   totalLearningHours: rawKpis.totalLearningHours,
-  learningHoursByBU: rawKpis.learningHoursByBU as Record<BU, number>,
+  learningHoursByBU: rawKpis.learningHoursByBU as Record<Bu, number>,
   totalCompletions: rawKpis.totalCompletions,
-  completionsByBU: rawKpis.completionsByBU as Record<BU, number>,
+  completionsByBU: rawKpis.completionsByBU as Record<Bu, number>,
   uniqueLearners: rawKpis.uniqueLearners,
-  uniqueLearnersByBU: rawKpis.uniqueLearnersByBU as Record<BU, number>,
-  avgSatisfaction: rawKpis.avgSatisfaction,
+  uniqueLearnersByBU: rawKpis.uniqueLearnersByBU as Record<Bu, number>,
+  programsCount: rawKpis.programsCount,
   feedbackResponses: rawKpis.feedbackResponses,
-  // Computed from the completion file (post-walk-in figures)
-  eligible: realCompletion.reduce((s, r) => s + r.eligible, 0),
-  completedEligible: realCompletion.reduce((s, r) => s + r.completedEligible, 0),
+  // Completion
   completionRatePct: rawKpis.completionRatePct,
-  programsActive: rawPrograms.length,
-  newIn2026: rawPrograms.filter((p) => p.year === 2026).length,
+  // Satisfaction — 1-5 programs
+  avgSatisfaction: rawKpis.avgSatisfaction,
+  satisfactionRatePct: rawKpis.satisfactionRatePct,
+  // Satisfaction — Psychological Safety (0-10)
+  avgSatisfaction_PS_native: rawKpis.avgSatisfaction_PS_native,
+  avgSatisfaction_PS_normalized: rawKpis.avgSatisfaction_PS_normalized,
+  satisfactionRatePct_PS: rawKpis.satisfactionRatePct_PS,
+  avgNPS_PS: rawKpis.avgNPS_PS,
+  // Per-program breakdowns
+  satisfactionRateByProgram: rawKpis.satisfactionRateByProgram as Record<string, number>,
+  avgSatisfactionByProgram: rawKpis.avgSatisfactionByProgram as Record<string, number>,
+  npsByProgram: rawKpis.npsByProgram as Record<string, number>,
 }
 
 // ---------------------------------------------------------------------------
-// programs — map displayName → name
+// programs — pass through directly (raw uses displayName)
 // ---------------------------------------------------------------------------
 export const programs: Program[] = rawPrograms.map((p) => ({
   code: p.code,
-  name: p.displayName,
+  displayName: p.displayName,
   year: p.year,
   buScope: p.buScope as Program['buScope'],
   hasFeedback: p.hasFeedback,
@@ -60,33 +69,39 @@ export const programs: Program[] = rawPrograms.map((p) => ({
 }))
 
 // ---------------------------------------------------------------------------
-// learningHours — map totalHours → hours
+// learningHours — map totalHours → hours; add program display name
 // ---------------------------------------------------------------------------
 export const learningHours: LearningHoursRow[] = rawLearningHours.map((r) => ({
   programCode: r.programCode,
+  program: r.programCode, // display label; components can look up displayName via programName()
   year: r.year,
   month: r.month,
-  bu: r.bu as BU,
+  bu: r.bu as Bu,
   country: r.country,
   role: r.role,
   completions: r.completions,
-  hours: r.totalHours,
+  totalHours: r.totalHours,
 }))
 
 // ---------------------------------------------------------------------------
-// feedback — add sessionPart; treat null numerics as 0 for optional metrics
+// feedback — pass through new scale-aware fields; keep null for optional metrics
 // ---------------------------------------------------------------------------
 export const feedback: FeedbackRow[] = rawFeedback.map((r) => ({
   programCode: r.programCode,
   sessionLabel: r.sessionLabel,
+  sessionPart: (r as any).sessionPart ?? '',
   month: r.month,
   responses: r.responses,
-  satisfaction: r.satisfaction ?? 0,
-  objectivesClarity: r.objectivesClarity ?? 0,
-  facilitatorEffectiveness: r.facilitatorEffectiveness ?? 0,
-  confidenceApplication: r.confidenceApplication ?? 0,
-  recommendation: r.recommendation ?? 0,
-  recommendationRatePct: r.recommendationRatePct ?? 0,
+  scale: r.scale as import('./types').Scale,
+  satisfaction: r.satisfaction ?? null,
+  satisfactionNormalized: r.satisfactionNormalized ?? null,
+  satisfactionRatePct: r.satisfactionRatePct ?? null,
+  nps: r.nps ?? null,
+  objectivesClarity: r.objectivesClarity ?? null,
+  facilitatorEffectiveness: r.facilitatorEffectiveness ?? null,
+  confidenceApplication: r.confidenceApplication ?? null,
+  recommendation: r.recommendation ?? null,
+  recommendationRatePct: r.recommendationRatePct ?? null,
 }))
 
 // ---------------------------------------------------------------------------

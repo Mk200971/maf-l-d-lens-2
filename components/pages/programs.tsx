@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { PageHeader } from '@/components/dashboard/shared'
 import { ProgramDrawer } from '@/components/pages/program-drawer'
-import { avgBy, filterHours, filterReach, formatNumber, sumBy } from '@/lib/aggregate'
+import { avgBy, filterHours, filterReach, formatNumber, normalizedAvgSat, sumBy } from '@/lib/aggregate'
 import { completion, feedback, programs } from '@/lib/dashboard-data'
 import { useFilters } from '@/lib/filters-context'
 import type { Program } from '@/lib/types'
@@ -21,7 +21,7 @@ export function ProgramsPage() {
     if (filters.programs.length > 0) list = list.filter((p) => filters.programs.includes(p.code))
     if (filters.years.length > 0) list = list.filter((p) => filters.years.includes(p.year))
     if (filters.bus.length > 0)
-      list = list.filter((p) => filters.bus.some((bu) => bu !== 'Unknown' && p.buScope.includes(bu)))
+      list = list.filter((p) => filters.bus.some((bu: string) => bu !== 'Unknown' && p.buScope.includes(bu)))
     return list
   }, [filters])
 
@@ -55,12 +55,13 @@ function ProgramCard({ program, onOpen }: { program: Program; onOpen: () => void
     [filters, program.code],
   )
 
-  const hours = Math.round(sumBy(rows, (r) => r.hours))
+  const hours = Math.round(sumBy(rows, (r) => r.totalHours))
   const completions = Math.round(sumBy(rows, (r) => r.completions))
   const learners = sumBy(reach, (r) => r.uniqueLearners)
   const comp = completion.find((c) => c.programCode === program.code)
   const fb = feedback.filter((r) => r.programCode === program.code)
-  const sat = avgBy(fb, (r) => r.satisfaction, (r) => r.responses)
+  // Use normalizedAvgSat so 0-10 PS rows compare on 1-5 scale
+  const sat = normalizedAvgSat(fb)
 
   return (
     <Card
@@ -77,7 +78,7 @@ function ProgramCard({ program, onOpen }: { program: Program; onOpen: () => void
     >
       <CardHeader className="gap-1.5">
         <div className="flex items-start justify-between gap-2">
-          <h2 className="text-base font-semibold leading-snug text-balance">{program.name}</h2>
+          <h2 className="text-base font-semibold leading-snug text-balance">{program.displayName}</h2>
           <Badge variant="outline" className="shrink-0 font-mono text-[10px]">
             {program.code.length > 12 ? program.code.slice(0, 12) + '…' : program.code}
           </Badge>
@@ -95,7 +96,7 @@ function ProgramCard({ program, onOpen }: { program: Program; onOpen: () => void
                 className="inline-block size-2 rounded-full bg-brand-amber"
                 aria-hidden="true"
               />
-              {sat.toFixed(1)}
+              {sat.toFixed(2)} / 5
             </span>
           )}
         </div>

@@ -121,15 +121,43 @@ export function groupSum<T>(
   return m
 }
 
-export function avgBy<T>(rows: T[], valFn: (r: T) => number, weightFn?: (r: T) => number): number {
-  if (rows.length === 0) return 0
-  if (!weightFn) return sumBy(rows, valFn) / rows.length
-  const w = sumBy(rows, weightFn)
-  return w === 0 ? 0 : sumBy(rows, (r) => valFn(r) * weightFn(r)) / w
+export function avgBy<T>(rows: T[], valFn: (r: T) => number | null, weightFn?: (r: T) => number): number {
+  const valid = rows.filter((r) => valFn(r) != null)
+  if (valid.length === 0) return 0
+  if (!weightFn) return sumBy(valid, (r) => valFn(r) as number) / valid.length
+  const w = sumBy(valid, weightFn)
+  return w === 0 ? 0 : sumBy(valid, (r) => (valFn(r) as number) * weightFn(r)) / w
+}
+
+/**
+ * Response-weighted average of satisfactionNormalized (always 1-5).
+ * Use this when aggregating across programs of different native scales.
+ */
+export function normalizedAvgSat(rows: FeedbackRow[]): number {
+  const valid = rows.filter((r) => r.satisfactionNormalized != null)
+  if (valid.length === 0) return 0
+  const w = sumBy(valid, (r) => r.responses)
+  return w === 0 ? 0 : sumBy(valid, (r) => (r.satisfactionNormalized as number) * r.responses) / w
+}
+
+/** Response-weighted average of satisfactionRatePct (top-2-box, 0-100). */
+export function avgSatRatePct(rows: FeedbackRow[]): number {
+  const valid = rows.filter((r) => r.satisfactionRatePct != null)
+  if (valid.length === 0) return 0
+  const w = sumBy(valid, (r) => r.responses)
+  return w === 0 ? 0 : sumBy(valid, (r) => (r.satisfactionRatePct as number) * r.responses) / w
+}
+
+/** Response-weighted average of nps (only rows with nps != null). */
+export function avgNps(rows: FeedbackRow[]): number | null {
+  const valid = rows.filter((r) => r.nps != null)
+  if (valid.length === 0) return null
+  const w = sumBy(valid, (r) => r.responses)
+  return w === 0 ? null : sumBy(valid, (r) => (r.nps as number) * r.responses) / w
 }
 
 export function programName(code: string): string {
-  return programs.find((p) => p.code === code)?.name ?? code
+  return programs.find((p) => p.code === code)?.displayName ?? code
 }
 
 export function formatNumber(n: number): string {

@@ -23,12 +23,14 @@ import { Card, CardContent } from '@/components/ui/card'
 import { ChartCard, InfoBanner, KpiTile, PageHeader } from '@/components/dashboard/shared'
 import {
   avgBy,
+  avgSatRatePct,
   filterCompletion,
   filterFeedback,
   filterHours,
   filterReach,
   formatNumber,
   groupSum,
+  normalizedAvgSat,
   programName,
   sumBy,
 } from '@/lib/aggregate'
@@ -53,11 +55,12 @@ export function OverviewPage() {
   const fb = useMemo(() => filterFeedback(filters), [filters])
   const comp = useMemo(() => filterCompletion(filters), [filters])
 
-  const totalHours = sumBy(hours, (r) => r.hours)
+  const totalHours = sumBy(hours, (r) => r.totalHours)
   const totalCompletions = sumBy(hours, (r) => r.completions)
   const completionsByBU = groupSum(hours, (r) => r.bu, (r) => r.completions)
   const uniqueLearners = sumBy(reach, (r) => r.uniqueLearners)
-  const avgSat = avgBy(fb, (r) => r.satisfaction, (r) => r.responses)
+  const avgSat = normalizedAvgSat(fb)
+  const satRatePct = avgSatRatePct(fb)
   const responses = sumBy(fb, (r) => r.responses)
   const eligible = sumBy(comp, (r) => r.eligible)
   const completed = sumBy(comp, (r) => r.completedEligible)
@@ -71,7 +74,7 @@ export function OverviewPage() {
     }
     if (filters.bus.length > 0) {
       list = list.filter((p) =>
-        filters.bus.some((bu) => p.buScope.includes(bu === 'Unknown' ? 'x-none' : bu)),
+        filters.bus.some((bu: string) => p.buScope.includes(bu === 'Unknown' ? 'x-none' : bu)),
       )
     }
     return list
@@ -81,7 +84,7 @@ export function OverviewPage() {
     filters.bus.length > 0 || filters.countries.length > 0 || filters.roles.length > 0
 
   // Donut: hours by BU
-  const byBU = groupSum(hours, (r) => r.bu, (r) => r.hours)
+  const byBU = groupSum(hours, (r) => r.bu, (r) => r.totalHours)
   const donutData = ['AMBU', 'DBU', 'Unknown']
     .map((bu) => ({ bu, hours: Math.round(byBU.get(bu) ?? 0) }))
     .filter((d) => d.hours > 0)
@@ -94,15 +97,15 @@ export function OverviewPage() {
       const rows = hours.filter((r) => r.month === month)
       return {
         month,
-        AMBU: Math.round(sumBy(rows.filter((r) => r.bu === 'AMBU'), (r) => r.hours)),
-        DBU: Math.round(sumBy(rows.filter((r) => r.bu === 'DBU'), (r) => r.hours)),
+        AMBU: Math.round(sumBy(rows.filter((r) => r.bu === 'AMBU'), (r) => r.totalHours)),
+        DBU: Math.round(sumBy(rows.filter((r) => r.bu === 'DBU'), (r) => r.totalHours)),
       }
     })
   }, [hours])
 
   // Horizontal bar: program contribution
   const programBars = useMemo(() => {
-    const m = groupSum(hours, (r) => r.programCode, (r) => r.hours)
+    const m = groupSum(hours, (r) => r.programCode, (r) => r.totalHours)
     return Array.from(m.entries())
       .map(([code, h]) => ({ name: programName(code), hours: Math.round(h) }))
       .sort((a, b) => b.hours - a.hours)
@@ -110,7 +113,7 @@ export function OverviewPage() {
 
   // Country cards
   const countryCards = useMemo(() => {
-    const h = groupSum(hours, (r) => r.country, (r) => r.hours)
+    const h = groupSum(hours, (r) => r.country, (r) => r.totalHours)
     const c = groupSum(hours, (r) => r.country, (r) => r.completions)
     return Array.from(h.entries())
       .map(([country, hrs]) => ({
@@ -130,16 +133,21 @@ export function OverviewPage() {
 
       {feedbackFiltersActive && <InfoBanner>{meta.grainNote}</InfoBanner>}
 
-      {/* Hero KPI strip */}
+      {/* Hero KPI strip — 8 tiles, 2 rows of 4 */}
       <section
         aria-label="Key performance indicators"
-        className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6"
+        className="grid grid-cols-2 gap-3 md:grid-cols-4"
       >
-        <KpiTile label="Learning Hours" value={formatNumber(totalHours)} sub="all filtered sessions" />
+        {/* Row 1 — Delivery */}
         <KpiTile
-          label="Completions"
+          label="Learning Hours"
+          value={formatNumber(totalHours)}
+          sub={`AMBU ${formatNumber(Math.round(completionsByBU.get('AMBU') ?? 0))} · DBU ${formatNumber(Math.round(completionsByBU.get('DBU') ?? 0))} completions`}
+        />
+        <KpiTile
+          label="Total Completions"
           value={formatNumber(totalCompletions)}
-          sub={`AMBU ${formatNumber(Math.round(completionsByBU.get('AMBU') ?? 0))} / DBU ${formatNumber(Math.round(completionsByBU.get('DBU') ?? 0))}`}
+          sub={`AMBU ${formatNumber(Math.round(completionsByBU.get('AMBU') ?? 0))} · DBU ${formatNumber(Math.round(completionsByBU.get('DBU') ?? 0))}`}
         />
         <KpiTile
           label="Unique Learners"
@@ -147,21 +155,33 @@ export function OverviewPage() {
           sub="distinct learners (PII-free grain)"
         />
         <KpiTile
+          label="Programs Active"
+          value={String(activePrograms.length)}
+          sub={`${kpis.programsCount} total across 2024–2026`}
+        />
+        {/* Row 2 — Quality */}
+        <KpiTile
           label="Avg Satisfaction"
-          value={avgSat > 0 ? `${avgSat.toFixed(1)} / 5` : '—'}
-          sub={`across ${formatNumber(responses)} responses`}
+          value={avgSat > 0 ? `${avgSat.toFixed(2)} / 5` : '—'}
+          sub="normalized to 1-5, cross-program weighted"
           emphasis
+        />
+        <KpiTile
+          label="Satisfaction Rate"
+          value={satRatePct > 0 ? `${satRatePct.toFixed(1)}%` : '—'}
+          sub="top-2-box on native scale"
+          emphasis
+        />
+        <KpiTile
+          label="Feedback Responses"
+          value={formatNumber(responses)}
+          sub={`${formatNumber(kpis.feedbackResponses)} total across all programs`}
         />
         <KpiTile
           label="Completion Rate"
           value={`${completionRate.toFixed(1)}%`}
           sub={`${formatNumber(completed)} / ${formatNumber(eligible)} eligible`}
           emphasis
-        />
-        <KpiTile
-          label="Programs Active"
-          value={String(activePrograms.length)}
-          sub={`${kpis.newIn2026} new in 2026`}
         />
       </section>
 

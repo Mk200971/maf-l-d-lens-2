@@ -38,11 +38,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { InfoBanner } from '@/components/dashboard/shared'
 import {
   avgBy,
+  avgNps,
+  avgSatRatePct,
   filterHours,
   formatNumber,
   groupSum,
+  normalizedAvgSat,
   sumBy,
 } from '@/lib/aggregate'
+import { formatSatisfaction, normalizedSatisfaction } from '@/lib/types'
 import { completion, extras, feedback, meta } from '@/lib/dashboard-data'
 import { useFilters } from '@/lib/filters-context'
 import type { Program } from '@/lib/types'
@@ -87,7 +91,7 @@ export function ProgramDrawer({
           return false
         return true
       })
-      .sort((a, b) => b.satisfaction - a.satisfaction)
+      .sort((a, b) => (normalizedSatisfaction(b) ?? 0) - (normalizedSatisfaction(a) ?? 0))
   }, [filters, program])
 
   const comp = program ? completion.find((c) => c.programCode === program.code) : undefined
@@ -99,7 +103,7 @@ export function ProgramDrawer({
       const mr = rows.filter((r) => r.month === month)
       return {
         month,
-        hours: Math.round(sumBy(mr, (r) => r.hours)),
+        hours: Math.round(sumBy(mr, (r) => r.totalHours)),
         completions: Math.round(sumBy(mr, (r) => r.completions)),
       }
     })
@@ -119,7 +123,7 @@ export function ProgramDrawer({
       const entry: Record<string, string | number> = { country }
       for (const role of roleList) {
         entry[slugifyRole(role)] = Math.round(
-          sumBy(rows.filter((r) => r.country === country && r.role === role), (r) => r.hours),
+          sumBy(rows.filter((r) => r.country === country && r.role === role), (r) => r.totalHours),
         )
       }
       return entry
@@ -144,7 +148,7 @@ export function ProgramDrawer({
           <>
             <SheetHeader className="border-b">
               <div className="flex items-center gap-2">
-                <SheetTitle className="text-accent">{program.name}</SheetTitle>
+                <SheetTitle className="text-accent">{program.displayName}</SheetTitle>
                 <Badge variant="outline" className="font-mono text-[10px]">
                   {program.code}
                 </Badge>
@@ -235,7 +239,7 @@ export function ProgramDrawer({
                                 {r.completions}
                               </TableCell>
                               <TableCell className="text-right text-xs tabular-nums">
-                                {r.hours}
+                                {r.totalHours}
                               </TableCell>
                             </TableRow>
                           ))}
@@ -248,44 +252,102 @@ export function ProgramDrawer({
                   {program.hasFeedback && (
                     <TabsContent value="feedback" className="mt-4 flex flex-col gap-6">
                       {feedbackFiltersActive && <InfoBanner>{meta.grainNote}</InfoBanner>}
+                      {/* Scale-aware KPI mini-cards */}
                       <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-                        {[
-                          { label: 'Satisfaction', v: avgBy(fb, (r) => r.satisfaction, (r) => r.responses) },
-                          { label: 'Objectives Clarity', v: avgBy(fb, (r) => r.objectivesClarity, (r) => r.responses) },
-                          { label: 'Facilitator', v: avgBy(fb, (r) => r.facilitatorEffectiveness, (r) => r.responses) },
-                          { label: 'Confidence', v: avgBy(fb, (r) => r.confidenceApplication, (r) => r.responses) },
-                          { label: 'Recommendation', v: avgBy(fb, (r) => r.recommendation, (r) => r.responses) },
-                        ].map((k) => (
-                          <div key={k.label} className="rounded-lg border bg-card p-3">
-                            <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                              {k.label}
-                            </p>
-                            <p className="text-xl font-semibold text-primary tabular-nums">
-                              {k.v > 0 ? k.v.toFixed(2) : '—'}
-                            </p>
-                          </div>
-                        ))}
-                        <div className="rounded-lg border bg-card p-3">
-                          <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                            Recommend Rate
-                          </p>
-                          <p className="text-xl font-semibold text-primary tabular-nums">
-                            {fb.length > 0
-                              ? `${avgBy(fb, (r) => r.recommendationRatePct, (r) => r.responses).toFixed(0)}%`
-                              : '—'}
-                          </p>
-                        </div>
+                        {(() => {
+                          const scale = fb[0]?.scale ?? '1-5'
+                          const isPS = scale === '0-10'
+                          const avgSat = normalizedAvgSat(fb)
+                          const satRate = avgSatRatePct(fb)
+                          const nps = avgNps(fb)
+                          return (
+                            <>
+                              <div className="rounded-lg border bg-card p-3">
+                                <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                                  Satisfaction
+                                </p>
+                                <p className="text-xl font-semibold text-primary tabular-nums">
+                                  {isPS
+                                    ? `${avgBy(fb, (r) => r.satisfaction, (r) => r.responses).toFixed(2)} / 10`
+                                    : avgSat > 0 ? `${avgSat.toFixed(2)} / 5` : '—'}
+                                </p>
+                                {isPS && avgSat > 0 && (
+                                  <p className="text-[10px] text-muted-foreground">≈ {avgSat.toFixed(2)} / 5 normalized</p>
+                                )}
+                              </div>
+                              <div className="rounded-lg border bg-card p-3">
+                                <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                                  Satisfaction Rate
+                                </p>
+                                <p className="text-xl font-semibold text-primary tabular-nums">
+                                  {satRate > 0 ? `${satRate.toFixed(1)}%` : '—'}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground">top-2-box {isPS ? '(≥9/10)' : '(≥4/5)'}</p>
+                              </div>
+                              {isPS && nps != null && (
+                                <div className="rounded-lg border bg-card p-3">
+                                  <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                                    NPS
+                                  </p>
+                                  <p className="text-xl font-semibold text-primary tabular-nums">
+                                    {nps.toFixed(1)}%
+                                  </p>
+                                </div>
+                              )}
+                              <div className="rounded-lg border bg-card p-3">
+                                <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                                  Objectives Clarity
+                                </p>
+                                <p className="text-xl font-semibold text-primary tabular-nums">
+                                  {(() => { const v = avgBy(fb, (r) => r.objectivesClarity, (r) => r.responses); return v > 0 ? `${v.toFixed(2)} / 5` : '—' })()}
+                                </p>
+                              </div>
+                              <div className="rounded-lg border bg-card p-3">
+                                <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                                  Facilitator
+                                </p>
+                                <p className="text-xl font-semibold text-primary tabular-nums">
+                                  {(() => { const v = avgBy(fb, (r) => r.facilitatorEffectiveness, (r) => r.responses); return v > 0 ? `${v.toFixed(2)} / 5` : '—' })()}
+                                </p>
+                              </div>
+                              <div className="rounded-lg border bg-card p-3">
+                                <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                                  {isPS ? 'Action Plan Commitment' : 'Confidence'}
+                                </p>
+                                <p className="text-xl font-semibold text-primary tabular-nums">
+                                  {(() => { const v = avgBy(fb, (r) => r.confidenceApplication, (r) => r.responses); return v > 0 ? `${v.toFixed(2)} / 5` : '—' })()}
+                                </p>
+                              </div>
+                              <div className="rounded-lg border bg-card p-3">
+                                <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                                  Recommend Rate
+                                </p>
+                                <p className="text-xl font-semibold text-primary tabular-nums">
+                                  {fb.length > 0
+                                    ? `${avgBy(fb, (r) => r.recommendationRatePct, (r) => r.responses).toFixed(0)}%`
+                                    : '—'}
+                                </p>
+                              </div>
+                            </>
+                          )
+                        })()}
                       </div>
 
                       <div>
                         <h3 className="mb-2 text-sm font-medium">Satisfaction by Session</h3>
                         <ChartContainer config={satConfig} className="h-56 w-full">
-                          <BarChart data={fb} margin={{ left: 0, right: 8 }}>
+                          <BarChart
+                            data={fb.map((r) => ({
+                              ...r,
+                              satisfactionNormalized: normalizedSatisfaction(r) ?? 0,
+                            }))}
+                            margin={{ left: 0, right: 8 }}
+                          >
                             <CartesianGrid vertical={false} strokeDasharray="3 3" />
                             <XAxis dataKey="sessionLabel" tick={false} axisLine={false} />
                             <YAxis domain={[0, 5]} tickLine={false} axisLine={false} fontSize={11} width={30} />
                             <ChartTooltip content={<ChartTooltipContent labelKey="sessionLabel" />} />
-                            <Bar dataKey="satisfaction" fill="var(--color-satisfaction)" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="satisfactionNormalized" name="Satisfaction (1-5)" fill="var(--color-satisfaction)" radius={[4, 4, 0, 0]} />
                           </BarChart>
                         </ChartContainer>
                       </div>
@@ -306,7 +368,7 @@ export function ProgramDrawer({
                               <TableCell className="text-xs">{r.month ?? 'Undated (VIP)'}</TableCell>
                               <TableCell className="text-right text-xs tabular-nums">{r.responses}</TableCell>
                               <TableCell className="text-right text-xs font-medium tabular-nums text-primary">
-                                {r.satisfaction.toFixed(2)}
+                                {formatSatisfaction(r)}
                               </TableCell>
                             </TableRow>
                           ))}

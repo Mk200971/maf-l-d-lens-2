@@ -25,7 +25,7 @@ import {
   programName,
   sumBy,
 } from '@/lib/aggregate'
-import { kpis } from '@/lib/dashboard-data'
+import { completion, kpis } from '@/lib/dashboard-data'
 import { ChartCard, InfoBanner, KpiTile, PageHeader } from '@/components/dashboard/shared'
 
 const rateChartConfig = {
@@ -121,12 +121,12 @@ export function EligibilityPage() {
         <KpiTile
           label="Eligible (filtered)"
           value={formatNumber(totals.eligible)}
-          sub={`Contract total: ${formatNumber(kpis.eligible)}`}
+          sub={`Total: ${formatNumber(completion.reduce((s, r) => s + r.eligible, 0))}`}
         />
         <KpiTile
           label="Completed (eligible)"
           value={formatNumber(totals.completed)}
-          sub={`Contract total: ${formatNumber(kpis.completedEligible)}`}
+          sub={`Total: ${formatNumber(completion.reduce((s, r) => s + r.completedEligible, 0))}`}
         />
         <KpiTile
           label="Completion rate"

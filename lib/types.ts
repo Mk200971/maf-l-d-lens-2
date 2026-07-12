@@ -156,5 +156,42 @@ export function normalizedSatisfaction(row: FeedbackRow): number | null {
 
 /** Get the top-2-box threshold for a given scale. */
 export function topBoxThreshold(scale: Scale): number {
-  return scale === '0-10' ? 9 : 4;
+  return scale === '0-10' ? 9 : 4
+}
+
+// ---------------------------------------------------------------------------
+// Aliases kept for backwards-compatibility with shim + consumer files
+// ---------------------------------------------------------------------------
+/** @deprecated Use Bu */
+export type BU = Bu
+
+export type FilterKey = 'year' | 'bu' | 'country' | 'role' | 'program' | 'month'
+
+export interface FilterState {
+  years: number[]
+  bus: string[]
+  countries: string[]
+  roles: string[]
+  programs: string[]
+  monthRange: [string, string] | null
+}
+
+/** Extended eligibility grain (from dashboard-data.extended.ts). */
+export interface EligibilityRow {
+  programCode: string
+  bu: Bu | string
+  country: Country | string
+  role: Role | string
+  eligible: number
+  completedEligible: number
+  completionRatePct: number
+}
+
+/** Normalised extras row as used in dashboard-data.ts shim. */
+export interface ExtrasMetric {
+  programCode: string
+  metric: string
+  value: number
+  scaleMax: number
+  n: number
 }

@@ -62,7 +62,7 @@ export function LearnersPage() {
     const grid = countries.map((country) => {
       const cells = roles.map((role) => {
         const v = Math.round(
-          sumBy(hours.filter((r) => r.country === country && r.role === role), (r) => r.hours),
+          sumBy(hours.filter((r) => r.country === country && r.role === role), (r) => r.totalHours),
         )
         max = Math.max(max, v)
         return { role, value: v }
@@ -80,8 +80,9 @@ export function LearnersPage() {
 
   // Monthly reach curve
   const monthly = useMemo(() => {
-    const m = groupSum(reach, (r) => r.month, (r) => r.uniqueLearners)
+    const m = groupSum(reach, (r) => r.month ?? 'Undated', (r) => r.uniqueLearners)
     return Array.from(m.entries())
+      .filter(([month]) => month !== 'Undated')
       .map(([month, learners]) => ({ month, learners }))
       .sort((a, b) => a.month.localeCompare(b.month))
   }, [reach])
@@ -104,7 +105,7 @@ export function LearnersPage() {
           h.country === r.country &&
           h.role === r.role,
       )
-      const perLearner = match && r.uniqueLearners > 0 ? match.hours / r.uniqueLearners : 0
+      const perLearner = match && r.uniqueLearners > 0 ? match.totalHours / r.uniqueLearners : 0
       const bucket = buckets.find((b) => perLearner >= b.min && perLearner < b.max) ?? buckets[0]
       bucket.learners += r.uniqueLearners
     }
