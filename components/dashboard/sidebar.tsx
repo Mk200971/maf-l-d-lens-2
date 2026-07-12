@@ -48,9 +48,9 @@ export function DashboardSidebar() {
           />
           {!isCollapsed && (
             <div className="flex flex-col">
-              <span className="text-sm font-semibold text-white">MAF Learning</span>
+              <span className="text-sm font-semibold text-white">MAFGS L&D LENS</span>
               <span className="text-[11px] tracking-wide text-sidebar-foreground/70">
-                L&amp;D DASHBOARD
+                DBU &amp; AMBU L&amp;D DASHBOARD
               </span>
             </div>
           )}
