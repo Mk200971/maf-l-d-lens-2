@@ -1,8 +1,14 @@
 // types.ts — Domain types for the AMBU & DBU Learning Dashboard
-// Updated 2026-07-12: added Scale union, satisfactionRatePct/nps fields,
-// PS-specific KPIs, and eligibilityByProgram grain.
+// v5 (2026-07-12):
+//   • Removed avgNPS_PS + npsByProgram (weighted cross-BU NPS deprecated)
+//   • Added npsByProgramBU (per-BU NPS only)
+//   • Added BuTag alias for session-level classification (AMBU|DBU|Mixed)
+//   • Added matchesBuFilter() and getPsNpsForActiveBu() helpers
+//   • FilterState.sessions renamed to sessionIds to match filter-rules.ts
 
 export type Bu = 'AMBU' | 'DBU';
+/** Session-level BU tag — Mixed = shared cohorts (SLP/SLII/L2H). */
+export type BuTag = 'AMBU' | 'DBU' | 'Mixed';
 export type BuScope = 'AMBU' | 'DBU' | 'AMBU+DBU';
 export type Role =
   | 'Individual Contributor'
@@ -19,12 +25,20 @@ export type Country =
   | 'Lebanon';
 export type Scale = '1-5' | '0-10';
 
+/** NPS reported per BU for programs measured on 0-10 scale. */
+export interface PsNpsByBU {
+  AMBU: number | null;
+  DBU: number | null;
+}
+
 export interface Meta {
   yearsCovered: number[];
   source: string;
   grainNote: string;
   note: string;
   scaleNote: string;
+  /** Explanation of NPS reporting policy (per-BU only). */
+  npsPolicy?: string;
 }
 
 export interface Kpis {
@@ -49,12 +63,17 @@ export interface Kpis {
   avgSatisfaction_PS_native: number | null;      // 0-10 native scale
   avgSatisfaction_PS_normalized: number | null;  // rescaled to 1-5 for display comparison
   satisfactionRatePct_PS: number | null;         // Top-2-Box % (satisfaction >= 9)
-  avgNPS_PS: number | null;                      // Program NPS % (Promoters - Detractors)
 
   // Per-program breakdowns
   satisfactionRateByProgram: Record<string, number>;
   avgSatisfactionByProgram: Record<string, number>;
-  npsByProgram: Record<string, number>;
+
+  /**
+   * NPS reported PER BU only. Weighted cross-BU aggregate intentionally NOT computed —
+   * mixing populations produces a misleading headline. Consumers should filter to a
+   * single BU or show both AMBU and DBU tiles side-by-side.
+   */
+  npsByProgramBU: Record<string, PsNpsByBU>;
 }
 
 export interface Program {
@@ -98,15 +117,14 @@ export interface FeedbackRow {
   recommendation: number | null;
   recommendationRatePct: number | null;
 
-  // NPS (only populated when scale === '0-10')
+  /** Session-level NPS % — populated only when scale === '0-10'. */
   nps: number | null;
-
   scale: Scale;
 
   // BU & Session filtering
-  bu: 'AMBU' | 'DBU' | 'Mixed';             // Business Unit: single BU, or Mixed for shared cohorts
-  country: Country | string;                // Country of delivery
-  sessionId: string;                        // Stable ID: ${programCode}::${sessionLabel}::${month}
+  bu: BuTag;                                // 'AMBU' | 'DBU' | 'Mixed'
+  country: Country | string;                // Mode country across responses
+  sessionId: string;                        // Stable: `${programCode}::${sessionLabel}::${month}`
 }
 
 export interface CompletionRow {
@@ -160,75 +178,69 @@ export function normalizedSatisfaction(row: FeedbackRow): number | null {
 
 /** Get the top-2-box threshold for a given scale. */
 export function topBoxThreshold(scale: Scale): number {
-  return scale === '0-10' ? 9 : 4
+  return scale === '0-10' ? 9 : 4;
 }
 
 /**
  * Normalize any sub-metric (objectivesClarity, facilitatorEffectiveness,
  * confidenceApplication, recommendation) to 1-5.
- * PS rows store sub-metrics on the same 0-10 native scale as satisfaction,
- * so rescale by ×(4/9) + 1 (maps 0→1, 10→5, 9→5).
+ * PS rows store sub-metrics on the same 0-10 native scale as satisfaction.
+ * Maps: 0→1, 10→5 linearly.
  */
 export function normalizeSubMetric(value: number | null, scale: Scale): number | null {
-  if (value == null) return null
-  if (scale === '0-10') return 1 + (value / 10) * 4
-  return value
+  if (value == null) return null;
+  if (scale === '0-10') return 1 + (value / 10) * 4;
+  return value;
 }
 
-/** Normalized facilitator effectiveness (always 1-5). */
 export function normalizedFacilitator(row: FeedbackRow): number | null {
-  return normalizeSubMetric(row.facilitatorEffectiveness, row.scale)
+  return normalizeSubMetric(row.facilitatorEffectiveness, row.scale);
 }
 
-/** Normalized objectives clarity (always 1-5). */
 export function normalizedObjectivesClarity(row: FeedbackRow): number | null {
-  return normalizeSubMetric(row.objectivesClarity, row.scale)
+  return normalizeSubMetric(row.objectivesClarity, row.scale);
 }
 
-/** Normalized confidence / commitment (always 1-5). */
 export function normalizedConfidence(row: FeedbackRow): number | null {
-  return normalizeSubMetric(row.confidenceApplication, row.scale)
+  return normalizeSubMetric(row.confidenceApplication, row.scale);
 }
 
-/** Normalized recommendation (always 1-5). */
 export function normalizedRecommendation(row: FeedbackRow): number | null {
-  return normalizeSubMetric(row.recommendation, row.scale)
+  return normalizeSubMetric(row.recommendation, row.scale);
 }
 
 // ---------------------------------------------------------------------------
-// Aliases kept for backwards-compatibility with shim + consumer files
+// BU filter helper — respects Mixed semantics.
 // ---------------------------------------------------------------------------
-/** @deprecated Use Bu */
-export type BU = Bu
 
-export type FilterKey = 'year' | 'bu' | 'country' | 'role' | 'program' | 'month' | 'session'
-
-export interface FilterState {
-  years: number[]
-  bus: string[]
-  countries: string[]
-  roles: string[]
-  programs: string[]
-  sessions: string[]
-  monthRange: [string, string] | null
+/**
+ * Returns true if a feedback row matches the selected BU filter.
+ * Selecting AMBU or DBU also includes Mixed sessions (shared cohorts had
+ * attendees from both BUs). Selecting Mixed shows only Mixed sessions.
+ */
+export function matchesBuFilter(row: { bu: BuTag }, selectedBus: string[]): boolean {
+  if (selectedBus.length === 0) return true;
+  return selectedBus.some(chosen => {
+    if (chosen === 'Mixed') return row.bu === 'Mixed';
+    return row.bu === chosen || row.bu === 'Mixed';
+  });
 }
 
-/** Extended eligibility grain (from dashboard-data.extended.ts). */
-export interface EligibilityRow {
-  programCode: string
-  bu: Bu | string
-  country: Country | string
-  role: Role | string
-  eligible: number
-  completedEligible: number
-  completionRatePct: number
-}
+// ---------------------------------------------------------------------------
+// PS NPS resolution — per BU only.
+// ---------------------------------------------------------------------------
 
-/** Normalised extras row as used in dashboard-data.ts shim. */
-export interface ExtrasMetric {
-  programCode: string
-  metric: string
-  value: number
-  scaleMax: number
-  n: number
-}
+/**
+ * Returns the PS NPS for the currently active BU filter.
+ * Returns null when zero or multiple BUs are selected (by design — no
+ * cross-BU weighted NPS is exposed). The dashboard should render "—" or
+ * two side-by-side tiles in that case.
+ */
+export function getPsNpsForActiveBu(
+  npsMap: Record<string, PsNpsByBU>,
+  programCode: string,
+  activeBus: string[]
+): { bu: Bu; nps: number } | null {
+  const entry = npsMap[programCode];
+  if (!entry) return null;
+  const singleBu = activeBus.filter(b => b === 'AMBU' || b === 'DBU');
