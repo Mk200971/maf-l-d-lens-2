@@ -294,3 +294,38 @@ export interface ExtrasMetric {
   scaleMax: number;
   n: number;
 }
+
+// ---------------------------------------------------------------------------
+// Voice of Learner — qualitative feedback themes & quotes
+// ---------------------------------------------------------------------------
+
+export interface VoiceOfLearnerQuote {
+  text: string;
+  sessionLabel: string | null;
+  month: string | null;
+  score: number | null;
+  type?: 'strength' | 'improvement' | 'general';
+}
+
+export interface VoiceOfLearnerTheme {
+  theme: string;
+  count: number;
+  sampleQuotes: VoiceOfLearnerQuote[];
+}
+
+export interface VoiceOfLearnerRow {
+  programCode: string;
+  programName: string;
+  totalComments: number;
+  strengthCount: number;
+  improvementCount: number;
+  generalCount: number;
+  nonTrivialComments: number;
+  themes: {
+    strengths: VoiceOfLearnerTheme[];
+    improvements: VoiceOfLearnerTheme[];
+    allSentiment?: VoiceOfLearnerTheme[];  // For programs with only 'general' bucket
+  };
+  highlightQuotes: VoiceOfLearnerQuote[];
+  concernQuotes: VoiceOfLearnerQuote[];
+}

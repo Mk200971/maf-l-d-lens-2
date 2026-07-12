@@ -13,6 +13,7 @@ import { Progress } from '@/components/ui/progress'
 import { useFilters } from '@/lib/filters-context'
 import { filterExtras, programName } from '@/lib/aggregate'
 import { ChartCard, InfoBanner, KpiTile, PageHeader } from '@/components/dashboard/shared'
+import { VoiceOfLearnerSection } from '@/components/quality-signals/voice-of-learner-section'
 
 const likertConfig = {
   value: { label: 'Score (of 5)', color: 'var(--chart-1)' },
@@ -75,6 +76,19 @@ export function ExtrasPage() {
         Extras exist only for programs that collected them (SLP, SLII, L2H, VIP). Only the
         Program filter applies here.
       </InfoBanner>
+
+      {/* Voice of Learner Section */}
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold text-accent">Voice of Learner</h2>
+        <p className="text-sm text-muted-foreground">Qualitative themes and quotes from learner feedback.</p>
+      </div>
+      <VoiceOfLearnerSection />
+
+      {/* Quantitative Extras */}
+      <div className="space-y-2 pt-4">
+        <h2 className="text-xl font-semibold text-accent">Quantitative Signals</h2>
+        <p className="text-sm text-muted-foreground">Additional survey metrics beyond core satisfaction.</p>
+      </div>
 
       {uplift !== null && skillBefore && skillAfter && (
         <ChartCard
