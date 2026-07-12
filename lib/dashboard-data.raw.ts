@@ -1,16 +1,11 @@
 // dashboard-data.raw.ts
-// GENERATED 2026-07-12 v2 from "AMBU & DBU Master 2025-2026 (Fixed) v2.xlsx".
-// Do NOT hand-edit. All aggregates are PII-free.
-//
-// v2 changes (this refresh):
-//   • Program Registry buScope corrected — RISE/PATH/MVT/Resilience = AMBU;
-//     6 Thinking Hats/Lean Fundamentals = DBU.
-//   • Feedback rows now carry `bu`, `country`, `sessionId` for filter support.
-//   • BU tagging rule for feedback sessions:
-//     1. Program's buScope is single BU → use it
-//     2. PS: response_id prefix (PS-AMBU-* / PS-DBU-*) → use it
-//     3. Session label contains "AMBU" xor "DBU" → parse it
-//     4. Otherwise (SLP/SLII/L2H shared cohorts) → "Mixed"
+// GENERATED 2026-07-12 v5 from "AMBU & DBU Master 2025-2026 (Fixed) v5.xlsx".
+// v5 changes:
+//   * PS eligibility rebuilt from source reports (Participant Roster + LT/Last Session
+//     minus Excluded Participants). Al Mouj Muscat employees (34) now classified DBU
+//     per business rule.
+//   * PS eligibility now: 278 target (162 AMBU + 116 DBU), 216 completed = 77.7%.
+//   * All v4 changes preserved: VIP dates, npsByProgramBU (per-BU only).
 
 export const meta = {
   "yearsCovered": [
@@ -19,9 +14,10 @@ export const meta = {
     2026
   ],
   "source": "Consolidated master (LMS learning hours + Forms/Qualtrics feedback)",
-  "grainNote": "learningHours attribute-sliceable; feedback session-level with bu/country/sessionId for filtering.",
-  "note": "Feedback pipeline updated 2026-07-12. Each feedback row now carries bu, country, sessionId — filters enabled on Feedback page.",
-  "scaleNote": "Satisfaction Rate is top-2-box: (satisfaction >= 4)/total for 1-5 scale; (satisfaction >= 9)/total for 0-10 scale (matches NPS Promoter definition)."
+  "grainNote": "learningHours attribute-sliceable; feedback session-level with bu/country/sessionId.",
+  "note": "v5 (2026-07-12): PS eligibility rebuilt from source reports (Al Mouj Muscat employees now classified DBU). VIP dates baked in. PS NPS shown per BU only. See master's Reconciliation sheet for audit trail.",
+  "scaleNote": "Satisfaction Rate is top-2-box: sat>=4/n for 1-5; sat>=9/n for 0-10 (matches NPS Promoter def).",
+  "npsPolicy": "PS NPS reported per BU only. See kpis.npsByProgramBU. Weighted cross-BU NPS intentionally not computed."
 } as const;
 
 export const kpis = {
@@ -29,14 +25,13 @@ export const kpis = {
   "totalCompletions": 1557,
   "uniqueLearners": 912,
   "programsCount": 12,
-  "feedbackResponses": 1304,
+  "feedbackResponses": 1299,
   "avgSatisfaction": 4.72,
-  "avgSatisfaction_PS_native": 8.89,
-  "avgSatisfaction_PS_normalized": 4.45,
+  "avgSatisfaction_PS_native": 9.11,
+  "avgSatisfaction_PS_normalized": 4.55,
   "satisfactionRatePct": 97.3,
-  "satisfactionRatePct_PS": 65.8,
-  "avgNPS_PS": 72.2,
-  "completionRatePct": 76.5,
+  "satisfactionRatePct_PS": 74.3,
+  "completionRatePct": 77.0,
   "learningHoursByBU": {
     "AMBU": 5884.0,
     "DBU": 4010.0,
@@ -63,7 +58,7 @@ export const kpis = {
     "SLP": 98.6,
     "SLII": 96.0,
     "L2H": 100.0,
-    "2026:MAFP_Psychological_Safety": 65.8
+    "2026:MAFP_Psychological_Safety": 74.3
   },
   "avgSatisfactionByProgram": {
     "2026:Managing_Virtual_Effectively": 4.78,
@@ -76,10 +71,13 @@ export const kpis = {
     "SLP": 4.75,
     "SLII": 4.77,
     "L2H": 4.67,
-    "2026:MAFP_Psychological_Safety": 8.89
+    "2026:MAFP_Psychological_Safety": 9.11
   },
-  "npsByProgram": {
-    "2026:MAFP_Psychological_Safety": 72.2
+  "npsByProgramBU": {
+    "2026:MAFP_Psychological_Safety": {
+      "AMBU": 81.44,
+      "DBU": 54.35
+    }
   }
 } as const;
 
@@ -2516,16 +2514,16 @@ export const feedback = [
     "sessionId": "2026:MAFP_Psychological_Safety::The 4 Stages of Psychological Safety - Cohort 1 - West Region::2026-04",
     "bu": "AMBU",
     "country": "Egypt",
-    "responses": 15,
+    "responses": 14,
     "satisfaction": 9.07,
     "satisfactionNormalized": 4.54,
-    "satisfactionRatePct": 66.7,
+    "satisfactionRatePct": 71.4,
     "objectivesClarity": null,
-    "facilitatorEffectiveness": 9.07,
-    "confidenceApplication": 8.86,
+    "facilitatorEffectiveness": 8.86,
+    "confidenceApplication": 9.0,
     "recommendation": 9.0,
-    "recommendationRatePct": 90.9,
-    "nps": 64.3,
+    "recommendationRatePct": 100.0,
+    "nps": 64.29,
     "scale": "0-10"
   },
   {
@@ -2537,15 +2535,15 @@ export const feedback = [
     "bu": "AMBU",
     "country": "Egypt",
     "responses": 13,
-    "satisfaction": 9.08,
-    "satisfactionNormalized": 4.54,
-    "satisfactionRatePct": 69.2,
+    "satisfaction": 9.46,
+    "satisfactionNormalized": 4.73,
+    "satisfactionRatePct": 84.6,
     "objectivesClarity": null,
-    "facilitatorEffectiveness": 9.46,
-    "confidenceApplication": 9.15,
-    "recommendation": 9.38,
+    "facilitatorEffectiveness": 9.15,
+    "confidenceApplication": 9.38,
+    "recommendation": 9.08,
     "recommendationRatePct": 100.0,
-    "nps": 84.6,
+    "nps": 69.23,
     "scale": "0-10"
   },
   {
@@ -2556,10 +2554,10 @@ export const feedback = [
     "sessionId": "2026:MAFP_Psychological_Safety::The 4 Stages of Psychological Safety - Cohort 3 - DBU UAE::2026-04",
     "bu": "DBU",
     "country": "United Arab Emirates",
-    "responses": 11,
-    "satisfaction": 9.09,
-    "satisfactionNormalized": 4.54,
-    "satisfactionRatePct": 63.6,
+    "responses": 10,
+    "satisfaction": 9.0,
+    "satisfactionNormalized": 4.5,
+    "satisfactionRatePct": 60.0,
     "objectivesClarity": null,
     "facilitatorEffectiveness": 9.1,
     "confidenceApplication": 9.1,
@@ -2577,15 +2575,15 @@ export const feedback = [
     "bu": "AMBU",
     "country": "United Arab Emirates",
     "responses": 11,
-    "satisfaction": 9.36,
-    "satisfactionNormalized": 4.68,
-    "satisfactionRatePct": 90.9,
+    "satisfaction": 9.73,
+    "satisfactionNormalized": 4.87,
+    "satisfactionRatePct": 100.0,
     "objectivesClarity": null,
     "facilitatorEffectiveness": 9.73,
-    "confidenceApplication": 9.73,
-    "recommendation": 9.64,
+    "confidenceApplication": 9.64,
+    "recommendation": 9.36,
     "recommendationRatePct": 100.0,
-    "nps": 90.9,
+    "nps": 90.91,
     "scale": "0-10"
   },
   {
@@ -2596,9 +2594,9 @@ export const feedback = [
     "sessionId": "2026:MAFP_Psychological_Safety::The 4 Stages of Psychological Safety - Cohort 4 - DBU UAE::2026-05",
     "bu": "DBU",
     "country": "United Arab Emirates",
-    "responses": 12,
-    "satisfaction": 8.25,
-    "satisfactionNormalized": 4.12,
+    "responses": 10,
+    "satisfaction": 8.4,
+    "satisfactionNormalized": 4.2,
     "satisfactionRatePct": 50.0,
     "objectivesClarity": null,
     "facilitatorEffectiveness": 8.0,
@@ -2617,15 +2615,15 @@ export const feedback = [
     "bu": "AMBU",
     "country": "United Arab Emirates",
     "responses": 11,
-    "satisfaction": 9.73,
-    "satisfactionNormalized": 4.87,
-    "satisfactionRatePct": 90.9,
+    "satisfaction": 9.91,
+    "satisfactionNormalized": 4.96,
+    "satisfactionRatePct": 100.0,
     "objectivesClarity": null,
-    "facilitatorEffectiveness": 9.91,
-    "confidenceApplication": 9.36,
-    "recommendation": 9.64,
+    "facilitatorEffectiveness": 9.36,
+    "confidenceApplication": 9.64,
+    "recommendation": 9.73,
     "recommendationRatePct": 100.0,
-    "nps": 81.8,
+    "nps": 90.91,
     "scale": "0-10"
   },
   {
@@ -2637,15 +2635,15 @@ export const feedback = [
     "bu": "AMBU",
     "country": "Oman",
     "responses": 16,
-    "satisfaction": 9.44,
-    "satisfactionNormalized": 4.72,
+    "satisfaction": 9.62,
+    "satisfactionNormalized": 4.81,
     "satisfactionRatePct": 93.8,
     "objectivesClarity": null,
-    "facilitatorEffectiveness": 9.62,
-    "confidenceApplication": 9.12,
-    "recommendation": 9.62,
+    "facilitatorEffectiveness": 9.12,
+    "confidenceApplication": 9.62,
+    "recommendation": 9.44,
     "recommendationRatePct": 100.0,
-    "nps": 87.5,
+    "nps": 93.75,
     "scale": "0-10"
   },
   {
@@ -2657,15 +2655,15 @@ export const feedback = [
     "bu": "AMBU",
     "country": "United Arab Emirates",
     "responses": 13,
-    "satisfaction": 9.0,
-    "satisfactionNormalized": 4.5,
-    "satisfactionRatePct": 61.5,
+    "satisfaction": 9.54,
+    "satisfactionNormalized": 4.77,
+    "satisfactionRatePct": 92.3,
     "objectivesClarity": null,
-    "facilitatorEffectiveness": 9.54,
-    "confidenceApplication": 9.31,
-    "recommendation": 9.23,
+    "facilitatorEffectiveness": 9.31,
+    "confidenceApplication": 9.23,
+    "recommendation": 9.0,
     "recommendationRatePct": 100.0,
-    "nps": 76.9,
+    "nps": 61.54,
     "scale": "0-10"
   },
   {
@@ -2676,16 +2674,16 @@ export const feedback = [
     "sessionId": "2026:MAFP_Psychological_Safety::The 4 Stages of Psychological Safety - Cohort 5 - DBU UAE::2026-06",
     "bu": "DBU",
     "country": "United Arab Emirates",
-    "responses": 15,
-    "satisfaction": 7.53,
-    "satisfactionNormalized": 3.77,
-    "satisfactionRatePct": 40.0,
+    "responses": 14,
+    "satisfaction": 7.57,
+    "satisfactionNormalized": 3.79,
+    "satisfactionRatePct": 42.9,
     "objectivesClarity": null,
     "facilitatorEffectiveness": 8.43,
     "confidenceApplication": 8.57,
     "recommendation": 7.5,
     "recommendationRatePct": 66.7,
-    "nps": 21.4,
+    "nps": 21.43,
     "scale": "0-10"
   },
   {
@@ -2697,15 +2695,15 @@ export const feedback = [
     "bu": "AMBU",
     "country": "United Arab Emirates",
     "responses": 10,
-    "satisfaction": 8.7,
-    "satisfactionNormalized": 4.35,
-    "satisfactionRatePct": 60.0,
+    "satisfaction": 9.6,
+    "satisfactionNormalized": 4.8,
+    "satisfactionRatePct": 100.0,
     "objectivesClarity": null,
-    "facilitatorEffectiveness": 9.6,
-    "confidenceApplication": 8.9,
-    "recommendation": 9.4,
-    "recommendationRatePct": 100.0,
-    "nps": 90.0,
+    "facilitatorEffectiveness": 8.9,
+    "confidenceApplication": 9.4,
+    "recommendation": 8.7,
+    "recommendationRatePct": 85.7,
+    "nps": 50.0,
     "scale": "0-10"
   },
   {
@@ -2725,7 +2723,7 @@ export const feedback = [
     "confidenceApplication": 9.33,
     "recommendation": 8.83,
     "recommendationRatePct": 100.0,
-    "nps": 66.7,
+    "nps": 66.67,
     "scale": "0-10"
   },
   {
@@ -2737,13 +2735,13 @@ export const feedback = [
     "bu": "AMBU",
     "country": "United Arab Emirates",
     "responses": 10,
-    "satisfaction": 9.1,
-    "satisfactionNormalized": 4.55,
-    "satisfactionRatePct": 70.0,
+    "satisfaction": 8.9,
+    "satisfactionNormalized": 4.45,
+    "satisfactionRatePct": 60.0,
     "objectivesClarity": null,
-    "facilitatorEffectiveness": 8.9,
-    "confidenceApplication": 9.1,
-    "recommendation": 9.2,
+    "facilitatorEffectiveness": 9.1,
+    "confidenceApplication": 9.2,
+    "recommendation": 9.1,
     "recommendationRatePct": 100.0,
     "nps": 70.0,
     "scale": "0-10"
@@ -4090,50 +4088,10 @@ export const feedback = [
   },
   {
     "programCode": "VIP",
-    "sessionLabel": "Advanced CX - Cohort 1",
-    "sessionPart": "Full session",
-    "month": null,
-    "sessionId": "VIP::Advanced CX - Cohort 1::",
-    "bu": "DBU",
-    "country": "Unknown",
-    "responses": 13,
-    "satisfaction": 4.62,
-    "satisfactionNormalized": 4.62,
-    "satisfactionRatePct": 92.3,
-    "objectivesClarity": 4.38,
-    "facilitatorEffectiveness": 4.54,
-    "confidenceApplication": null,
-    "recommendation": null,
-    "recommendationRatePct": 100.0,
-    "nps": null,
-    "scale": "1-5"
-  },
-  {
-    "programCode": "VIP",
-    "sessionLabel": "Advanced CX - Cohort 2",
-    "sessionPart": "Full session",
-    "month": null,
-    "sessionId": "VIP::Advanced CX - Cohort 2::",
-    "bu": "DBU",
-    "country": "Unknown",
-    "responses": 8,
-    "satisfaction": 4.75,
-    "satisfactionNormalized": 4.75,
-    "satisfactionRatePct": 100.0,
-    "objectivesClarity": 4.62,
-    "facilitatorEffectiveness": 5.0,
-    "confidenceApplication": null,
-    "recommendation": null,
-    "recommendationRatePct": 100.0,
-    "nps": null,
-    "scale": "1-5"
-  },
-  {
-    "programCode": "VIP",
     "sessionLabel": "Introduction to VIP Clienteling - Cohort 1",
     "sessionPart": "Full session",
-    "month": null,
-    "sessionId": "VIP::Introduction to VIP Clienteling - Cohort 1::",
+    "month": "2024-10",
+    "sessionId": "VIP::Introduction to VIP Clienteling - Cohort 1::2024-10",
     "bu": "DBU",
     "country": "Unknown",
     "responses": 8,
@@ -4152,8 +4110,8 @@ export const feedback = [
     "programCode": "VIP",
     "sessionLabel": "Introduction to VIP Clienteling - Cohort 2",
     "sessionPart": "Full session",
-    "month": null,
-    "sessionId": "VIP::Introduction to VIP Clienteling - Cohort 2::",
+    "month": "2025-02",
+    "sessionId": "VIP::Introduction to VIP Clienteling - Cohort 2::2025-02",
     "bu": "DBU",
     "country": "Unknown",
     "responses": 8,
@@ -4170,10 +4128,30 @@ export const feedback = [
   },
   {
     "programCode": "VIP",
+    "sessionLabel": "Advanced CX - Cohort 1",
+    "sessionPart": "Full session",
+    "month": "2025-05",
+    "sessionId": "VIP::Advanced CX - Cohort 1::2025-05",
+    "bu": "DBU",
+    "country": "Unknown",
+    "responses": 13,
+    "satisfaction": 4.62,
+    "satisfactionNormalized": 4.62,
+    "satisfactionRatePct": 92.3,
+    "objectivesClarity": 4.38,
+    "facilitatorEffectiveness": 4.54,
+    "confidenceApplication": null,
+    "recommendation": null,
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
+  },
+  {
+    "programCode": "VIP",
     "sessionLabel": "Observation Debrief Course - Main",
     "sessionPart": "Full session",
-    "month": null,
-    "sessionId": "VIP::Observation Debrief Course - Main::",
+    "month": "2025-05",
+    "sessionId": "VIP::Observation Debrief Course - Main::2025-05",
     "bu": "DBU",
     "country": "Unknown",
     "responses": 8,
@@ -4187,15 +4165,35 @@ export const feedback = [
     "recommendationRatePct": null,
     "nps": null,
     "scale": "1-5"
+  },
+  {
+    "programCode": "VIP",
+    "sessionLabel": "Advanced CX - Cohort 2",
+    "sessionPart": "Full session",
+    "month": "2025-09",
+    "sessionId": "VIP::Advanced CX - Cohort 2::2025-09",
+    "bu": "DBU",
+    "country": "Unknown",
+    "responses": 8,
+    "satisfaction": 4.75,
+    "satisfactionNormalized": 4.75,
+    "satisfactionRatePct": 100.0,
+    "objectivesClarity": 4.62,
+    "facilitatorEffectiveness": 5.0,
+    "confidenceApplication": null,
+    "recommendation": null,
+    "recommendationRatePct": 100.0,
+    "nps": null,
+    "scale": "1-5"
   }
 ];
 
 export const completion = [
   {
     "programCode": "2026:MAFP_Psychological_Safety",
-    "eligible": 209,
-    "completedEligible": 155,
-    "completionRatePct": 74.2
+    "eligible": 278,
+    "completedEligible": 216,
+    "completionRatePct": 77.7
   },
   {
     "programCode": "2026:MAFP_Rise_Mall_management",
