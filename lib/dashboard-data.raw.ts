@@ -4197,8 +4197,8 @@ export const completion = [
   },
   {
     "programCode": "2026:MAFP_Rise_Mall_management",
-    "eligible": 27,
-    "completedEligible": 27,
+    "eligible": 23,
+    "completedEligible": 23,
     "completionRatePct": 100.0
   },
   {
