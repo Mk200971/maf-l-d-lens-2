@@ -159,7 +159,7 @@ export function OverviewPage() {
           label="Unique Learners"
           docId="unique-learners"
           value={formatNumber(uniqueLearners)}
-          sub="distinct learners (PII-free grain)"
+          sub="distinct learners"
         />
         <KpiTile
           label="Programs Active"
