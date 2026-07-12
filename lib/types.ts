@@ -159,6 +159,38 @@ export function topBoxThreshold(scale: Scale): number {
   return scale === '0-10' ? 9 : 4
 }
 
+/**
+ * Normalize any sub-metric (objectivesClarity, facilitatorEffectiveness,
+ * confidenceApplication, recommendation) to 1-5.
+ * PS rows store sub-metrics on the same 0-10 native scale as satisfaction,
+ * so rescale by ×(4/9) + 1 (maps 0→1, 10→5, 9→5).
+ */
+export function normalizeSubMetric(value: number | null, scale: Scale): number | null {
+  if (value == null) return null
+  if (scale === '0-10') return 1 + (value / 10) * 4
+  return value
+}
+
+/** Normalized facilitator effectiveness (always 1-5). */
+export function normalizedFacilitator(row: FeedbackRow): number | null {
+  return normalizeSubMetric(row.facilitatorEffectiveness, row.scale)
+}
+
+/** Normalized objectives clarity (always 1-5). */
+export function normalizedObjectivesClarity(row: FeedbackRow): number | null {
+  return normalizeSubMetric(row.objectivesClarity, row.scale)
+}
+
+/** Normalized confidence / commitment (always 1-5). */
+export function normalizedConfidence(row: FeedbackRow): number | null {
+  return normalizeSubMetric(row.confidenceApplication, row.scale)
+}
+
+/** Normalized recommendation (always 1-5). */
+export function normalizedRecommendation(row: FeedbackRow): number | null {
+  return normalizeSubMetric(row.recommendation, row.scale)
+}
+
 // ---------------------------------------------------------------------------
 // Aliases kept for backwards-compatibility with shim + consumer files
 // ---------------------------------------------------------------------------

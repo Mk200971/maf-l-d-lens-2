@@ -148,6 +148,40 @@ export function avgSatRatePct(rows: FeedbackRow[]): number {
   return w === 0 ? 0 : sumBy(valid, (r) => (r.satisfactionRatePct as number) * r.responses) / w
 }
 
+/**
+ * Response-weighted average of a sub-metric normalized to 1-5.
+ * Pass the per-row normalizer (e.g. normalizedFacilitator).
+ */
+import {
+  normalizedConfidence,
+  normalizedFacilitator,
+  normalizedObjectivesClarity,
+  normalizedRecommendation,
+} from './types'
+
+export function avgNormalizedSubMetric(
+  rows: FeedbackRow[],
+  fn: (r: FeedbackRow) => number | null,
+): number {
+  const valid = rows.filter((r) => fn(r) != null)
+  if (valid.length === 0) return 0
+  const w = sumBy(valid, (r) => r.responses)
+  return w === 0 ? 0 : sumBy(valid, (r) => (fn(r) as number) * r.responses) / w
+}
+
+export function avgNormalizedFacilitator(rows: FeedbackRow[]): number {
+  return avgNormalizedSubMetric(rows, normalizedFacilitator)
+}
+export function avgNormalizedObjectivesClarity(rows: FeedbackRow[]): number {
+  return avgNormalizedSubMetric(rows, normalizedObjectivesClarity)
+}
+export function avgNormalizedConfidence(rows: FeedbackRow[]): number {
+  return avgNormalizedSubMetric(rows, normalizedConfidence)
+}
+export function avgNormalizedRecommendation(rows: FeedbackRow[]): number {
+  return avgNormalizedSubMetric(rows, normalizedRecommendation)
+}
+
 /** Response-weighted average of nps (only rows with nps != null). */
 export function avgNps(rows: FeedbackRow[]): number | null {
   const valid = rows.filter((r) => r.nps != null)

@@ -29,10 +29,21 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { ChartCard, InfoBanner, KpiTile, PageHeader } from '@/components/dashboard/shared'
-import { avgBy, avgNps, avgSatRatePct, filterFeedback, formatNumber, normalizedAvgSat, programName, sumBy } from '@/lib/aggregate'
+import {
+  avgBy,
+  avgNormalizedConfidence,
+  avgNormalizedFacilitator,
+  avgNps,
+  avgSatRatePct,
+  filterFeedback,
+  formatNumber,
+  normalizedAvgSat,
+  programName,
+  sumBy,
+} from '@/lib/aggregate'
 import { useFilters } from '@/lib/filters-context'
 import { pageBanners } from '@/lib/filter-rules'
-import { formatSatisfaction, normalizedSatisfaction } from '@/lib/types'
+import { formatSatisfaction, normalizedFacilitator, normalizedSatisfaction } from '@/lib/types'
 import type { FeedbackRow } from '@/lib/types'
 
 const histConfig = {
@@ -63,8 +74,9 @@ export function FeedbackPage() {
   const avgSat = normalizedAvgSat(fb)
   const satRatePct = avgSatRatePct(fb)
   const npsValue = avgNps(fb)
-  const avgFac = avgBy(fb, (r) => r.facilitatorEffectiveness, (r) => r.responses)
-  const avgConf = avgBy(fb, (r) => r.confidenceApplication, (r) => r.responses)
+  // Normalize sub-metrics to 1-5 before averaging so PS (0-10) rows don't skew results
+  const avgFac = avgNormalizedFacilitator(fb)
+  const avgConf = avgNormalizedConfidence(fb)
   const recRate = avgBy(fb, (r) => r.recommendationRatePct, (r) => r.responses)
 
   // Histogram: distribution on normalized 1-5 scale (so PS rows are comparable)
@@ -86,17 +98,16 @@ export function FeedbackPage() {
     return buckets
   }, [fb])
 
-  // Scatter: facilitator vs satisfaction (both on 1-5 normalized scale)
+  // Scatter: facilitator vs satisfaction — both normalized to 1-5 so axes are consistent
   const scatter = useMemo(
     () =>
       fb
-        .filter((r) => r.facilitatorEffectiveness != null && normalizedSatisfaction(r) != null)
+        .filter((r) => normalizedFacilitator(r) != null && normalizedSatisfaction(r) != null)
         .map((r) => ({
-          x: r.facilitatorEffectiveness,
+          x: normalizedFacilitator(r),
           y: normalizedSatisfaction(r),
           z: r.responses,
           label: r.sessionLabel,
-          scale: r.scale,
         })),
     [fb],
   )

@@ -38,6 +38,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { InfoBanner } from '@/components/dashboard/shared'
 import {
   avgBy,
+  avgNormalizedConfidence,
+  avgNormalizedFacilitator,
+  avgNormalizedObjectivesClarity,
   avgNps,
   avgSatRatePct,
   filterHours,
@@ -299,7 +302,7 @@ export function ProgramDrawer({
                                   Objectives Clarity
                                 </p>
                                 <p className="text-xl font-semibold text-primary tabular-nums">
-                                  {(() => { const v = avgBy(fb, (r) => r.objectivesClarity, (r) => r.responses); return v > 0 ? `${v.toFixed(2)} / 5` : '—' })()}
+                                  {(() => { const v = avgNormalizedObjectivesClarity(fb); return v > 0 ? `${v.toFixed(2)} / 5` : '—' })()}
                                 </p>
                               </div>
                               <div className="rounded-lg border bg-card p-3">
@@ -307,7 +310,7 @@ export function ProgramDrawer({
                                   Facilitator
                                 </p>
                                 <p className="text-xl font-semibold text-primary tabular-nums">
-                                  {(() => { const v = avgBy(fb, (r) => r.facilitatorEffectiveness, (r) => r.responses); return v > 0 ? `${v.toFixed(2)} / 5` : '—' })()}
+                                  {(() => { const v = avgNormalizedFacilitator(fb); return v > 0 ? `${v.toFixed(2)} / 5` : '—' })()}
                                 </p>
                               </div>
                               <div className="rounded-lg border bg-card p-3">
@@ -315,7 +318,7 @@ export function ProgramDrawer({
                                   {isPS ? 'Action Plan Commitment' : 'Confidence'}
                                 </p>
                                 <p className="text-xl font-semibold text-primary tabular-nums">
-                                  {(() => { const v = avgBy(fb, (r) => r.confidenceApplication, (r) => r.responses); return v > 0 ? `${v.toFixed(2)} / 5` : '—' })()}
+                                  {(() => { const v = avgNormalizedConfidence(fb); return v > 0 ? `${v.toFixed(2)} / 5` : '—' })()}
                                 </p>
                               </div>
                               <div className="rounded-lg border bg-card p-3">
