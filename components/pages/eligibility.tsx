@@ -38,7 +38,7 @@ const funnelConfig = {
 } as const
 
 export function EligibilityPage() {
-  const { filters } = useFilters()
+  const { filters, toggle } = useFilters()
 
   // Eligibility grain supports program/bu/country/role slicing.
   const rows = useMemo(
@@ -146,7 +146,12 @@ export function EligibilityPage() {
           description="Funnel per program — the completion denominator is the eligibility list."
         >
           <ChartContainer config={funnelConfig} className="h-[340px] w-full">
-            <BarChart data={byProgram} layout="vertical" margin={{ left: 8, right: 8 }}>
+            <BarChart data={byProgram} layout="vertical" margin={{ left: 8, right: 8 }} onClick={(state: any) => {
+              if (state?.activeTooltipIndex !== undefined && byProgram[state.activeTooltipIndex]) {
+                const program = byProgram[state.activeTooltipIndex]
+                toggle('programs', program.code)
+              }
+            }}>
               <CartesianGrid horizontal={false} strokeDasharray="3 3" />
               <XAxis type="number" tickLine={false} axisLine={false} fontSize={11} />
               <YAxis
@@ -156,10 +161,15 @@ export function EligibilityPage() {
                 tickLine={false}
                 axisLine={false}
                 fontSize={11}
+                style={{ cursor: 'pointer' }}
               />
               <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="eligible" fill="var(--color-eligible)" radius={3} barSize={10} />
-              <Bar dataKey="completed" fill="var(--color-completed)" radius={3} barSize={10} />
+              <Bar dataKey="eligible" fill="var(--color-eligible)" radius={3} barSize={10} style={{ cursor: 'pointer' }} onClick={(data: any) => {
+                if (data?.code) toggle('programs', data.code)
+              }} />
+              <Bar dataKey="completed" fill="var(--color-completed)" radius={3} barSize={10} style={{ cursor: 'pointer' }} onClick={(data: any) => {
+                if (data?.code) toggle('programs', data.code)
+              }} />
             </BarChart>
           </ChartContainer>
         </ChartCard>
@@ -170,7 +180,12 @@ export function EligibilityPage() {
           description="Green ≥ 80%, amber 60–79%, red < 60%."
         >
           <ChartContainer config={rateChartConfig} className="h-[340px] w-full">
-            <BarChart data={byProgram} layout="vertical" margin={{ left: 8, right: 8 }}>
+            <BarChart data={byProgram} layout="vertical" margin={{ left: 8, right: 8 }} onClick={(state: any) => {
+              if (state?.activeTooltipIndex !== undefined && byProgram[state.activeTooltipIndex]) {
+                const program = byProgram[state.activeTooltipIndex]
+                toggle('programs', program.code)
+              }
+            }}>
               <CartesianGrid horizontal={false} strokeDasharray="3 3" />
               <XAxis
                 type="number"
@@ -186,9 +201,12 @@ export function EligibilityPage() {
                 tickLine={false}
                 axisLine={false}
                 fontSize={11}
+                style={{ cursor: 'pointer' }}
               />
               <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="rate" radius={3} barSize={14}>
+              <Bar dataKey="rate" radius={3} barSize={14} style={{ cursor: 'pointer' }} onClick={(data: any) => {
+                if (data?.code) toggle('programs', data.code)
+              }}>
                 {byProgram.map((p) => (
                   <Cell key={p.code} fill={rateColor(p.rate)} />
                 ))}

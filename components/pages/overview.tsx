@@ -49,7 +49,7 @@ const hoursConfig = {
 } satisfies ChartConfig
 
 export function OverviewPage() {
-  const { filters } = useFilters()
+  const { filters, toggle } = useFilters()
 
   const hours = useMemo(() => filterHours(filters), [filters])
   const reach = useMemo(() => filterReach(filters), [filters])
@@ -111,7 +111,7 @@ export function OverviewPage() {
   const programBars = useMemo(() => {
     const m = groupSum(hours, (r) => r.programCode, (r) => r.totalHours)
     return Array.from(m.entries())
-      .map(([code, h]) => ({ name: programName(code), hours: Math.round(h) }))
+      .map(([code, h]) => ({ code, name: programName(code), hours: Math.round(h) }))
       .sort((a, b) => b.hours - a.hours)
   }, [hours])
 
@@ -279,8 +279,13 @@ export function OverviewPage() {
 
       {/* Program contribution */}
       <ChartCard title="Program Contribution" docId="program-contribution" description="Learning hours by program, sorted descending.">
-        <ChartContainer config={hoursConfig} className="h-64 w-full lg:h-80 xl:h-96">
-          <BarChart data={programBars} layout="vertical" margin={{ left: 8, right: 16 }}>
+        <ChartContainer config={hoursConfig} className="h-56 w-full lg:h-72 xl:h-80">
+          <BarChart data={programBars} layout="vertical" margin={{ left: 8, right: 16 }} onClick={(state: any) => {
+            if (state?.activeTooltipIndex !== undefined && programBars[state.activeTooltipIndex]) {
+              const program = programBars[state.activeTooltipIndex]
+              toggle('programs', program.code)
+            }
+          }}>
             <CartesianGrid horizontal={false} strokeDasharray="3 3" />
             <XAxis type="number" tickLine={false} axisLine={false} fontSize={11} />
             <YAxis
@@ -290,9 +295,14 @@ export function OverviewPage() {
               axisLine={false}
               fontSize={11}
               width={170}
+              style={{ cursor: 'pointer' }}
             />
             <ChartTooltip content={<ChartTooltipContent />} />
-            <Bar dataKey="hours" fill="var(--color-hours)" radius={[0, 4, 4, 0]} />
+            <Bar dataKey="hours" fill="var(--color-hours)" radius={[0, 4, 4, 0]} style={{ cursor: 'pointer' }} onClick={(data: any) => {
+              if (data?.code) {
+                toggle('programs', data.code)
+              }
+            }} />
           </BarChart>
         </ChartContainer>
       </ChartCard>
