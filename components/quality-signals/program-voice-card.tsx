@@ -50,10 +50,67 @@ export function ProgramVoiceCard({ row, isPlaceholder, npsScore }: ProgramVoiceC
   const totalQuotes = row.highlightQuotes.length
   const displayedQuotes = expandedQuotes ? row.highlightQuotes : row.highlightQuotes.slice(0, 1)
 
+  // Determine if content is sparse (few themes and quotes)
+  const isSparseContent = totalThemes <= 2 && totalQuotes <= 1 && row.concernQuotes.length === 0
+
   const truncateQuote = (text: string, maxLength: number = 300) => {
+    if (!text) return ''
     return text.length > maxLength ? text.slice(0, maxLength) + '...' : text
   }
 
+  // Compact layout for sparse content
+  if (isSparseContent) {
+    return (
+      <Card className="border-l-4 border-l-amber-400 bg-amber-50/30">
+        <CardContent className="py-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <h3 className="font-semibold text-foreground">{row.programName}</h3>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <span className="text-xs text-muted-foreground">{row.totalComments} comments</span>
+                {row.nonTrivialComments > 0 && (
+                  <>
+                    <span className="text-xs text-muted-foreground">•</span>
+                    <span className="text-xs text-muted-foreground">{row.nonTrivialComments} non-trivial</span>
+                  </>
+                )}
+              </div>
+              {totalThemes > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {allThemes?.slice(0, 2).map((theme, idx) => {
+                    const bgColor = hasAllSentiment ? 'bg-blue-100' : (idx === 0 && row.themes.strengths.length > 0) ? 'bg-green-100' : 'bg-amber-100'
+                    const textColor = hasAllSentiment ? 'text-blue-700' : (idx === 0 && row.themes.strengths.length > 0) ? 'text-green-700' : 'text-amber-700'
+                    return (
+                      <Badge key={`theme-${idx}`} variant="secondary" className={cn('text-xs', bgColor, textColor)}>
+                        {theme.theme} ({theme.count})
+                      </Badge>
+                    )
+                  })}
+                  {totalThemes > 2 && <span className="text-xs text-muted-foreground">+{totalThemes - 2} more</span>}
+                </div>
+              )}
+            </div>
+            {npsScore !== undefined && npsScore !== null && (
+              <Badge variant="outline" className="whitespace-nowrap">
+                NPS: {npsScore > 0 ? '+' : ''}{npsScore}%
+              </Badge>
+            )}
+          </div>
+          
+          {row.highlightQuotes.length > 0 && (
+            <div className="mt-3 border-t border-amber-200 pt-3">
+              <p className="text-xs font-medium text-amber-700">Highlight</p>
+              <p className="mt-1 text-xs italic text-foreground">
+                &quot;{truncateQuote(row.highlightQuotes[0].text, 120)}&quot;
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Full layout for rich content
   return (
     <Card className="border-l-4 border-l-amber-400 bg-amber-50/30">
       <CardHeader className="pb-3">
