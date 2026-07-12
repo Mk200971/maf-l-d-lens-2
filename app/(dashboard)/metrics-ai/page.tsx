@@ -7,7 +7,8 @@ import { Send, Loader2, BarChart3 } from 'lucide-react';
 import MetricsChart from '@/components/MetricsChart';
 
 export default function MetricsAIPage() {
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+  const [inputValue, setInputValue] = useState('');
+  const { messages, isLoading, append } = useChat({
     api: '/api/chat',
   });
 
@@ -60,7 +61,7 @@ export default function MetricsAIPage() {
                   <button
                     key={idx}
                     onClick={() => {
-                      handleInputChange({ target: { value: question } } as any);
+                      append({ role: 'user', content: question });
                     }}
                     className="w-full text-left p-3 rounded-lg bg-card border border-border hover:bg-accent transition-colors text-sm"
                   >
@@ -102,10 +103,19 @@ export default function MetricsAIPage() {
 
         {/* Input Area */}
         <div className="border-t border-border p-4 bg-card">
-          <form onSubmit={handleSubmit} className="flex gap-2">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (inputValue.trim()) {
+                append({ role: 'user', content: inputValue });
+                setInputValue('');
+              }
+            }}
+            className="flex gap-2"
+          >
             <input
-              value={input}
-              onChange={handleInputChange}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
               placeholder="Ask about metrics, calculations, or findings..."
               className="flex-1 px-4 py-2 rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary text-sm"
               disabled={isLoading}
