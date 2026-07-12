@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -27,9 +28,14 @@ export function DashboardSidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-56 flex-col bg-sidebar text-sidebar-foreground md:flex">
       <div className="flex h-16 items-center gap-2.5 border-b border-sidebar-border px-5">
-        <div className="flex size-8 items-center justify-center rounded-md bg-sidebar-primary text-sm font-bold text-sidebar-primary-foreground">
-          M
-        </div>
+        <Image
+          src="/logo.png"
+          alt="MAF Learning Logo"
+          width={32}
+          height={32}
+          className="rounded-md"
+          priority
+        />
         <div className="flex flex-col">
           <span className="text-sm font-semibold text-white">MAF Learning</span>
           <span className="text-[11px] tracking-wide text-sidebar-foreground/70">
