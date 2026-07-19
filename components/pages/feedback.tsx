@@ -290,8 +290,8 @@ export function FeedbackPage() {
       </ChartCard>
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <SessionTable title="Best Sessions (Top 5)" rows={best} tone="best" />
-        <SessionTable title="Needs Attention (Bottom 5)" rows={worst} tone="worst" />
+        <SessionTable title="Top 5 Sessions" rows={best} tone="best" />
+        <SessionTable title="Bottom 5 Sessions" rows={worst} tone="worst" />
       </section>
 
       <ChartCard title="Monthly Satisfaction Trend" docId="satisfaction-trend" description="Response-weighted average per month.">
