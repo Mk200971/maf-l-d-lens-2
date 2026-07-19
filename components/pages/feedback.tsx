@@ -8,11 +8,8 @@ import {
   ErrorBar,
   Line,
   LineChart,
-  Scatter,
-  ScatterChart,
   XAxis,
   YAxis,
-  ZAxis,
 } from 'recharts'
 import {
   ChartContainer,
@@ -48,10 +45,6 @@ import type { FeedbackRow } from '@/lib/types'
 
 const histConfig = {
   sessions: { label: 'Sessions', color: 'var(--chart-3)' },
-} satisfies ChartConfig
-
-const scatterConfig = {
-  session: { label: 'Session', color: 'var(--chart-2)' },
 } satisfies ChartConfig
 
 const benchConfig = {
@@ -113,20 +106,6 @@ export function FeedbackPage() {
     }
     return buckets
   }, [fb])
-
-  // Scatter: facilitator vs satisfaction — both normalized to 1-5 so axes are consistent
-  const scatter = useMemo(
-    () =>
-      fb
-        .filter((r) => normalizedFacilitator(r) != null && normalizedSatisfaction(r) != null)
-        .map((r) => ({
-          x: normalizedFacilitator(r),
-          y: normalizedSatisfaction(r),
-          z: r.responses,
-          label: r.sessionLabel,
-        })),
-    [fb],
-  )
 
   // Program benchmark: uses normalizedSatisfaction so 0-10 PS rows are comparable
   const benchmark = useMemo(() => {
@@ -210,7 +189,7 @@ export function FeedbackPage() {
         <KpiTile label="Recommend Rate" docId="recommend-rate" value={recRate > 0 ? `${recRate.toFixed(0)}%` : '—'} />
       </section>
 
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <section className="grid grid-cols-1 gap-4">
         <ChartCard title="Satisfaction Distribution" docId="satisfaction-distribution" description="Session count per satisfaction band.">
           <ChartContainer config={histConfig} className="h-64 w-full">
             <BarChart data={hist} margin={{ left: 0, right: 8 }}>
@@ -220,40 +199,6 @@ export function FeedbackPage() {
               <ChartTooltip content={<ChartTooltipContent />} />
               <Bar dataKey="sessions" fill="var(--color-sessions)" radius={[4, 4, 0, 0]} />
             </BarChart>
-          </ChartContainer>
-        </ChartCard>
-
-        <ChartCard
-          title="Facilitator vs Satisfaction"
-          docId="feedback-comparison"
-          description="Each dot is a session; size = number of responses."
-        >
-          <ChartContainer config={scatterConfig} className="h-64 w-full">
-            <ScatterChart margin={{ left: 0, right: 8, bottom: 4 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="x"
-                type="number"
-                name="Facilitator"
-                domain={[3.5, 5]}
-                tickLine={false}
-                axisLine={false}
-                fontSize={11}
-              />
-              <YAxis
-                dataKey="y"
-                type="number"
-                name="Satisfaction"
-                domain={[3.5, 5]}
-                tickLine={false}
-                axisLine={false}
-                fontSize={11}
-                width={30}
-              />
-              <ZAxis dataKey="z" range={[30, 220]} />
-              <ChartTooltip content={<ChartTooltipContent labelKey="label" hideIndicator />} />
-              <Scatter data={scatter} name="session" fill="var(--color-session)" fillOpacity={0.7} />
-            </ScatterChart>
           </ChartContainer>
         </ChartCard>
       </section>
