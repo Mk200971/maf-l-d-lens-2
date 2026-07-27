@@ -208,8 +208,8 @@ export function FeedbackPage() {
         docId="feedback-comparison"
         description="Average satisfaction per program with min–max whiskers."
       >
-        <ChartContainer config={benchConfig} className="h-72 w-full">
-          <BarChart data={benchmark} layout="vertical" margin={{ left: 8, right: 24 }}>
+        <ChartContainer config={benchConfig} className="h-96 w-full">
+          <BarChart data={benchmark} layout="vertical" margin={{ left: 220, right: 24 }}>
             <CartesianGrid horizontal={false} strokeDasharray="3 3" />
             <XAxis type="number" domain={[3, 5]} tickLine={false} axisLine={false} fontSize={11} />
             <YAxis
@@ -218,7 +218,7 @@ export function FeedbackPage() {
               tickLine={false}
               axisLine={false}
               fontSize={11}
-              width={170}
+              width={200}
             />
             <ChartTooltip content={<ChartTooltipContent />} />
             <Bar dataKey="avg" fill="var(--color-avg)" radius={[0, 4, 4, 0]}>
