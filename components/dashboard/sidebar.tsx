@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import {
   Award,
   BookOpen,
+  GraduationCap,
   LayoutDashboard,
   MessageSquare,
   Target,
@@ -19,6 +20,7 @@ import { useSidebar } from '@/lib/sidebar-context'
 
 const nav = [
   { href: '/', label: 'Overview', icon: LayoutDashboard },
+  { href: '/skillup', label: 'SkillUP', icon: GraduationCap },
   { href: '/programs', label: 'Programs', icon: BookOpen },
   { href: '/learners', label: 'Learners & Reach', icon: Users },
   { href: '/feedback', label: 'Feedback', icon: MessageSquare },
