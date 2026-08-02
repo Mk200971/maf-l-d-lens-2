@@ -1,6 +1,9 @@
 // dashboard-data.voiceOfLearner.ts — Qualitative feedback themes & quotes
-// GENERATED 2026-07-11 — do not hand-edit. PII-free aggregates only.
-// Source: thematic_analysis_input.xlsx (1,081 free-text comments across 9 programs)
+// GENERATED 2026-08-02 v2 — do not hand-edit. PII-free aggregates only.
+// Source: thematic_analysis_input.xlsx (1,081 comments, 8 programs) + Psychological Safety
+//         re-analysed 2026-08-02 from the AMBU / DBU / Al Mouj programme-report feedback tabs
+//         (372 free-text comments across 203 responses, all 16 sessions to 26-Jul-2026).
+// Note: PS counts are on a full-extract basis and are not comparable to the 11-Jul PS figures.
 // Note: SLP intentionally excluded — its source has no free-text columns.
 
 import type { VoiceOfLearnerRow } from '@/lib/types'
@@ -264,62 +267,26 @@ export const voiceOfLearner: VoiceOfLearnerRow[] = [
   {
     "programCode": "2026:MAFP_Psychological_Safety",
     "programName": "4 Stages of Psychological Safety",
-    "totalComments": 228,
-    "strengthCount": 136,
-    "improvementCount": 0,
-    "generalCount": 92,
-    "nonTrivialComments": 220,
+    "totalComments": 372,
+    "strengthCount": 197,
+    "improvementCount": 14,
+    "generalCount": 161,
+    "nonTrivialComments": 316,
     "themes": {
       "strengths": [
         {
           "theme": "Psychological safety & culture",
-          "count": 55,
+          "count": 104,
           "sampleQuotes": [
             {
-              "text": "During the course, I had several key \"aha\" moments that really resonated with me: / / 1. Inclusion is not something that needs to be earned, it is a fundamental obligation. If someone is a human being and their presence does not cause harm, they deserve to be included and treated",
-              "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 4 - AMBU Oman [AMBU]",
+              "text": "During the course, I had several key \"aha\" moments that really resonated with me: 1. Inclusion is not something that needs to be earned, it is a fundamental obligation. If someone is a human being and their presence does not cause harm, they deserve to be included and treated wit",
+              "sessionLabel": "The 4 Stages of Psychological Safety - AMBU Cohort 5 - Oman [AMBU]",
               "month": "2026-06",
               "score": 10
             },
             {
-              "text": "What I found most impactful from the course was the concept of psychological safety as a \"culture of rewarded vulnerability\" It highlighted how people perform at their best when they feel safe to speak up, ask questions, share ideas, and challenge assumptions without fear of judg",
-              "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 5 - AMBU UAE [AMBU]",
-              "month": "2026-06",
-              "score": 10
-            }
-          ]
-        },
-        {
-          "theme": "Interactive & engaging delivery",
-          "count": 30,
-          "sampleQuotes": [
-            {
-              "text": "During the course, I had several key \"aha\" moments that really resonated with me: / / 1. Inclusion is not something that needs to be earned, it is a fundamental obligation. If someone is a human being and their presence does not cause harm, they deserve to be included and treated",
-              "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 4 - AMBU Oman [AMBU]",
-              "month": "2026-06",
-              "score": 10
-            },
-            {
-              "text": "What I found most impactful from the course was the concept of psychological safety as a \"culture of rewarded vulnerability\" It highlighted how people perform at their best when they feel safe to speak up, ask questions, share ideas, and challenge assumptions without fear of judg",
-              "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 5 - AMBU UAE [AMBU]",
-              "month": "2026-06",
-              "score": 10
-            }
-          ]
-        },
-        {
-          "theme": "Facilitator excellence",
-          "count": 20,
-          "sampleQuotes": [
-            {
-              "text": "It was a very informative and engaging session. Thank you to Walaa and Sara for facilitating and handling all questions. It is great to have a clear action plan by the end of session what will surely convert ideas and intention into the actual steps to achieve our goal",
-              "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 4 - DBU UAE [DBU]",
-              "month": "2026-05",
-              "score": 10
-            },
-            {
-              "text": "The facilitator delivered an engaging and informative presentation, complemented by healthy, interactive, and productive discussions between the facilitator and the participants",
-              "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 8 - AMBU UAE [AMBU]",
+              "text": "he concept that stayed with me the most was that people first need to feel safe before they can learn, contribute, or challenge existing ways of working. It made me reflect on how my own actions, even small ones such as listening without interrupting, responding calmly to mistake",
+              "sessionLabel": "The 4 Stages of Psychological Safety - Al Mouj Muscat [DBU]",
               "month": "2026-07",
               "score": 10
             }
@@ -327,17 +294,53 @@ export const voiceOfLearner: VoiceOfLearnerRow[] = [
         },
         {
           "theme": "Content relevance & clarity",
-          "count": 20,
+          "count": 93,
           "sampleQuotes": [
             {
-              "text": "It was a very informative and engaging session. Thank you to Walaa and Sara for facilitating and handling all questions. It is great to have a clear action plan by the end of session what will surely convert ideas and intention into the actual steps to achieve our goal",
-              "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 4 - DBU UAE [DBU]",
-              "month": "2026-05",
+              "text": "he concept that stayed with me the most was that people first need to feel safe before they can learn, contribute, or challenge existing ways of working. It made me reflect on how my own actions, even small ones such as listening without interrupting, responding calmly to mistake",
+              "sessionLabel": "The 4 Stages of Psychological Safety - Al Mouj Muscat [DBU]",
+              "month": "2026-07",
               "score": 10
             },
             {
-              "text": "The facilitator delivered an engaging and informative presentation, complemented by healthy, interactive, and productive discussions between the facilitator and the participants",
-              "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 8 - AMBU UAE [AMBU]",
+              "text": "I thoroughly enjoyed this course and found it highly relevant to both my professional and personal development. The content was engaging, practical, and encouraged meaningful reflection on how individual behaviors contribute to team culture and psychological safety. I would also ",
+              "sessionLabel": "The 4 Stages of Psychological Safety - AMBU Cohort 6- UAE [AMBU]",
+              "month": "2026-06",
+              "score": 10
+            }
+          ]
+        },
+        {
+          "theme": "Interactive & engaging delivery",
+          "count": 66,
+          "sampleQuotes": [
+            {
+              "text": "During the course, I had several key \"aha\" moments that really resonated with me: 1. Inclusion is not something that needs to be earned, it is a fundamental obligation. If someone is a human being and their presence does not cause harm, they deserve to be included and treated wit",
+              "sessionLabel": "The 4 Stages of Psychological Safety - AMBU Cohort 5 - Oman [AMBU]",
+              "month": "2026-06",
+              "score": 10
+            },
+            {
+              "text": "I thoroughly enjoyed this course and found it highly relevant to both my professional and personal development. The content was engaging, practical, and encouraged meaningful reflection on how individual behaviors contribute to team culture and psychological safety. I would also ",
+              "sessionLabel": "The 4 Stages of Psychological Safety - AMBU Cohort 6- UAE [AMBU]",
+              "month": "2026-06",
+              "score": 10
+            }
+          ]
+        },
+        {
+          "theme": "Facilitator excellence",
+          "count": 54,
+          "sampleQuotes": [
+            {
+              "text": "I thoroughly enjoyed this course and found it highly relevant to both my professional and personal development. The content was engaging, practical, and encouraged meaningful reflection on how individual behaviors contribute to team culture and psychological safety. I would also ",
+              "sessionLabel": "The 4 Stages of Psychological Safety - AMBU Cohort 6- UAE [AMBU]",
+              "month": "2026-06",
+              "score": 10
+            },
+            {
+              "text": "The session on Stage 4: Challenger Safety was very useful and insightful. It provided a better understanding of how to create an environment where team members feel confident to challenge existing ideas, share suggestions, and contribute to continuous improvement. I appreciate th",
+              "sessionLabel": "The 4 Stages of Psychological Safety - AMBU Cohort 6 - UAE [AMBU]",
               "month": "2026-07",
               "score": 10
             }
@@ -345,69 +348,162 @@ export const voiceOfLearner: VoiceOfLearnerRow[] = [
         },
         {
           "theme": "Leadership & self-awareness",
-          "count": 17,
+          "count": 51,
           "sampleQuotes": [
             {
-              "text": "The most impactful takeaway for me was the understanding that psychological safety is intentionally created through culture by design, not by default. I particularly valued learning how inclusion, vulnerability, and open communication build trust and encourage people to share ide",
-              "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 1 - West Region [AMBU]",
-              "month": "2026-04",
+              "text": "During the course, I had several key \"aha\" moments that really resonated with me: 1. Inclusion is not something that needs to be earned, it is a fundamental obligation. If someone is a human being and their presence does not cause harm, they deserve to be included and treated wit",
+              "sessionLabel": "The 4 Stages of Psychological Safety - AMBU Cohort 5 - Oman [AMBU]",
+              "month": "2026-06",
               "score": 10
             },
             {
-              "text": "The most impactful learning from this course is that leadership is about empowering others rather than directing them. By encouraging team members to think beyond their individual roles, giving them opportunities to lead, and creating an environment where diverse ideas are welcom",
-              "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 6 - AMBU UAE [AMBU]",
-              "month": "2026-06",
+              "text": "he concept that stayed with me the most was that people first need to feel safe before they can learn, contribute, or challenge existing ways of working. It made me reflect on how my own actions, even small ones such as listening without interrupting, responding calmly to mistake",
+              "sessionLabel": "The 4 Stages of Psychological Safety - Al Mouj Muscat [DBU]",
+              "month": "2026-07",
               "score": 10
             }
           ]
         }
       ],
-      "improvements": []
+      "improvements": [
+        {
+          "theme": "Time & duration feedback",
+          "count": 6,
+          "sampleQuotes": [
+            {
+              "text": "The room and the chairs were not comfortable at all. Additionally, the course should be provided within a shorter timeframe.",
+              "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 4 - UAE [AMBU]",
+              "month": "2026-05",
+              "score": 10
+            },
+            {
+              "text": "1. I suggest to start the session earlier - 9am instead of 10 am 2. longer lunch break 45 min instead of 30 min.",
+              "sessionLabel": "The 4 Stages of Psychological Safety - AMBU Cohort 5 - UAE [AMBU]",
+              "month": "2026-07",
+              "score": 10
+            }
+          ]
+        },
+        {
+          "theme": "Suggestion for wider rollout",
+          "count": 4,
+          "sampleQuotes": [
+            {
+              "text": "I think their should be a hotline special for such culture complain if any to have a quick actions plans",
+              "sessionLabel": "The 4 Stages of Psychological Safety - AMBU Cohort 4 - UAE [AMBU]",
+              "month": "2026-06",
+              "score": 10
+            },
+            {
+              "text": "A day well spent, should be extended to all employees",
+              "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 3 - UAE [AMBU]",
+              "month": "2026-04",
+              "score": 10
+            }
+          ]
+        },
+        {
+          "theme": "Content relevance & clarity",
+          "count": 2,
+          "sampleQuotes": [
+            {
+              "text": "Just a small observation, second part of the course had a lot of content, but of course useful so just a suggestion if a portion can be shifted to the first part of the program so the balance can be maintained and so does the energy",
+              "sessionLabel": "The 4 Stages of Psychological Safety - AMBU Cohort 5 - UAE [AMBU]",
+              "month": "2026-07",
+              "score": 8
+            },
+            {
+              "text": "Thank you MAF and Walaa Hassan for providing us with this great opportunity and valuable content and leading the learning journey. I would suggest to spare more time to enhance the delivery of the material's course.",
+              "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 3 - UAE [AMBU]",
+              "month": "2026-04",
+              "score": 8
+            }
+          ]
+        },
+        {
+          "theme": "Venue, logistics & catering",
+          "count": 1,
+          "sampleQuotes": [
+            {
+              "text": "The room and the chairs were not comfortable at all. Additionally, the course should be provided within a shorter timeframe.",
+              "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 4 - UAE [AMBU]",
+              "month": "2026-05",
+              "score": 10
+            }
+          ]
+        },
+        {
+          "theme": "Real-world examples & application",
+          "count": 1,
+          "sampleQuotes": [
+            {
+              "text": "Could be more discussion based on examples with breakout sessions rather than monologues.",
+              "sessionLabel": "The 4 Stages of Psychological Safety - DBU Cohort 5 - UAE [DBU]",
+              "month": "2026-06",
+              "score": 7
+            }
+          ]
+        }
+      ]
     },
     "highlightQuotes": [
       {
-        "text": "During the course, I had several key \"aha\" moments that really resonated with me: / / 1. Inclusion is not something that needs to be earned, it is a fundamental obligation. If someone is a human being and their presence does not cause harm, they deserve to be included and treated with dignity and respect. / / 2. Psychological Safety cannot be created through words alone. Simply saying that people ",
-        "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 4 - AMBU Oman [AMBU]",
+        "text": "During the course, I had several key \"aha\" moments that really resonated with me: 1. Inclusion is not something that needs to be earned, it is a fundamental obligation. If someone is a human being and their presence does not cause harm, they deserve to be included and treated with dignity and respect. 2. Psychological Safety cannot be created through words alone. Simply saying that people are safe",
+        "sessionLabel": "The 4 Stages of Psychological Safety - AMBU Cohort 5 - Oman [AMBU]",
         "month": "2026-06",
         "score": 10,
         "type": "strength"
       },
       {
-        "text": "I thoroughly enjoyed this course and found it highly relevant to both my professional and personal development. The content was engaging, practical, and encouraged meaningful reflection on how individual behaviors contribute to team culture and psychological safety. / / I would also like to extend my sincere appreciation to Wala for facilitating the session. She demonstrated excellent knowledge of",
-        "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 5 - AMBU UAE [AMBU]",
+        "text": "he concept that stayed with me the most was that people first need to feel safe before they can learn, contribute, or challenge existing ways of working. It made me reflect on how my own actions, even small ones such as listening without interrupting, responding calmly to mistakes, and encouraging different opinions, shape the culture around me. I also found the phrase \"rewarded vulnerability\" ver",
+        "sessionLabel": "The 4 Stages of Psychological Safety - Al Mouj Muscat [DBU]",
+        "month": "2026-07",
+        "score": 10,
+        "type": "strength"
+      },
+      {
+        "text": "I thoroughly enjoyed this course and found it highly relevant to both my professional and personal development. The content was engaging, practical, and encouraged meaningful reflection on how individual behaviors contribute to team culture and psychological safety. I would also like to extend my sincere appreciation to Wala for facilitating the session. She demonstrated excellent knowledge of the",
+        "sessionLabel": "The 4 Stages of Psychological Safety - AMBU Cohort 6- UAE [AMBU]",
         "month": "2026-06",
         "score": 10,
         "type": "general"
-      },
-      {
-        "text": "What I found most impactful from the course was the concept of psychological safety as a \"culture of rewarded vulnerability\" It highlighted how people perform at their best when they feel safe to speak up, ask questions, share ideas, and challenge assumptions without fear of judgment or punishment. / / I also found it valuable to understand that culture is not created by chance—it is intentionally",
-        "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 5 - AMBU UAE [AMBU]",
-        "month": "2026-06",
-        "score": 10,
-        "type": "strength"
       },
       {
         "text": "The most impactful lesson from the course was understanding the four stages of psychological safety: Inclusion Safety, Learner Safety, Contributor Safety, and Challenger Safety. I learned that when people feel accepted, supported in learning, trusted to contribute, and comfortable challenging ideas, teams perform better and collaborate more effectively. The course helped me recognize the importanc",
-        "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 5 - DBU UAE [DBU]",
+        "sessionLabel": "The 4 Stages of Psychological Safety - DBU Cohort 5 - UAE [DBU]",
         "month": "2026-06",
         "score": 10,
         "type": "strength"
       },
       {
-        "text": "Overall, I had a positive experience with this course. It provided practical insights into the importance of psychological safety and how it affects teamwork, communication, and performance. The concepts were easy to understand and relevant to my work environment. The course reinforced the value of creating a culture where team members feel respected, included, and comfortable sharing ideas and co",
-        "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 5 - DBU UAE [DBU]",
-        "month": "2026-06",
+        "text": "The session on Stage 4: Challenger Safety was very useful and insightful. It provided a better understanding of how to create an environment where team members feel confident to challenge existing ideas, share suggestions, and contribute to continuous improvement. I appreciate the support and guidance provided by the trainer, Mr. Basher, throughout the session. His practical examples and explanati",
+        "sessionLabel": "The 4 Stages of Psychological Safety - AMBU Cohort 6 - UAE [AMBU]",
+        "month": "2026-07",
         "score": 10,
-        "type": "general"
+        "type": "strength"
       }
     ],
     "concernQuotes": [
       {
-        "text": "Seemed to be pretty much common sense as an experienced line manager and mentor over the last 22 years",
-        "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 5 - DBU UAE [DBU]",
+        "text": "Seemed to be pretty much common sense as an experienced line manager and mentor over the last 22 years.",
+        "sessionLabel": "The 4 Stages of Psychological Safety - DBU Cohort 5 - UAE [DBU]",
         "month": "2026-06",
         "score": 0,
         "type": "strength"
+      },
+      {
+        "text": "One area for improvement would be better alignment and coordination between the facilitators. At times, the flow of the session felt slightly unsynchronized, particularly when Walaa was invited by Amer to contribute unexpectedly. This occasionally created moments where the transition between the 2 speakers was not seamless. Strengthening coordination and clarity on facilitation roles could enhance",
+        "sessionLabel": "The 4 Stages of Psychological Safety - DBU Cohort 6 - UAE [DBU]",
+        "month": "2026-06",
+        "score": 7,
+        "type": "improvement"
+      },
+      {
+        "text": "Just a small observation, second part of the course had a lot of content, but of course useful so just a suggestion if a portion can be shifted to the first part of the program so the balance can be maintained and so does the energy",
+        "sessionLabel": "The 4 Stages of Psychological Safety - AMBU Cohort 5 - UAE [AMBU]",
+        "month": "2026-07",
+        "score": 8,
+        "type": "improvement"
       }
     ]
   },
