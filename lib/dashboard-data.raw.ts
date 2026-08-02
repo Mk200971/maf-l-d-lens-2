@@ -1,11 +1,10 @@
 // dashboard-data.raw.ts
-// GENERATED 2026-07-12 v5 from "AMBU & DBU Master 2025-2026 (Fixed) v5.xlsx".
-// v5 changes:
-//   * PS eligibility rebuilt from source reports (Participant Roster + LT/Last Session
-//     minus Excluded Participants). Al Mouj Muscat employees (34) now classified DBU
-//     per business rule.
-//   * PS eligibility now: 278 target (162 AMBU + 116 DBU), 216 completed = 77.7%.
-//   * All v4 changes preserved: VIP dates, npsByProgramBU (per-BU only).
+// GENERATED 2026-08-02 v6 from "AMBU_&_DBU_Master_2025-2026_Enriched.xlsx".
+// v6 changes:
+//   * PS learning hours 159 -> 222 completions (1,110 hrs) from the Participant Rosters.
+//   * PS feedback 144 -> 198 responses; all AMBU rows realigned to the current column set.
+//   * PS AMBU NPS corrected 81.44 -> 80.49; Al Mouj (29 responses) folded into DBU.
+//   * PS eligibility completion 216 -> 218 of 278 (78.4%).
 
 export const meta = {
   "yearsCovered": [
@@ -15,36 +14,36 @@ export const meta = {
   ],
   "source": "Consolidated master (LMS learning hours + Forms/Qualtrics feedback)",
   "grainNote": "learningHours attribute-sliceable; feedback session-level with bu/country/sessionId.",
-  "note": "v5 (2026-07-12): PS eligibility rebuilt from source reports (Al Mouj Muscat employees now classified DBU). VIP dates baked in. PS NPS shown per BU only. See master's Reconciliation sheet for audit trail.",
+  "note": "v6 (2026-08-02): Psychological Safety refreshed. Learning hours 159 -> 222 completions (63 attended participants added from the AMBU/DBU Participant Rosters, incl. 20 Al Mouj AMM- IDs). Feedback 144 -> 198 responses (+52 from the 15/16/23/26-Jul sessions, +2 late arrivals on 27-Apr and 30-Jun). All 98 AMBU feedback rows realigned: the earlier export omitted the Likelihood Of Recommendation column, so facilitation / action-plan / recommendation had been shifted by one field. AMBU NPS corrected 81.44 -> 80.49. Al Mouj Muscat responses roll up to DBU per business rule, so DBU NPS is now blended. See the master's Reconciliation sheet for the full audit trail.",
   "scaleNote": "Satisfaction Rate is top-2-box: sat>=4/n for 1-5; sat>=9/n for 0-10 (matches NPS Promoter def).",
   "npsPolicy": "PS NPS reported per BU only. See kpis.npsByProgramBU. Weighted cross-BU NPS intentionally not computed."
 } as const;
 
 export const kpis = {
-  "totalLearningHours": 9918.0,
-  "totalCompletions": 1557,
-  "uniqueLearners": 912,
+  "totalLearningHours": 10233.0,
+  "totalCompletions": 1620,
+  "uniqueLearners": 922,
   "programsCount": 12,
-  "feedbackResponses": 1299,
+  "feedbackResponses": 1353,
   "avgSatisfaction": 4.72,
-  "avgSatisfaction_PS_native": 9.11,
-  "avgSatisfaction_PS_normalized": 4.55,
+  "avgSatisfaction_PS_native": 8.94,
+  "avgSatisfaction_PS_normalized": 4.47,
   "satisfactionRatePct": 97.3,
-  "satisfactionRatePct_PS": 74.3,
+  "satisfactionRatePct_PS": 67.2,
   "completionRatePct": 77.0,
   "learningHoursByBU": {
-    "AMBU": 5884.0,
-    "DBU": 4010.0,
+    "AMBU": 6014.0,
+    "DBU": 4195.0,
     "Unknown": 24.0
   },
   "completionsByBU": {
-    "AMBU": 1052,
-    "DBU": 502,
+    "AMBU": 1078,
+    "DBU": 539,
     "Unknown": 3
   },
   "uniqueLearnersByBU": {
     "AMBU": 559,
-    "DBU": 350,
+    "DBU": 360,
     "Unknown": 3
   },
   "satisfactionRateByProgram": {
@@ -58,7 +57,7 @@ export const kpis = {
     "SLP": 98.6,
     "SLII": 96.0,
     "L2H": 100.0,
-    "2026:MAFP_Psychological_Safety": 74.3
+    "2026:MAFP_Psychological_Safety": 67.2
   },
   "avgSatisfactionByProgram": {
     "2026:Managing_Virtual_Effectively": 4.78,
@@ -71,12 +70,12 @@ export const kpis = {
     "SLP": 4.75,
     "SLII": 4.77,
     "L2H": 4.67,
-    "2026:MAFP_Psychological_Safety": 9.11
+    "2026:MAFP_Psychological_Safety": 8.94
   },
   "npsByProgramBU": {
     "2026:MAFP_Psychological_Safety": {
-      "AMBU": 81.44,
-      "DBU": 54.35
+      "AMBU": 80.49,
+      "DBU": 57.33
     }
   }
 } as const;
@@ -219,72 +218,6 @@ export const learningHours = [
     "programCode": "2026:MAFP_Psychological_Safety",
     "program": "4 stages of psychological safety",
     "year": 2026,
-    "bu": "AMBU",
-    "country": "Oman",
-    "role": "Individual Contributor",
-    "month": "2026-06",
-    "completions": 2,
-    "totalHours": 10.0
-  },
-  {
-    "programCode": "2026:MAFP_Psychological_Safety",
-    "program": "4 stages of psychological safety",
-    "year": 2026,
-    "bu": "AMBU",
-    "country": "Oman",
-    "role": "Team Leader",
-    "month": "2026-06",
-    "completions": 14,
-    "totalHours": 70.0
-  },
-  {
-    "programCode": "2026:MAFP_Psychological_Safety",
-    "program": "4 stages of psychological safety",
-    "year": 2026,
-    "bu": "AMBU",
-    "country": "United Arab Emirates",
-    "role": "Individual Contributor",
-    "month": "2026-05",
-    "completions": 8,
-    "totalHours": 40.0
-  },
-  {
-    "programCode": "2026:MAFP_Psychological_Safety",
-    "program": "4 stages of psychological safety",
-    "year": 2026,
-    "bu": "AMBU",
-    "country": "United Arab Emirates",
-    "role": "Individual Contributor",
-    "month": "2026-06",
-    "completions": 8,
-    "totalHours": 40.0
-  },
-  {
-    "programCode": "2026:MAFP_Psychological_Safety",
-    "program": "4 stages of psychological safety",
-    "year": 2026,
-    "bu": "AMBU",
-    "country": "United Arab Emirates",
-    "role": "Team Leader",
-    "month": "2026-05",
-    "completions": 14,
-    "totalHours": 70.0
-  },
-  {
-    "programCode": "2026:MAFP_Psychological_Safety",
-    "program": "4 stages of psychological safety",
-    "year": 2026,
-    "bu": "AMBU",
-    "country": "United Arab Emirates",
-    "role": "Team Leader",
-    "month": "2026-06",
-    "completions": 5,
-    "totalHours": 25.0
-  },
-  {
-    "programCode": "2026:MAFP_Psychological_Safety",
-    "program": "4 stages of psychological safety",
-    "year": 2026,
     "bu": "DBU",
     "country": "Egypt",
     "role": "Team Leader",
@@ -297,42 +230,9 @@ export const learningHours = [
     "program": "4 stages of psychological safety",
     "year": 2026,
     "bu": "DBU",
-    "country": "Egypt",
-    "role": "Team Leader",
-    "month": "2026-06",
-    "completions": 1,
-    "totalHours": 5.0
-  },
-  {
-    "programCode": "2026:MAFP_Psychological_Safety",
-    "program": "4 stages of psychological safety",
-    "year": 2026,
-    "bu": "DBU",
     "country": "United Arab Emirates",
     "role": "Individual Contributor",
     "month": "2026-04",
-    "completions": 1,
-    "totalHours": 5.0
-  },
-  {
-    "programCode": "2026:MAFP_Psychological_Safety",
-    "program": "4 stages of psychological safety",
-    "year": 2026,
-    "bu": "DBU",
-    "country": "United Arab Emirates",
-    "role": "Individual Contributor",
-    "month": "2026-05",
-    "completions": 2,
-    "totalHours": 10.0
-  },
-  {
-    "programCode": "2026:MAFP_Psychological_Safety",
-    "program": "4 stages of psychological safety",
-    "year": 2026,
-    "bu": "DBU",
-    "country": "United Arab Emirates",
-    "role": "Individual Contributor",
-    "month": "2026-06",
     "completions": 1,
     "totalHours": 5.0
   },
@@ -351,6 +251,39 @@ export const learningHours = [
     "programCode": "2026:MAFP_Psychological_Safety",
     "program": "4 stages of psychological safety",
     "year": 2026,
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "month": "2026-05",
+    "completions": 8,
+    "totalHours": 40.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "program": "4 stages of psychological safety",
+    "year": 2026,
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "month": "2026-05",
+    "completions": 14,
+    "totalHours": 70.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "program": "4 stages of psychological safety",
+    "year": 2026,
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "month": "2026-05",
+    "completions": 2,
+    "totalHours": 10.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "program": "4 stages of psychological safety",
+    "year": 2026,
     "bu": "DBU",
     "country": "United Arab Emirates",
     "role": "Team Leader",
@@ -362,56 +295,210 @@ export const learningHours = [
     "programCode": "2026:MAFP_Psychological_Safety",
     "program": "4 stages of psychological safety",
     "year": 2026,
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "month": "2026-06",
+    "completions": 2,
+    "totalHours": 10.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "program": "4 stages of psychological safety",
+    "year": 2026,
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "month": "2026-06",
+    "completions": 14,
+    "totalHours": 70.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "program": "4 stages of psychological safety",
+    "year": 2026,
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "month": "2026-06",
+    "completions": 13,
+    "totalHours": 65.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "program": "4 stages of psychological safety",
+    "year": 2026,
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "role": "Team Leader",
+    "month": "2026-06",
+    "completions": 11,
+    "totalHours": 55.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "program": "4 stages of psychological safety",
+    "year": 2026,
+    "bu": "DBU",
+    "country": "Egypt",
+    "role": "Team Leader",
+    "month": "2026-06",
+    "completions": 1,
+    "totalHours": 5.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "program": "4 stages of psychological safety",
+    "year": 2026,
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Business Leader",
+    "month": "2026-06",
+    "completions": 2,
+    "totalHours": 10.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "program": "4 stages of psychological safety",
+    "year": 2026,
+    "bu": "DBU",
+    "country": "United Arab Emirates",
+    "role": "Individual Contributor",
+    "month": "2026-06",
+    "completions": 1,
+    "totalHours": 5.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "program": "4 stages of psychological safety",
+    "year": 2026,
     "bu": "DBU",
     "country": "United Arab Emirates",
     "role": "Team Leader",
     "month": "2026-06",
-    "completions": 26,
-    "totalHours": 130.0
+    "completions": 33,
+    "totalHours": 165.0
   },
   {
     "programCode": "2026:MAFP_Psychological_Safety",
-    "program": "The 4 Stages of Psychological Safety™ - AMBU UAE",
+    "program": "4 stages of psychological safety",
     "year": 2026,
     "bu": "AMBU",
-    "country": "United Arab Emirates",
-    "role": "Individual Contributor",
-    "month": "2026-06",
-    "completions": 5,
-    "totalHours": 25.0
+    "country": "Bahrain",
+    "role": "Expert",
+    "month": "2026-07",
+    "completions": 1,
+    "totalHours": 5.0
   },
   {
     "programCode": "2026:MAFP_Psychological_Safety",
-    "program": "The 4 Stages of Psychological Safety™ - AMBU UAE",
+    "program": "4 stages of psychological safety",
+    "year": 2026,
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Individual Contributor",
+    "month": "2026-07",
+    "completions": 2,
+    "totalHours": 10.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "program": "4 stages of psychological safety",
+    "year": 2026,
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Team Leader",
+    "month": "2026-07",
+    "completions": 7,
+    "totalHours": 35.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "program": "4 stages of psychological safety",
+    "year": 2026,
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "month": "2026-07",
+    "completions": 1,
+    "totalHours": 5.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "program": "4 stages of psychological safety",
+    "year": 2026,
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "month": "2026-07",
+    "completions": 1,
+    "totalHours": 5.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "program": "4 stages of psychological safety",
     "year": 2026,
     "bu": "AMBU",
     "country": "United Arab Emirates",
     "role": "Individual Contributor",
     "month": "2026-07",
-    "completions": 3,
-    "totalHours": 15.0
+    "completions": 7,
+    "totalHours": 35.0
   },
   {
     "programCode": "2026:MAFP_Psychological_Safety",
-    "program": "The 4 Stages of Psychological Safety™ - AMBU UAE",
-    "year": 2026,
-    "bu": "AMBU",
-    "country": "United Arab Emirates",
-    "role": "Team Leader",
-    "month": "2026-06",
-    "completions": 6,
-    "totalHours": 30.0
-  },
-  {
-    "programCode": "2026:MAFP_Psychological_Safety",
-    "program": "The 4 Stages of Psychological Safety™ - AMBU UAE",
+    "program": "4 stages of psychological safety",
     "year": 2026,
     "bu": "AMBU",
     "country": "United Arab Emirates",
     "role": "Team Leader",
     "month": "2026-07",
-    "completions": 8,
-    "totalHours": 40.0
+    "completions": 18,
+    "totalHours": 90.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "program": "4 stages of psychological safety",
+    "year": 2026,
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Business Leader",
+    "month": "2026-07",
+    "completions": 1,
+    "totalHours": 5.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "program": "4 stages of psychological safety",
+    "year": 2026,
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Expert",
+    "month": "2026-07",
+    "completions": 1,
+    "totalHours": 5.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "program": "4 stages of psychological safety",
+    "year": 2026,
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "month": "2026-07",
+    "completions": 14,
+    "totalHours": 70.0
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "program": "4 stages of psychological safety",
+    "year": 2026,
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "month": "2026-07",
+    "completions": 12,
+    "totalHours": 60.0
   },
   {
     "programCode": "2026:MAFP_Rise_Mall_management",
@@ -2515,14 +2602,14 @@ export const feedback = [
     "bu": "AMBU",
     "country": "Egypt",
     "responses": 14,
-    "satisfaction": 9.07,
-    "satisfactionNormalized": 4.54,
-    "satisfactionRatePct": 71.4,
+    "satisfaction": 9.0,
+    "satisfactionNormalized": 4.5,
+    "satisfactionRatePct": 64.3,
     "objectivesClarity": null,
-    "facilitatorEffectiveness": 8.86,
-    "confidenceApplication": 9.0,
+    "facilitatorEffectiveness": 9.07,
+    "confidenceApplication": 8.86,
     "recommendation": 9.0,
-    "recommendationRatePct": 100.0,
+    "recommendationRatePct": 92.9,
     "nps": 64.29,
     "scale": "0-10"
   },
@@ -2534,16 +2621,16 @@ export const feedback = [
     "sessionId": "2026:MAFP_Psychological_Safety::The 4 Stages of Psychological Safety - Cohort 2 - West Region::2026-04",
     "bu": "AMBU",
     "country": "Egypt",
-    "responses": 13,
-    "satisfaction": 9.46,
-    "satisfactionNormalized": 4.73,
-    "satisfactionRatePct": 84.6,
+    "responses": 14,
+    "satisfaction": 9.14,
+    "satisfactionNormalized": 4.57,
+    "satisfactionRatePct": 71.4,
     "objectivesClarity": null,
-    "facilitatorEffectiveness": 9.15,
-    "confidenceApplication": 9.38,
-    "recommendation": 9.08,
+    "facilitatorEffectiveness": 9.5,
+    "confidenceApplication": 9.21,
+    "recommendation": 9.29,
     "recommendationRatePct": 100.0,
-    "nps": 69.23,
+    "nps": 78.57,
     "scale": "0-10"
   },
   {
@@ -2575,15 +2662,35 @@ export const feedback = [
     "bu": "AMBU",
     "country": "United Arab Emirates",
     "responses": 11,
-    "satisfaction": 9.73,
-    "satisfactionNormalized": 4.87,
-    "satisfactionRatePct": 100.0,
+    "satisfaction": 9.36,
+    "satisfactionNormalized": 4.68,
+    "satisfactionRatePct": 90.9,
     "objectivesClarity": null,
     "facilitatorEffectiveness": 9.73,
-    "confidenceApplication": 9.64,
-    "recommendation": 9.36,
+    "confidenceApplication": 9.73,
+    "recommendation": 9.64,
     "recommendationRatePct": 100.0,
     "nps": 90.91,
+    "scale": "0-10"
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 7 - AMBU UAE",
+    "sessionPart": "Full session",
+    "month": "2026-05",
+    "sessionId": "2026:MAFP_Psychological_Safety::The 4 Stages of Psychological Safety - Cohort 7 - AMBU UAE::2026-05",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "responses": 11,
+    "satisfaction": 9.73,
+    "satisfactionNormalized": 4.86,
+    "satisfactionRatePct": 90.9,
+    "objectivesClarity": null,
+    "facilitatorEffectiveness": 9.91,
+    "confidenceApplication": 9.36,
+    "recommendation": 9.64,
+    "recommendationRatePct": 100.0,
+    "nps": 81.82,
     "scale": "0-10"
   },
   {
@@ -2608,22 +2715,22 @@ export const feedback = [
   },
   {
     "programCode": "2026:MAFP_Psychological_Safety",
-    "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 7 - AMBU UAE",
+    "sessionLabel": "The 4 Stages of Psychological Safety - AMBU Cohort 4 - UAE",
     "sessionPart": "Full session",
-    "month": "2026-05",
-    "sessionId": "2026:MAFP_Psychological_Safety::The 4 Stages of Psychological Safety - Cohort 7 - AMBU UAE::2026-05",
+    "month": "2026-06",
+    "sessionId": "2026:MAFP_Psychological_Safety::The 4 Stages of Psychological Safety - AMBU Cohort 4 - UAE::2026-06",
     "bu": "AMBU",
     "country": "United Arab Emirates",
-    "responses": 11,
-    "satisfaction": 9.91,
-    "satisfactionNormalized": 4.96,
+    "responses": 1,
+    "satisfaction": 10.0,
+    "satisfactionNormalized": 5.0,
     "satisfactionRatePct": 100.0,
     "objectivesClarity": null,
-    "facilitatorEffectiveness": 9.36,
-    "confidenceApplication": 9.64,
-    "recommendation": 9.73,
+    "facilitatorEffectiveness": 10.0,
+    "confidenceApplication": 10.0,
+    "recommendation": 10.0,
     "recommendationRatePct": 100.0,
-    "nps": 90.91,
+    "nps": 100.0,
     "scale": "0-10"
   },
   {
@@ -2635,15 +2742,15 @@ export const feedback = [
     "bu": "AMBU",
     "country": "Oman",
     "responses": 16,
-    "satisfaction": 9.62,
-    "satisfactionNormalized": 4.81,
+    "satisfaction": 9.44,
+    "satisfactionNormalized": 4.72,
     "satisfactionRatePct": 93.8,
     "objectivesClarity": null,
-    "facilitatorEffectiveness": 9.12,
-    "confidenceApplication": 9.62,
-    "recommendation": 9.44,
+    "facilitatorEffectiveness": 9.63,
+    "confidenceApplication": 9.13,
+    "recommendation": 9.63,
     "recommendationRatePct": 100.0,
-    "nps": 93.75,
+    "nps": 87.5,
     "scale": "0-10"
   },
   {
@@ -2655,15 +2762,35 @@ export const feedback = [
     "bu": "AMBU",
     "country": "United Arab Emirates",
     "responses": 13,
-    "satisfaction": 9.54,
-    "satisfactionNormalized": 4.77,
-    "satisfactionRatePct": 92.3,
+    "satisfaction": 9.0,
+    "satisfactionNormalized": 4.5,
+    "satisfactionRatePct": 61.5,
     "objectivesClarity": null,
-    "facilitatorEffectiveness": 9.31,
-    "confidenceApplication": 9.23,
-    "recommendation": 9.0,
+    "facilitatorEffectiveness": 9.54,
+    "confidenceApplication": 9.31,
+    "recommendation": 9.23,
     "recommendationRatePct": 100.0,
-    "nps": 61.54,
+    "nps": 76.92,
+    "scale": "0-10"
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 6 - AMBU UAE",
+    "sessionPart": "Full session",
+    "month": "2026-06",
+    "sessionId": "2026:MAFP_Psychological_Safety::The 4 Stages of Psychological Safety - Cohort 6 - AMBU UAE::2026-06",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "responses": 10,
+    "satisfaction": 8.5,
+    "satisfactionNormalized": 4.25,
+    "satisfactionRatePct": 50.0,
+    "objectivesClarity": null,
+    "facilitatorEffectiveness": 9.6,
+    "confidenceApplication": 8.8,
+    "recommendation": 9.2,
+    "recommendationRatePct": 100.0,
+    "nps": 80.0,
     "scale": "0-10"
   },
   {
@@ -2682,28 +2809,8 @@ export const feedback = [
     "facilitatorEffectiveness": 8.43,
     "confidenceApplication": 8.57,
     "recommendation": 7.5,
-    "recommendationRatePct": 66.7,
+    "recommendationRatePct": 78.6,
     "nps": 21.43,
-    "scale": "0-10"
-  },
-  {
-    "programCode": "2026:MAFP_Psychological_Safety",
-    "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 6 - AMBU UAE",
-    "sessionPart": "Full session",
-    "month": "2026-06",
-    "sessionId": "2026:MAFP_Psychological_Safety::The 4 Stages of Psychological Safety - Cohort 6 - AMBU UAE::2026-06",
-    "bu": "AMBU",
-    "country": "United Arab Emirates",
-    "responses": 10,
-    "satisfaction": 9.6,
-    "satisfactionNormalized": 4.8,
-    "satisfactionRatePct": 100.0,
-    "objectivesClarity": null,
-    "facilitatorEffectiveness": 8.9,
-    "confidenceApplication": 9.4,
-    "recommendation": 8.7,
-    "recommendationRatePct": 85.7,
-    "nps": 50.0,
     "scale": "0-10"
   },
   {
@@ -2728,6 +2835,46 @@ export const feedback = [
   },
   {
     "programCode": "2026:MAFP_Psychological_Safety",
+    "sessionLabel": "The 4 Stages of Psychological Safety - AMBU - Bahrain",
+    "sessionPart": "Full session",
+    "month": "2026-07",
+    "sessionId": "2026:MAFP_Psychological_Safety::The 4 Stages of Psychological Safety - AMBU - Bahrain::2026-07",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "responses": 10,
+    "satisfaction": 9.4,
+    "satisfactionNormalized": 4.7,
+    "satisfactionRatePct": 90.0,
+    "objectivesClarity": null,
+    "facilitatorEffectiveness": 9.4,
+    "confidenceApplication": 9.2,
+    "recommendation": 9.6,
+    "recommendationRatePct": 100.0,
+    "nps": 100.0,
+    "scale": "0-10"
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "sessionLabel": "The 4 Stages of Psychological Safety - AMBU Cohort 6 - UAE",
+    "sessionPart": "Full session",
+    "month": "2026-07",
+    "sessionId": "2026:MAFP_Psychological_Safety::The 4 Stages of Psychological Safety - AMBU Cohort 6 - UAE::2026-07",
+    "bu": "AMBU",
+    "country": "United Arab Emirates",
+    "responses": 13,
+    "satisfaction": 9.23,
+    "satisfactionNormalized": 4.62,
+    "satisfactionRatePct": 69.2,
+    "objectivesClarity": null,
+    "facilitatorEffectiveness": 9.77,
+    "confidenceApplication": 9.31,
+    "recommendation": 9.46,
+    "recommendationRatePct": 100.0,
+    "nps": 76.92,
+    "scale": "0-10"
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
     "sessionLabel": "The 4 Stages of Psychological Safety - Cohort 8 - AMBU UAE",
     "sessionPart": "Full session",
     "month": "2026-07",
@@ -2735,15 +2882,35 @@ export const feedback = [
     "bu": "AMBU",
     "country": "United Arab Emirates",
     "responses": 10,
-    "satisfaction": 8.9,
-    "satisfactionNormalized": 4.45,
-    "satisfactionRatePct": 60.0,
+    "satisfaction": 9.1,
+    "satisfactionNormalized": 4.55,
+    "satisfactionRatePct": 70.0,
     "objectivesClarity": null,
-    "facilitatorEffectiveness": 9.1,
-    "confidenceApplication": 9.2,
-    "recommendation": 9.1,
+    "facilitatorEffectiveness": 8.9,
+    "confidenceApplication": 9.1,
+    "recommendation": 9.2,
     "recommendationRatePct": 100.0,
     "nps": 70.0,
+    "scale": "0-10"
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "sessionLabel": "The 4 Stages of Psychological Safety - Al Mouj Muscat",
+    "sessionPart": "Full session",
+    "month": "2026-07",
+    "sessionId": "2026:MAFP_Psychological_Safety::The 4 Stages of Psychological Safety - Al Mouj Muscat::2026-07",
+    "bu": "DBU",
+    "country": "Oman",
+    "responses": 29,
+    "satisfaction": 8.79,
+    "satisfactionNormalized": 4.4,
+    "satisfactionRatePct": 65.5,
+    "objectivesClarity": null,
+    "facilitatorEffectiveness": 9.14,
+    "confidenceApplication": 8.69,
+    "recommendation": 8.97,
+    "recommendationRatePct": 93.1,
+    "nps": 62.07,
     "scale": "0-10"
   },
   {
@@ -4192,8 +4359,8 @@ export const completion = [
   {
     "programCode": "2026:MAFP_Psychological_Safety",
     "eligible": 278,
-    "completedEligible": 216,
-    "completionRatePct": 77.7
+    "completedEligible": 218,
+    "completionRatePct": 78.4
   },
   {
     "programCode": "2026:MAFP_Rise_Mall_management",
@@ -4519,6 +4686,15 @@ export const learnerReach = [
     "month": "2026-06",
     "bu": "DBU",
     "country": "United Arab Emirates",
+    "role": "Business Leader",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "year": 2026,
+    "month": "2026-06",
+    "bu": "DBU",
+    "country": "United Arab Emirates",
     "role": "Individual Contributor",
     "uniqueLearners": 1
   },
@@ -4529,7 +4705,52 @@ export const learnerReach = [
     "bu": "DBU",
     "country": "United Arab Emirates",
     "role": "Team Leader",
-    "uniqueLearners": 26
+    "uniqueLearners": 33
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "year": 2026,
+    "month": "2026-07",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Expert",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "year": 2026,
+    "month": "2026-07",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Individual Contributor",
+    "uniqueLearners": 2
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "year": 2026,
+    "month": "2026-07",
+    "bu": "AMBU",
+    "country": "Bahrain",
+    "role": "Team Leader",
+    "uniqueLearners": 7
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "year": 2026,
+    "month": "2026-07",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "year": 2026,
+    "month": "2026-07",
+    "bu": "AMBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "uniqueLearners": 1
   },
   {
     "programCode": "2026:MAFP_Psychological_Safety",
@@ -4538,7 +4759,7 @@ export const learnerReach = [
     "bu": "AMBU",
     "country": "United Arab Emirates",
     "role": "Individual Contributor",
-    "uniqueLearners": 3
+    "uniqueLearners": 7
   },
   {
     "programCode": "2026:MAFP_Psychological_Safety",
@@ -4547,7 +4768,43 @@ export const learnerReach = [
     "bu": "AMBU",
     "country": "United Arab Emirates",
     "role": "Team Leader",
-    "uniqueLearners": 8
+    "uniqueLearners": 18
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "year": 2026,
+    "month": "2026-07",
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Business Leader",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "year": 2026,
+    "month": "2026-07",
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Expert",
+    "uniqueLearners": 1
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "year": 2026,
+    "month": "2026-07",
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Individual Contributor",
+    "uniqueLearners": 14
+  },
+  {
+    "programCode": "2026:MAFP_Psychological_Safety",
+    "year": 2026,
+    "month": "2026-07",
+    "bu": "DBU",
+    "country": "Oman",
+    "role": "Team Leader",
+    "uniqueLearners": 12
   },
   {
     "programCode": "2026:MAFP_Rise_Mall_management",
