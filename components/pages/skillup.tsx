@@ -32,6 +32,7 @@ import { cn } from '@/lib/utils'
 import {
   kpis as rawKpis,
   journeys as rawJourneys,
+  journeyByCountry as rawJourneyByCountry,
   byDepartment as rawByDepartment,
   byCountry as rawByCountry,
   byRole as rawByRole,
@@ -46,8 +47,15 @@ const STATUS_OPTIONS = ['All', 'Completed', 'In Progress', 'Not Started'] as con
 type StatusFilter = (typeof STATUS_OPTIONS)[number]
 type BUFilter = 'ALL' | 'AMBU' | 'DBU'
 type JourneyFilter = 'ALL' | 'GROW' | 'MOBILISE' | 'MULTIPLY' | 'STEER'
+type CountryFilter = 'ALL' | string
 
 const JOURNEY_ORDER: JourneyFilter[] = ['ALL', 'GROW', 'MOBILISE', 'MULTIPLY', 'STEER']
+
+// Sorted unique countries from journeyByCountry
+const COUNTRY_OPTIONS: CountryFilter[] = [
+  'ALL',
+  ...[...new Set(rawJourneyByCountry.map((r) => r.country))].sort(),
+]
 
 const JOURNEY_BLURB: Record<string, string> = {
   GROW: 'Foundation skills for early-career professionals',
@@ -158,23 +166,51 @@ export function SkillupPage() {
   const [buFilter, setBuFilter] = useState<BUFilter>('ALL')
   const [journeyFilter, setJourneyFilter] = useState<JourneyFilter>('ALL')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('All')
+  const [countryFilter, setCountryFilter] = useState<CountryFilter>('ALL')
 
-  const hasActiveFilter = buFilter !== 'ALL' || journeyFilter !== 'ALL' || statusFilter !== 'All'
+  const hasActiveFilter =
+    buFilter !== 'ALL' || journeyFilter !== 'ALL' || statusFilter !== 'All' || countryFilter !== 'ALL'
 
   function clearFilters() {
     setBuFilter('ALL')
     setJourneyFilter('ALL')
     setStatusFilter('All')
+    setCountryFilter('ALL')
   }
 
   // ── filtered journeys slice ────────────────────────────────────────────────
+  // When a country is selected, derive journey-level aggregates from journeyByCountry.
+  // Otherwise use the original journeys array exactly as before.
   const filteredJourneys = useMemo(() => {
+    if (countryFilter !== 'ALL') {
+      // Aggregate journeyByCountry rows for the selected country, then apply BU/journey filters
+      const countryRows = rawJourneyByCountry.filter((r) => {
+        if (r.country !== countryFilter) return false
+        if (buFilter !== 'ALL' && r.bu !== buFilter) return false
+        if (journeyFilter !== 'ALL' && r.journey !== journeyFilter) return false
+        return true
+      })
+      // Merge by journey+bu (rows are already at that grain)
+      return countryRows.map((r) => ({
+        journey: r.journey,
+        label: r.journey,
+        audience: '',
+        bu: r.bu,
+        assigned: r.assigned,
+        notStarted: r.notStarted,
+        started: r.started,
+        completed: r.completed,
+        completionRatePct: r.completionRatePct,
+        engagementRatePct: r.engagementRatePct,
+        dueDate: rawJourneys.find((j) => j.journey === r.journey && j.bu === r.bu)?.dueDate ?? '',
+      }))
+    }
     return rawJourneys.filter((r) => {
       if (buFilter !== 'ALL' && r.bu !== buFilter) return false
       if (journeyFilter !== 'ALL' && r.journey !== journeyFilter) return false
       return true
     })
-  }, [buFilter, journeyFilter])
+  }, [buFilter, journeyFilter, countryFilter])
 
   // ── derived KPIs ──────────────────────────────────────────────────────────
   const kpis = useMemo(() => {
@@ -284,14 +320,15 @@ export function SkillupPage() {
   // ── country data ──────────────────────────────────────────────────────────
   const countryData = useMemo(() => {
     const filtered = rawByCountry.filter((c) => buFilter === 'ALL' || c.bu === buFilter)
-    const m = new Map<string, { country: string; AMBU: number; DBU: number }>()
+    const m = new Map<string, { country: string; AMBU: number; DBU: number; isSelected: boolean }>()
     for (const c of filtered) {
-      const e = m.get(c.country) ?? { country: c.country, AMBU: 0, DBU: 0 }
+      const e = m.get(c.country) ?? { country: c.country, AMBU: 0, DBU: 0, isSelected: false }
       e[c.bu as 'AMBU' | 'DBU'] += c.assigned
+      if (countryFilter !== 'ALL' && c.country === countryFilter) e.isSelected = true
       m.set(c.country, e)
     }
     return [...m.values()].sort((a, b) => b.AMBU + b.DBU - (a.AMBU + a.DBU))
-  }, [buFilter])
+  }, [buFilter, countryFilter])
 
   // ── role engagement ────────────────────────────────────────────────────────
   const roleData = useMemo(() => {
@@ -398,6 +435,23 @@ export function SkillupPage() {
             </div>
           </div>
 
+          <div className="h-4 w-px bg-border" aria-hidden="true" />
+
+          {/* Country */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-muted-foreground">Country</span>
+            <div className="flex flex-wrap items-center gap-1">
+              {COUNTRY_OPTIONS.map((v) => (
+                <FilterChip
+                  key={v}
+                  value={v === 'ALL' ? 'All' : v}
+                  active={countryFilter === v}
+                  onClick={() => setCountryFilter(v)}
+                />
+              ))}
+            </div>
+          </div>
+
           {/* Clear */}
           {hasActiveFilter && (
             <button
@@ -420,6 +474,7 @@ export function SkillupPage() {
             {buFilter !== 'ALL' && <> · BU: <span className="font-medium text-foreground">{buFilter}</span></>}
             {journeyFilter !== 'ALL' && <> · Journey: <span className="font-medium text-foreground">{journeyFilter}</span></>}
             {statusFilter !== 'All' && <> · Status: <span className="font-medium text-foreground">{statusFilter}</span></>}
+            {countryFilter !== 'ALL' && <> · Country: <span className="font-medium text-foreground">{countryFilter}</span></>}
           </p>
         )}
       </section>
@@ -660,6 +715,11 @@ export function SkillupPage() {
         title="Department Leaderboard"
         description="Top 12 departments by enrollment, ranked with engagement progress."
       >
+        {countryFilter !== 'ALL' && (
+          <p className="mb-3 text-xs text-muted-foreground/70 italic">
+            Filtered views by country use journey data; department/role shown at BU level.
+          </p>
+        )}
         <div className="flex flex-col divide-y divide-border">
           {deptLeaderboard.map((d, i) => (
             <div key={d.department} className="flex items-center gap-4 py-2.5">
@@ -695,7 +755,14 @@ export function SkillupPage() {
 
       {/* ── Country + Role ─────────────────────────────────────────────────── */}
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <ChartCard title="Enrollment by Country" description="Assigned learners per country, split by BU.">
+        <ChartCard
+          title="Enrollment by Country"
+          description={
+            countryFilter !== 'ALL'
+              ? `Showing ${countryFilter} (highlighted).`
+              : 'Assigned learners per country, split by BU.'
+          }
+        >
           <ChartContainer config={buConfig} className="h-64 w-full">
             <BarChart data={countryData} margin={{ left: 0, right: 8 }}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -712,10 +779,26 @@ export function SkillupPage() {
               <YAxis tickLine={false} axisLine={false} fontSize={11} width={34} />
               <ChartTooltip content={<ChartTooltipContent />} />
               {(buFilter === 'ALL' || buFilter === 'AMBU') && (
-                <Bar dataKey="AMBU" stackId="bu" fill="var(--color-AMBU)" />
+                <Bar dataKey="AMBU" stackId="bu">
+                  {countryData.map((d) => (
+                    <Cell
+                      key={d.country}
+                      fill="var(--color-AMBU)"
+                      fillOpacity={countryFilter === 'ALL' || d.isSelected ? 1 : 0.3}
+                    />
+                  ))}
+                </Bar>
               )}
               {(buFilter === 'ALL' || buFilter === 'DBU') && (
-                <Bar dataKey="DBU" stackId="bu" fill="var(--color-DBU)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="DBU" stackId="bu" radius={[4, 4, 0, 0]}>
+                  {countryData.map((d) => (
+                    <Cell
+                      key={d.country}
+                      fill="var(--color-DBU)"
+                      fillOpacity={countryFilter === 'ALL' || d.isSelected ? 1 : 0.3}
+                    />
+                  ))}
+                </Bar>
               )}
             </BarChart>
           </ChartContainer>

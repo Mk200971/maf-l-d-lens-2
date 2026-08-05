@@ -35,6 +35,7 @@ import {
   sumBy,
 } from '@/lib/aggregate'
 import { kpis, meta, programs } from '@/lib/dashboard-data'
+import { kpis as skillupKpis } from '@/lib/skillup-data'
 import { filterRules } from '@/lib/filter-rules'
 import { useFilters } from '@/lib/filters-context'
 
@@ -60,6 +61,17 @@ export function OverviewPage() {
   const comp = useMemo(() => filterCompletion(filters), [filters])
 
   const totalHours = sumBy(hours, (r) => r.totalHours)
+
+  // SkillUp hours — BU-aware, excluded when a month/program drill-down is active
+  const hasMonthOrProgramFilter = filters.months?.length > 0 || filters.programs?.length > 0
+  const skillupHoursAdded = (() => {
+    if (hasMonthOrProgramFilter) return 0
+    if (filters.bus.length === 1 && filters.bus[0] === 'AMBU') return skillupKpis.learningHoursByBU.AMBU
+    if (filters.bus.length === 1 && filters.bus[0] === 'DBU') return skillupKpis.learningHoursByBU.DBU
+    return skillupKpis.learningHours
+  })()
+  const adjustedTotalHours = Math.round(totalHours + skillupHoursAdded)
+
   const totalCompletions = sumBy(hours, (r) => r.completions)
   const completionsByBU = groupSum(hours, (r) => r.bu, (r) => r.completions)
   const uniqueLearners = sumBy(reach, (r) => r.uniqueLearners)
@@ -146,8 +158,12 @@ export function OverviewPage() {
         <KpiTile
           label="Learning Hours"
           docId="learning-hours"
-          value={formatNumber(totalHours)}
-          sub={`AMBU ${formatNumber(Math.round(completionsByBU.get('AMBU') ?? 0))} · DBU ${formatNumber(Math.round(completionsByBU.get('DBU') ?? 0))} completions`}
+          value={formatNumber(adjustedTotalHours)}
+          sub={
+            hasMonthOrProgramFilter
+              ? 'excl. SkillUp (no monthly grain)'
+              : `incl. ${skillupHoursAdded.toFixed(1)} hrs from SkillUp journeys`
+          }
         />
         <KpiTile
           label="Total Completions"

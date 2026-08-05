@@ -34,7 +34,7 @@ export function Preloader() {
     <div
       role="status"
       aria-live="polite"
-      aria-label="Loading MAFGS L&D Lens"
+      aria-label="Loading MAF L&D Lens"
       className={`fixed inset-0 z-100 flex items-center justify-center overflow-hidden bg-sidebar ${
         phase === 'exit' ? 'animate-preloader-exit' : ''
       }`}
@@ -72,7 +72,7 @@ export function Preloader() {
 
         <div className="flex flex-col items-center gap-3">
           <p className="animate-preloader-rise text-sm font-semibold tracking-[0.32em] text-white opacity-0 [animation-delay:700ms]">
-            MAFGS L&amp;D LENS
+            MAF L&amp;D LENS
           </p>
           <p className="animate-preloader-rise text-[11px] tracking-[0.18em] text-sidebar-foreground/70 opacity-0 [animation-delay:900ms]">
             DBU &amp; AMBU DASHBOARD
