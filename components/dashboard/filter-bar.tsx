@@ -132,6 +132,22 @@ export function FilterBar() {
   const allowed = new Set<FilterKey>(pageFilterRules[pageId])
   const { filters, toggle, setMonthRange, reset, activeCount } = useFilters()
 
+  // SkillUP owns its own in-page filter panel (BU, Journey, Status, Country) with a
+  // different data domain (e.g. includes Saudi Arabia) and page-specific dimensions.
+  // The global filter controls would just duplicate BU/Country and do nothing else here,
+  // so we render a minimal bar that keeps only the Metric guide.
+  if (pathname.startsWith('/skillup')) {
+    return (
+      <div className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
+        <div className="flex items-center px-4 py-2.5 md:px-6">
+          <div className="ml-auto">
+            <MetricGuide />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const isFeedback = pageId === 'feedback'
   const availableYears = isFeedback
     ? getAvailableFeedbackYears(filters)
