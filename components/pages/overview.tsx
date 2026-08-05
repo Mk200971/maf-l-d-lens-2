@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
   Area,
   AreaChart,
@@ -38,6 +38,7 @@ import { kpis, meta, programs } from '@/lib/dashboard-data'
 import { kpis as skillupKpis } from '@/lib/skillup-data'
 import { filterRules } from '@/lib/filter-rules'
 import { useFilters } from '@/lib/filters-context'
+import { cn } from '@/lib/utils'
 
 const buConfig = {
   AMBU: { label: 'AMBU', color: 'var(--chart-1)' },
@@ -51,6 +52,7 @@ const hoursConfig = {
 
 export function OverviewPage() {
   const { filters, toggle } = useFilters()
+  const [excludeSkillup, setExcludeSkillup] = useState(false)
 
   const hours = useMemo(() => filterHours(filters), [filters])
   const reach = useMemo(() => filterReach(filters), [filters])
@@ -62,14 +64,15 @@ export function OverviewPage() {
 
   const totalHours = sumBy(hours, (r) => r.totalHours)
 
-  // SkillUp hours — BU-aware, excluded when a month/program drill-down is active
+  // SkillUp hours — BU-aware, excluded when a month/program drill-down is active, or user toggled off
   const hasMonthOrProgramFilter = filters.months?.length > 0 || filters.programs?.length > 0
-  const skillupHoursAdded = (() => {
+  const skillupHoursBase = (() => {
     if (hasMonthOrProgramFilter) return 0
     if (filters.bus.length === 1 && filters.bus[0] === 'AMBU') return skillupKpis.learningHoursByBU.AMBU
     if (filters.bus.length === 1 && filters.bus[0] === 'DBU') return skillupKpis.learningHoursByBU.DBU
     return skillupKpis.learningHours
   })()
+  const skillupHoursAdded = excludeSkillup ? 0 : skillupHoursBase
   const adjustedTotalHours = Math.round(totalHours + skillupHoursAdded)
 
   const totalCompletions = sumBy(hours, (r) => r.completions)
@@ -162,9 +165,27 @@ export function OverviewPage() {
           sub={
             hasMonthOrProgramFilter
               ? 'excl. SkillUp (no monthly grain)'
-              : `incl. ${skillupHoursAdded.toFixed(1)} hrs from SkillUp journeys`
+              : excludeSkillup
+                ? 'SkillUp hours excluded'
+                : `incl. ${skillupHoursBase.toFixed(1)} hrs from SkillUp journeys`
           }
-        />
+        >
+          {!hasMonthOrProgramFilter && (
+            <button
+              type="button"
+              onClick={() => setExcludeSkillup((v) => !v)}
+              className={cn(
+                'mt-1 self-start rounded-full border px-2 py-0.5 text-[10px] font-medium transition-colors',
+                excludeSkillup
+                  ? 'border-muted-foreground/30 bg-muted text-muted-foreground hover:bg-muted/70'
+                  : 'border-primary/30 bg-primary/10 text-primary hover:bg-primary/20',
+              )}
+              aria-pressed={excludeSkillup}
+            >
+              {excludeSkillup ? 'SkillUp: off' : 'SkillUp: on'}
+            </button>
+          )}
+        </KpiTile>
         <KpiTile
           label="Total Completions"
           docId="completions"
