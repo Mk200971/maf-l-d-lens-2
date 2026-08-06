@@ -147,7 +147,10 @@ export function FeedbackPage() {
     (a, b) => (normalizedSatisfaction(b) ?? 0) - (normalizedSatisfaction(a) ?? 0),
   )
   const best = sorted.slice(0, 5)
-  const worst = sorted.slice(-5).reverse()
+  // Exclude the top-5 rows before picking the bottom-5 so they never overlap
+  // when the total session count is small (≤ 10).
+  const remaining = sorted.slice(5)
+  const worst = remaining.slice(-5).reverse()
 
   return (
     <>
