@@ -9,6 +9,7 @@ import {
   GraduationCap,
   LayoutDashboard,
   MessageSquare,
+  ShieldCheck,
   Target,
   Users,
   ChevronLeft,
@@ -21,6 +22,7 @@ import { useSidebar } from '@/lib/sidebar-context'
 const nav = [
   { href: '/', label: 'Overview', icon: LayoutDashboard },
   { href: '/skillup', label: 'SkillUP', icon: GraduationCap },
+  { href: '/mandatory', label: 'Mandatory', icon: ShieldCheck },
   { href: '/programs', label: 'Programs', icon: BookOpen },
   { href: '/learners', label: 'Learners & Reach', icon: Users },
   { href: '/feedback', label: 'Feedback', icon: MessageSquare },
