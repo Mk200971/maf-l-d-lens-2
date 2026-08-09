@@ -1,111 +1,156 @@
 // mandatory-data.ts
-// SAMPLE DATA — hand-maintained. Replace with real exports when ready; see the
-// "EDIT ME" markers below. No component changes are required to update this file.
+// GENERATED 2026-08-09 from the two LMS mandatory-learning exports
+//   "MAFP Asset Management Mandatory Learnings - 06-08-2026.xlsx" (AMBU)
+//   "MAFP Development Mandatory Learnings - 06-08-2026.xlsx"      (DBU)
+// Real data — replaces the earlier hand-seeded sample. AGGREGATES ONLY: no
+// learner names, emails, or manager rows are surfaced. All counts reconcile
+// to each workbook's Summary sheet.
 //
-// Sources this models (two exports, different grains, no shared key):
-//   1) Completions report: Title, User ID, Full Name, E-mail, Business Entity,
-//      Completion Status, Completion Date
-//   2) Pending/assignment report: Item Title, User ID, Full Name, Business Entity,
-//      E-mail, Organization ID, Job Location, Job Classification ID, Manager ID,
-//      Manager Name, Manager E-mail
-//
-// Neither export carries an AMBU/DBU column, so BU is derived here from
-// Business Entity via `businessEntityToBU`. This dashboard shows AGGREGATES
-// ONLY — no learner names, emails, or manager rows are surfaced in the UI.
+// IMPORTANT — grain note (why the shape changed from the sample):
+// The two source exports have DIFFERENT columns and no shared location key:
+//   • Completed export: Title, User ID, Full Name, E-mail, Business Entity,
+//     Completion Status, Completion Date   — NO organization / location / country.
+//   • Pending export:   Item Title, User ID, ..., Organization ID, Job Location,
+//     Manager fields                        — HAS organization / location.
+// So COMPLETED counts exist only at course x BU (and by month), while a
+// location / country breakdown is available for PENDING learners only. The
+// sample's completed-by-location split did not exist in the real data and was
+// not reproduced. `mandatoryRows` is course x BU; `pendingByLocation` carries
+// the location grain (pending only).
 
 export type BU = 'AMBU' | 'DBU'
 
-// ── EDIT ME ───────────────────────────────────────────────────────────────
-// Every Business Entity value that appears in `mandatoryRows` must have an
-// entry here. Rows with an unmapped entity fall back to "Unknown" and are
-// flagged in the page's info banner instead of silently dropped.
+// Business Entity -> BU. The real exports carry exactly two entities.
 export const businessEntityToBU: Record<string, BU> = {
+  'MAFP Asset Management': 'AMBU',
   'MAFP Development': 'DBU',
-  'MAFP Operations': 'DBU',
-  'MAF Carrefour': 'AMBU',
-  'MAF Ventures': 'AMBU',
-  'MAF Leisure & Entertainment': 'AMBU',
-  'Majid Al Futtaim Properties': 'DBU',
-  'Majid Al Futtaim Retail': 'AMBU',
 }
 
-// One row per course x business entity x job location — the finest grain
-// available. Every breakdown on the page (course, BU, entity, location,
-// country) is summed from this array, so `pending` can never contradict
-// `completed` — it is always derived, never stored.
+// Mandatory courses present in the current exports (3).
+export const courses = [
+  "Data Privacy Awareness",
+  "Information Security Awareness",
+  "Sustainability E-learning"
+] as const
+
+// ── Course x BU rollup — the authoritative completion grain ────────────────
+// assigned = completed + pending. completed/pending come straight from the
+// Completed / Pending sheets and reconcile to each file's Summary tab.
 export type MandatoryRow = {
   course: string
   businessEntity: string
-  organization: string // e.g. "P Shopping Mall Development Egypt (PSMDEG)"
-  jobLocation: string // e.g. "Cairo (CAI)"
-  country: string
+  bu: BU
   assigned: number
   completed: number
+  pending: number
+  completionRatePct: number
 }
 
-// ── EDIT ME ───────────────────────────────────────────────────────────────
 export const mandatoryRows: MandatoryRow[] = [
-  // Data Privacy Awareness
-  { course: 'Data Privacy Awareness', businessEntity: 'MAFP Development', organization: 'P Shopping Mall Development Egypt (PSMDEG)', jobLocation: 'Cairo (CAI)', country: 'Egypt', assigned: 64, completed: 39 },
-  { course: 'Data Privacy Awareness', businessEntity: 'MAFP Development', organization: 'P Shopping Mall Development UAE (PSMDAE)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 48, completed: 33 },
-  { course: 'Data Privacy Awareness', businessEntity: 'MAFP Operations', organization: 'P Shopping Mall Operations UAE (PSMOAE)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 112, completed: 71 },
-  { course: 'Data Privacy Awareness', businessEntity: 'Majid Al Futtaim Properties', organization: 'Properties Corporate (PROPCORP)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 58, completed: 44 },
-  { course: 'Data Privacy Awareness', businessEntity: 'MAF Carrefour', organization: 'Carrefour UAE Retail (CRFAE)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 210, completed: 118 },
-  { course: 'Data Privacy Awareness', businessEntity: 'MAF Carrefour', organization: 'Carrefour Egypt Retail (CRFEG)', jobLocation: 'Cairo (CAI)', country: 'Egypt', assigned: 165, completed: 87 },
-  { course: 'Data Privacy Awareness', businessEntity: 'MAF Ventures', organization: 'Ventures Corporate (VENTCORP)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 36, completed: 30 },
-  { course: 'Data Privacy Awareness', businessEntity: 'MAF Leisure & Entertainment', organization: 'Leisure Oman (LEIOM)', jobLocation: 'Muscat (MCT)', country: 'Oman', assigned: 41, completed: 22 },
-
-  // Sustainability E-learning
-  { course: 'Sustainability E-learning', businessEntity: 'MAFP Development', organization: 'P Shopping Mall Development Egypt (PSMDEG)', jobLocation: 'Cairo (CAI)', country: 'Egypt', assigned: 64, completed: 51 },
-  { course: 'Sustainability E-learning', businessEntity: 'MAFP Development', organization: 'P Shopping Mall Development UAE (PSMDAE)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 48, completed: 40 },
-  { course: 'Sustainability E-learning', businessEntity: 'MAFP Operations', organization: 'P Shopping Mall Operations UAE (PSMOAE)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 112, completed: 84 },
-  { course: 'Sustainability E-learning', businessEntity: 'Majid Al Futtaim Properties', organization: 'Properties Corporate (PROPCORP)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 58, completed: 49 },
-  { course: 'Sustainability E-learning', businessEntity: 'MAF Carrefour', organization: 'Carrefour UAE Retail (CRFAE)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 210, completed: 142 },
-  { course: 'Sustainability E-learning', businessEntity: 'MAF Carrefour', organization: 'Carrefour Egypt Retail (CRFEG)', jobLocation: 'Cairo (CAI)', country: 'Egypt', assigned: 165, completed: 101 },
-  { course: 'Sustainability E-learning', businessEntity: 'MAF Ventures', organization: 'Ventures Corporate (VENTCORP)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 36, completed: 33 },
-  { course: 'Sustainability E-learning', businessEntity: 'MAF Leisure & Entertainment', organization: 'Leisure Oman (LEIOM)', jobLocation: 'Muscat (MCT)', country: 'Oman', assigned: 41, completed: 29 },
-
-  // Anti-Bribery & Corruption
-  { course: 'Anti-Bribery & Corruption', businessEntity: 'MAFP Development', organization: 'P Shopping Mall Development Egypt (PSMDEG)', jobLocation: 'Cairo (CAI)', country: 'Egypt', assigned: 64, completed: 28 },
-  { course: 'Anti-Bribery & Corruption', businessEntity: 'MAFP Operations', organization: 'P Shopping Mall Operations UAE (PSMOAE)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 112, completed: 55 },
-  { course: 'Anti-Bribery & Corruption', businessEntity: 'Majid Al Futtaim Properties', organization: 'Properties Corporate (PROPCORP)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 58, completed: 41 },
-  { course: 'Anti-Bribery & Corruption', businessEntity: 'MAF Carrefour', organization: 'Carrefour UAE Retail (CRFAE)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 210, completed: 96 },
-  { course: 'Anti-Bribery & Corruption', businessEntity: 'MAF Carrefour', organization: 'Carrefour Egypt Retail (CRFEG)', jobLocation: 'Cairo (CAI)', country: 'Egypt', assigned: 165, completed: 62 },
-  { course: 'Anti-Bribery & Corruption', businessEntity: 'MAF Ventures', organization: 'Ventures Corporate (VENTCORP)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 36, completed: 21 },
-  { course: 'Anti-Bribery & Corruption', businessEntity: 'MAF Leisure & Entertainment', organization: 'Leisure Oman (LEIOM)', jobLocation: 'Muscat (MCT)', country: 'Oman', assigned: 41, completed: 14 },
-
-  // Health & Safety Essentials
-  { course: 'Health & Safety Essentials', businessEntity: 'MAFP Development', organization: 'P Shopping Mall Development UAE (PSMDAE)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 48, completed: 45 },
-  { course: 'Health & Safety Essentials', businessEntity: 'MAFP Operations', organization: 'P Shopping Mall Operations UAE (PSMOAE)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 112, completed: 103 },
-  { course: 'Health & Safety Essentials', businessEntity: 'MAF Carrefour', organization: 'Carrefour UAE Retail (CRFAE)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 210, completed: 188 },
-  { course: 'Health & Safety Essentials', businessEntity: 'MAF Carrefour', organization: 'Carrefour Egypt Retail (CRFEG)', jobLocation: 'Cairo (CAI)', country: 'Egypt', assigned: 165, completed: 140 },
-  { course: 'Health & Safety Essentials', businessEntity: 'MAF Ventures', organization: 'Ventures Corporate (VENTCORP)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 36, completed: 34 },
-  { course: 'Health & Safety Essentials', businessEntity: 'MAF Leisure & Entertainment', organization: 'Leisure Oman (LEIOM)', jobLocation: 'Muscat (MCT)', country: 'Oman', assigned: 41, completed: 36 },
-
-  // Code of Conduct Refresher
-  { course: 'Code of Conduct Refresher', businessEntity: 'MAFP Development', organization: 'P Shopping Mall Development Egypt (PSMDEG)', jobLocation: 'Cairo (CAI)', country: 'Egypt', assigned: 64, completed: 22 },
-  { course: 'Code of Conduct Refresher', businessEntity: 'MAFP Operations', organization: 'P Shopping Mall Operations UAE (PSMOAE)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 112, completed: 47 },
-  { course: 'Code of Conduct Refresher', businessEntity: 'Majid Al Futtaim Properties', organization: 'Properties Corporate (PROPCORP)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 58, completed: 19 },
-  { course: 'Code of Conduct Refresher', businessEntity: 'MAF Carrefour', organization: 'Carrefour UAE Retail (CRFAE)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 210, completed: 78 },
-  { course: 'Code of Conduct Refresher', businessEntity: 'MAF Carrefour', organization: 'Carrefour Egypt Retail (CRFEG)', jobLocation: 'Cairo (CAI)', country: 'Egypt', assigned: 165, completed: 51 },
-  { course: 'Code of Conduct Refresher', businessEntity: 'MAF Ventures', organization: 'Ventures Corporate (VENTCORP)', jobLocation: 'Dubai (DXB)', country: 'United Arab Emirates', assigned: 36, completed: 16 },
+  { course: "Data Privacy Awareness", businessEntity: "MAFP Asset Management", bu: "AMBU", assigned: 599, completed: 480, pending: 119, completionRatePct: 80.1 },
+  { course: "Data Privacy Awareness", businessEntity: "MAFP Development", bu: "DBU", assigned: 439, completed: 326, pending: 113, completionRatePct: 74.3 },
+  { course: "Information Security Awareness", businessEntity: "MAFP Asset Management", bu: "AMBU", assigned: 616, completed: 534, pending: 82, completionRatePct: 86.7 },
+  { course: "Information Security Awareness", businessEntity: "MAFP Development", bu: "DBU", assigned: 451, completed: 353, pending: 98, completionRatePct: 78.3 },
+  { course: "Sustainability E-learning", businessEntity: "MAFP Asset Management", bu: "AMBU", assigned: 597, completed: 459, pending: 138, completionRatePct: 76.9 },
+  { course: "Sustainability E-learning", businessEntity: "MAFP Development", bu: "DBU", assigned: 437, completed: 296, pending: 141, completionRatePct: 67.7 },
 ]
 
-// Separate grain, sourced from Completion Date on the completions export.
-// Values are completions recorded in that month, split by BU.
-// ── EDIT ME ───────────────────────────────────────────────────────────────
+// ── Pending learners by location — PENDING ONLY (completed has no location) ─
+// Use this for "where are the outstanding completions" breakdowns by
+// organization / job location / country. Do NOT infer completion rates from
+// it; it has no completed figures.
+export type PendingLocationRow = {
+  course: string
+  businessEntity: string
+  bu: BU
+  organization: string
+  jobLocation: string
+  country: string
+  pending: number
+}
+
+export const pendingByLocation: PendingLocationRow[] = [
+  // Data Privacy Awareness
+  { course: "Data Privacy Awareness", businessEntity: "MAFP Asset Management", bu: "AMBU", organization: "P Asset Management Bahrain (PAMBUBH)", jobLocation: "Manama (MN)", country: "Bahrain", pending: 2 },
+  { course: "Data Privacy Awareness", businessEntity: "MAFP Asset Management", bu: "AMBU", organization: "P Asset Management Egypt (PAMBUEG)", jobLocation: "Cairo (CAI)", country: "Egypt", pending: 3 },
+  { course: "Data Privacy Awareness", businessEntity: "MAFP Asset Management", bu: "AMBU", organization: "P Asset Management Oman (PAMBUOM)", jobLocation: "Muscat (MCT)", country: "Oman", pending: 9 },
+  { course: "Data Privacy Awareness", businessEntity: "MAFP Asset Management", bu: "AMBU", organization: "P Asset Management UAE (PAMBUAE)", jobLocation: "Dubai (DXB)", country: "United Arab Emirates", pending: 103 },
+  { course: "Data Privacy Awareness", businessEntity: "MAFP Asset Management", bu: "AMBU", organization: "P Asset Management UAE (PAMBUAE)", jobLocation: "Sharjah (SHA)", country: "United Arab Emirates", pending: 2 },
+  { course: "Data Privacy Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Corporate Egypt (PCORPEG)", jobLocation: "Cairo (CAI)", country: "Egypt", pending: 3 },
+  { course: "Data Privacy Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Project Management Egypt (PPMEG)", jobLocation: "Cairo (CAI)", country: "Egypt", pending: 1 },
+  { course: "Data Privacy Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Shopping Mall Development Egypt (PSMDEG)", jobLocation: "Cairo (CAI)", country: "Egypt", pending: 12 },
+  { course: "Data Privacy Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Corporate Lebanon (PCORPLB)", jobLocation: "Beirut (BEI)", country: "Lebanon", pending: 2 },
+  { course: "Data Privacy Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Communities Oman (PCOBUOM)", jobLocation: "Muscat (MCT)", country: "Oman", pending: 9 },
+  { course: "Data Privacy Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "Communities Development Saudi Arabia (PCDVSA)", jobLocation: "Riyadh (RIY)", country: "Saudi Arabia", pending: 1 },
+  { course: "Data Privacy Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Corporate Saudi Arabia (PCORPSA)", jobLocation: "Riyadh (RIY)", country: "Saudi Arabia", pending: 1 },
+  { course: "Data Privacy Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Project Management Saudi Arabia (PPMSA)", jobLocation: "Riyadh (RIY)", country: "Saudi Arabia", pending: 2 },
+  { course: "Data Privacy Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Shopping Mall Development Saudi Arabia (PSMDSA)", jobLocation: "Riyadh (RIY)", country: "Saudi Arabia", pending: 3 },
+  { course: "Data Privacy Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Communities Development UAE (PCDVBUAE)", jobLocation: "Dubai (DXB)", country: "United Arab Emirates", pending: 59 },
+  { course: "Data Privacy Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Design Studio Development UAE (PDSDBUAE)", jobLocation: "Dubai (DXB)", country: "United Arab Emirates", pending: 8 },
+  { course: "Data Privacy Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Project Management UAE (PPMAE)", jobLocation: "Dubai (DXB)", country: "United Arab Emirates", pending: 10 },
+  { course: "Data Privacy Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Shopping Mall Development UAE (PSMDAE)", jobLocation: "Dubai (DXB)", country: "United Arab Emirates", pending: 2 },
+  // Information Security Awareness
+  { course: "Information Security Awareness", businessEntity: "MAFP Asset Management", bu: "AMBU", organization: "P Asset Management Bahrain (PAMBUBH)", jobLocation: "Manama (MN)", country: "Bahrain", pending: 1 },
+  { course: "Information Security Awareness", businessEntity: "MAFP Asset Management", bu: "AMBU", organization: "P Asset Management Egypt (PAMBUEG)", jobLocation: "Cairo (CAI)", country: "Egypt", pending: 3 },
+  { course: "Information Security Awareness", businessEntity: "MAFP Asset Management", bu: "AMBU", organization: "P Asset Management Oman (PAMBUOM)", jobLocation: "Muscat (MCT)", country: "Oman", pending: 3 },
+  { course: "Information Security Awareness", businessEntity: "MAFP Asset Management", bu: "AMBU", organization: "P Asset Management UAE (PAMBUAE)", jobLocation: "Dubai (DXB)", country: "United Arab Emirates", pending: 74 },
+  { course: "Information Security Awareness", businessEntity: "MAFP Asset Management", bu: "AMBU", organization: "P Asset Management UAE (PAMBUAE)", jobLocation: "Sharjah (SHA)", country: "United Arab Emirates", pending: 1 },
+  { course: "Information Security Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Corporate Egypt (PCORPEG)", jobLocation: "Cairo (CAI)", country: "Egypt", pending: 3 },
+  { course: "Information Security Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Shopping Mall Development Egypt (PSMDEG)", jobLocation: "Cairo (CAI)", country: "Egypt", pending: 10 },
+  { course: "Information Security Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Corporate Lebanon (PCORPLB)", jobLocation: "Beirut (BEI)", country: "Lebanon", pending: 1 },
+  { course: "Information Security Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Communities Oman (PCOBUOM)", jobLocation: "Muscat (MCT)", country: "Oman", pending: 8 },
+  { course: "Information Security Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "Communities Development Saudi Arabia (PCDVSA)", jobLocation: "Riyadh (RIY)", country: "Saudi Arabia", pending: 2 },
+  { course: "Information Security Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Corporate Saudi Arabia (PCORPSA)", jobLocation: "Riyadh (RIY)", country: "Saudi Arabia", pending: 1 },
+  { course: "Information Security Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Project Management Saudi Arabia (PPMSA)", jobLocation: "Riyadh (RIY)", country: "Saudi Arabia", pending: 2 },
+  { course: "Information Security Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Shopping Mall Development Saudi Arabia (PSMDSA)", jobLocation: "Riyadh (RIY)", country: "Saudi Arabia", pending: 4 },
+  { course: "Information Security Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Communities Development UAE (PCDVBUAE)", jobLocation: "Dubai (DXB)", country: "United Arab Emirates", pending: 48 },
+  { course: "Information Security Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Design Studio Development UAE (PDSDBUAE)", jobLocation: "Dubai (DXB)", country: "United Arab Emirates", pending: 9 },
+  { course: "Information Security Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Project Management UAE (PPMAE)", jobLocation: "Dubai (DXB)", country: "United Arab Emirates", pending: 8 },
+  { course: "Information Security Awareness", businessEntity: "MAFP Development", bu: "DBU", organization: "P Shopping Mall Development UAE (PSMDAE)", jobLocation: "Dubai (DXB)", country: "United Arab Emirates", pending: 2 },
+  // Sustainability E-learning
+  { course: "Sustainability E-learning", businessEntity: "MAFP Asset Management", bu: "AMBU", organization: "P Asset Management Bahrain (PAMBUBH)", jobLocation: "Manama (MN)", country: "Bahrain", pending: 2 },
+  { course: "Sustainability E-learning", businessEntity: "MAFP Asset Management", bu: "AMBU", organization: "P Asset Management Egypt (PAMBUEG)", jobLocation: "Cairo (CAI)", country: "Egypt", pending: 2 },
+  { course: "Sustainability E-learning", businessEntity: "MAFP Asset Management", bu: "AMBU", organization: "P Asset Management Oman (PAMBUOM)", jobLocation: "Muscat (MCT)", country: "Oman", pending: 9 },
+  { course: "Sustainability E-learning", businessEntity: "MAFP Asset Management", bu: "AMBU", organization: "P Asset Management UAE (PAMBUAE)", jobLocation: "Dubai (DXB)", country: "United Arab Emirates", pending: 123 },
+  { course: "Sustainability E-learning", businessEntity: "MAFP Asset Management", bu: "AMBU", organization: "P Asset Management UAE (PAMBUAE)", jobLocation: "Sharjah (SHA)", country: "United Arab Emirates", pending: 2 },
+  { course: "Sustainability E-learning", businessEntity: "MAFP Development", bu: "DBU", organization: "P Corporate Egypt (PCORPEG)", jobLocation: "Cairo (CAI)", country: "Egypt", pending: 4 },
+  { course: "Sustainability E-learning", businessEntity: "MAFP Development", bu: "DBU", organization: "P Project Management Egypt (PPMEG)", jobLocation: "Cairo (CAI)", country: "Egypt", pending: 1 },
+  { course: "Sustainability E-learning", businessEntity: "MAFP Development", bu: "DBU", organization: "P Shopping Mall Development Egypt (PSMDEG)", jobLocation: "Cairo (CAI)", country: "Egypt", pending: 13 },
+  { course: "Sustainability E-learning", businessEntity: "MAFP Development", bu: "DBU", organization: "P Corporate Lebanon (PCORPLB)", jobLocation: "Beirut (BEI)", country: "Lebanon", pending: 4 },
+  { course: "Sustainability E-learning", businessEntity: "MAFP Development", bu: "DBU", organization: "P Communities Oman (PCOBUOM)", jobLocation: "Muscat (MCT)", country: "Oman", pending: 11 },
+  { course: "Sustainability E-learning", businessEntity: "MAFP Development", bu: "DBU", organization: "Communities Development Saudi Arabia (PCDVSA)", jobLocation: "Riyadh (RIY)", country: "Saudi Arabia", pending: 1 },
+  { course: "Sustainability E-learning", businessEntity: "MAFP Development", bu: "DBU", organization: "P Corporate Saudi Arabia (PCORPSA)", jobLocation: "Riyadh (RIY)", country: "Saudi Arabia", pending: 1 },
+  { course: "Sustainability E-learning", businessEntity: "MAFP Development", bu: "DBU", organization: "P Project Management Saudi Arabia (PPMSA)", jobLocation: "Riyadh (RIY)", country: "Saudi Arabia", pending: 2 },
+  { course: "Sustainability E-learning", businessEntity: "MAFP Development", bu: "DBU", organization: "P Shopping Mall Development Saudi Arabia (PSMDSA)", jobLocation: "Riyadh (RIY)", country: "Saudi Arabia", pending: 4 },
+  { course: "Sustainability E-learning", businessEntity: "MAFP Development", bu: "DBU", organization: "P Communities Development UAE (PCDVBUAE)", jobLocation: "Dubai (DXB)", country: "United Arab Emirates", pending: 78 },
+  { course: "Sustainability E-learning", businessEntity: "MAFP Development", bu: "DBU", organization: "P Design Studio Development UAE (PDSDBUAE)", jobLocation: "Dubai (DXB)", country: "United Arab Emirates", pending: 9 },
+  { course: "Sustainability E-learning", businessEntity: "MAFP Development", bu: "DBU", organization: "P Project Management UAE (PPMAE)", jobLocation: "Dubai (DXB)", country: "United Arab Emirates", pending: 11 },
+  { course: "Sustainability E-learning", businessEntity: "MAFP Development", bu: "DBU", organization: "P Shopping Mall Development UAE (PSMDAE)", jobLocation: "Dubai (DXB)", country: "United Arab Emirates", pending: 2 },
+]
+
+// ── Completions by month — from Completion Date on the Completed export ─────
+// Split by BU. Sums to the total completed count across all courses.
 export const completionsByMonth: { month: string; AMBU: number; DBU: number }[] = [
-  { month: '2025-07', AMBU: 38, DBU: 19 },
-  { month: '2025-08', AMBU: 52, DBU: 27 },
-  { month: '2025-09', AMBU: 61, DBU: 34 },
-  { month: '2025-10', AMBU: 74, DBU: 41 },
-  { month: '2025-11', AMBU: 69, DBU: 48 },
-  { month: '2025-12', AMBU: 88, DBU: 57 },
+  { month: "2025-09", AMBU: 29, DBU: 8 },
+  { month: "2025-10", AMBU: 40, DBU: 28 },
+  { month: "2025-11", AMBU: 74, DBU: 38 },
+  { month: "2025-12", AMBU: 120, DBU: 107 },
+  { month: "2026-01", AMBU: 378, DBU: 281 },
+  { month: "2026-02", AMBU: 398, DBU: 224 },
+  { month: "2026-03", AMBU: 42, DBU: 22 },
+  { month: "2026-04", AMBU: 93, DBU: 119 },
+  { month: "2026-05", AMBU: 112, DBU: 46 },
+  { month: "2026-06", AMBU: 146, DBU: 64 },
+  { month: "2026-07", AMBU: 34, DBU: 31 },
+  { month: "2026-08", AMBU: 7, DBU: 7 },
 ]
 
 export const meta = {
   lastUpdated: '2026-08-09',
-  source: 'Sample data seeded from LMS completions + pending assignment export format',
-  isSampleData: true,
-  coursesCount: new Set(mandatoryRows.map((r) => r.course)).size,
+  source: 'LMS mandatory-learning exports (AMBU + DBU), dated 06-08-2026',
+  isSampleData: false,
+  coursesCount: courses.length,
+  totalAssigned: 3139,
+  totalCompleted: 2448,
+  totalPending: 691,
 } as const
