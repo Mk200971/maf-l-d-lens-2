@@ -33,6 +33,7 @@ import {
   completionsByMonth,
   mandatoryRows,
   meta,
+  pendingByLocation,
   type BU,
 } from '@/lib/mandatory-data'
 
@@ -51,7 +52,7 @@ const COURSE_OPTIONS: CourseFilter[] = [
 ]
 const COUNTRY_OPTIONS: CountryFilter[] = [
   'ALL',
-  ...[...new Set(mandatoryRows.map((r) => r.country))].sort(),
+  ...[...new Set(pendingByLocation.map((r) => r.country))].sort(),
 ]
 const STATUS_OPTIONS: StatusFilter[] = ['All', 'Complete', 'Pending']
 
@@ -162,7 +163,6 @@ export function MandatoryPage() {
       mandatoryRows.filter((r) => {
         if (buFilter !== 'ALL' && buOf(r.businessEntity) !== buFilter) return false
         if (courseFilter !== 'ALL' && r.course !== courseFilter) return false
-        if (countryFilter !== 'ALL' && r.country !== countryFilter) return false
         return true
       }),
     [buFilter, courseFilter, countryFilter],
@@ -243,23 +243,22 @@ export function MandatoryPage() {
       .sort((a, b) => b.pending - a.pending)
   }, [filteredRows])
 
-  // ── job location breakdown ─────────────────────────────────────────────────
+  // ── pending-only location breakdown ────────────────────────────────────────
+  // Completed exports have no location key, so never infer completed counts here.
   const byLocation = useMemo(() => {
-    const m = new Map<string, { jobLocation: string; completed: number; pending: number }>()
-    for (const r of filteredRows) {
-      const e = m.get(r.jobLocation) ?? { jobLocation: r.jobLocation, completed: 0, pending: 0 }
-      e.completed += r.completed
-      e.pending += r.assigned - r.completed
+    if (statusFilter === 'Complete') return []
+
+    const m = new Map<string, { jobLocation: string; pending: number }>()
+    for (const r of pendingByLocation) {
+      if (buFilter !== 'ALL' && r.bu !== buFilter) continue
+      if (courseFilter !== 'ALL' && r.course !== courseFilter) continue
+      if (countryFilter !== 'ALL' && r.country !== countryFilter) continue
+      const e = m.get(r.jobLocation) ?? { jobLocation: r.jobLocation, pending: 0 }
+      e.pending += r.pending
       m.set(r.jobLocation, e)
     }
-    return [...m.values()]
-      .map((e) => ({
-        ...e,
-        completed: statusFilter === 'Pending' ? 0 : e.completed,
-        pending: statusFilter === 'Complete' ? 0 : e.pending,
-      }))
-      .sort((a, b) => b.completed + b.pending - (a.completed + a.pending))
-  }, [filteredRows, statusFilter])
+    return [...m.values()].sort((a, b) => b.pending - a.pending)
+  }, [buFilter, courseFilter, countryFilter, statusFilter])
 
   // ── monthly completion trend ───────────────────────────────────────────────
   const trendData = useMemo(
@@ -416,6 +415,11 @@ export function MandatoryPage() {
             )}
           </p>
         )}
+        {countryFilter !== 'ALL' && (
+          <p className="mt-2 text-xs italic text-muted-foreground/75">
+            Country applies to the pending-location view only; completed records do not include location.
+          </p>
+        )}
       </section>
 
       {/* ── KPI strip ──────────────────────────────────────────────────────── */}
@@ -472,7 +476,7 @@ export function MandatoryPage() {
               <LabelList
                 dataKey="rate"
                 position="right"
-                formatter={(v: number) => `${v}%`}
+                formatter={(v) => `${v ?? ''}%`}
                 className="fill-foreground text-xs"
               />
             </Bar>
@@ -507,17 +511,25 @@ export function MandatoryPage() {
         </ChartCard>
 
         {/* ── Job location breakdown ────────────────────────────────────── */}
-        <ChartCard title="By Job Location" description="Completed vs pending headcount by job location.">
-          <ChartContainer config={statusConfig} className="h-[240px] w-full">
-            <BarChart data={byLocation} margin={{ left: 0, right: 8 }}>
-              <CartesianGrid vertical={false} strokeDasharray="3 3" />
-              <XAxis dataKey="jobLocation" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
-              <YAxis tickLine={false} axisLine={false} width={36} />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="completed" stackId="s" fill="var(--color-completed)" radius={[0, 0, 0, 0]} />
-              <Bar dataKey="pending" stackId="s" fill="var(--color-pending)" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ChartContainer>
+        <ChartCard
+          title="Pending by Job Location"
+          description="Where outstanding mandatory completions are located. Pending learners only."
+        >
+          {statusFilter === 'Complete' ? (
+            <p className="py-6 text-center text-sm text-muted-foreground">
+              Location is not available for completed learners in the source export.
+            </p>
+          ) : (
+            <ChartContainer config={statusConfig} className="h-[240px] w-full">
+              <BarChart data={byLocation} margin={{ left: 0, right: 8 }}>
+                <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                <XAxis dataKey="jobLocation" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
+                <YAxis tickLine={false} axisLine={false} width={36} />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar dataKey="pending" fill="var(--color-pending)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ChartContainer>
+          )}
         </ChartCard>
       </div>
 
