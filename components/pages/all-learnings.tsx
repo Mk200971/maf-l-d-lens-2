@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import {
   Bar,
   BarChart,
@@ -495,9 +495,8 @@ export function AllLearningsPage() {
               const minorItems = groupItemsAll.filter((i) => i.isLongTail)
 
               return (
-                <>
+                <Fragment key={group.id}>
                   <TableRow
-                    key={group.id}
                     className={group.isConsolidated ? 'cursor-pointer' : undefined}
                     onClick={() => group.isConsolidated && toggleExpand(group.id)}
                   >
@@ -595,7 +594,7 @@ export function AllLearningsPage() {
                         <TableCell />
                       </TableRow>
                     ))}
-                </>
+                </Fragment>
               )
             })}
           </TableBody>
