@@ -22,7 +22,8 @@ export type Country =
   | 'Egypt'
   | 'Oman'
   | 'Bahrain'
-  | 'Lebanon';
+  | 'Lebanon'
+  | 'Saudi Arabia';
 export type Scale = '1-5' | '0-10';
 
 /** NPS reported per BU for programs measured on 0-10 scale. */

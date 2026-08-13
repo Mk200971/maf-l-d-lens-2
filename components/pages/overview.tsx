@@ -19,6 +19,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart'
+import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { ChartCard, InfoBanner, KpiTile, PageHeader } from '@/components/dashboard/shared'
 import { ScopeBadge } from '@/components/dashboard/scope-badge'
@@ -37,6 +38,7 @@ import {
 } from '@/lib/aggregate'
 import { kpis, meta, programs } from '@/lib/dashboard-data'
 import { kpis as skillupKpis } from '@/lib/skillup-data'
+import { kpis as allLearningsKpis } from '@/lib/all-learnings-data'
 import { filterRules } from '@/lib/filter-rules'
 import { useFilters } from '@/lib/filters-context'
 import { cn } from '@/lib/utils'
@@ -235,6 +237,14 @@ export function OverviewPage() {
           emphasis
         />
       </section>
+
+      <p className="text-xs text-muted-foreground">
+        Total LMS activity including self-paced, compliance and leadership programmes:{' '}
+        {formatNumber(Math.round(allLearningsKpis.totalHours))} hrs →{' '}
+        <Link href="/all-learnings" className="font-medium text-accent underline-offset-2 hover:underline">
+          View all
+        </Link>
+      </p>
 
       <section className="grid grid-cols-1 gap-4 lg:gap-5 xl:gap-6 lg:grid-cols-2">
         {/* Donut / single BU big number */}
