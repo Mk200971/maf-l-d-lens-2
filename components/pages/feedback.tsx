@@ -26,6 +26,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { ChartCard, InfoBanner, KpiTile, PageHeader } from '@/components/dashboard/shared'
+import { ScopeBadge } from '@/components/dashboard/scope-badge'
 import {
   avgBy,
   avgNormalizedConfidence,
@@ -157,6 +158,7 @@ export function FeedbackPage() {
       <PageHeader
         title="Feedback Deep Dive"
         description="Anonymous session-level feedback across all programs."
+        badge={<ScopeBadge>Curated programmes</ScopeBadge>}
       />
 
       <InfoBanner>{pageBanners.feedback}</InfoBanner>

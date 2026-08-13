@@ -6,13 +6,18 @@ import { cn } from '@/lib/utils'
 export function PageHeader({
   title,
   description,
+  badge,
 }: {
   title: string
   description?: string
+  badge?: React.ReactNode
 }) {
   return (
     <header className="flex flex-col gap-1 lg:gap-2">
-      <h1 className="text-2xl font-semibold text-balance text-accent lg:text-3xl xl:text-4xl">{title}</h1>
+      <div className="flex items-center gap-2.5">
+        <h1 className="text-2xl font-semibold text-balance text-accent lg:text-3xl xl:text-4xl">{title}</h1>
+        {badge}
+      </div>
       {description && (
         <p className="text-sm text-pretty text-muted-foreground lg:text-base">{description}</p>
       )}

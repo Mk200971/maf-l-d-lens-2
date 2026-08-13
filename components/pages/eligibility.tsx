@@ -27,6 +27,7 @@ import {
 } from '@/lib/aggregate'
 import { completion, kpis } from '@/lib/dashboard-data'
 import { ChartCard, InfoBanner, KpiTile, PageHeader } from '@/components/dashboard/shared'
+import { ScopeBadge } from '@/components/dashboard/scope-badge'
 
 const rateChartConfig = {
   rate: { label: 'Completion rate %', color: 'var(--chart-1)' },
@@ -113,6 +114,7 @@ export function EligibilityPage() {
       <PageHeader
         title="Eligibility & Completion"
         description="Completion measured strictly against per-program eligibility lists."
+        badge={<ScopeBadge>Curated programmes</ScopeBadge>}
       />
 
       <InfoBanner>Completion rate is computed against the eligibility list per program. Slice by program only.</InfoBanner>

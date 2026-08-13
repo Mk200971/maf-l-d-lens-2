@@ -8,6 +8,7 @@ import {
   BookOpen,
   GraduationCap,
   LayoutDashboard,
+  Layers,
   MessageSquare,
   ShieldCheck,
   Target,
@@ -19,17 +20,33 @@ import {
 import { cn } from '@/lib/utils'
 import { useSidebar } from '@/lib/sidebar-context'
 
-const nav = [
-  { href: '/', label: 'Overview', icon: LayoutDashboard },
-  { href: '/skillup', label: 'SkillUP', icon: GraduationCap },
-  { href: '/mandatory', label: 'Mandatory', icon: ShieldCheck },
-  { href: '/programs', label: 'Programs', icon: BookOpen },
-  { href: '/learners', label: 'Learners & Reach', icon: Users },
-  { href: '/feedback', label: 'Feedback', icon: MessageSquare },
-  { href: '/eligibility', label: 'Eligibility', icon: Target },
-  { href: '/extras', label: 'Quality Signals', icon: Award },
-  { href: '/metrics-ai', label: 'Metrics AI', icon: Sparkles },
+const navSections = [
+  {
+    label: 'Programmes',
+    items: [
+      { href: '/', label: 'Programme Overview', icon: LayoutDashboard },
+      { href: '/programs', label: 'Programs', icon: BookOpen },
+      { href: '/learners', label: 'Learners & Reach', icon: Users },
+      { href: '/feedback', label: 'Feedback', icon: MessageSquare },
+      { href: '/eligibility', label: 'Eligibility', icon: Target },
+      { href: '/extras', label: 'Quality Signals', icon: Award },
+    ],
+  },
+  {
+    label: 'Enterprise Learning',
+    items: [
+      { href: '/all-learnings', label: 'All Learning Activity', icon: Layers },
+      { href: '/mandatory', label: 'Mandatory Learnings', icon: ShieldCheck },
+      { href: '/skillup', label: 'SkillUp', icon: GraduationCap },
+    ],
+  },
+  {
+    label: 'Tools',
+    items: [{ href: '/metrics-ai', label: 'Metrics AI', icon: Sparkles }],
+  },
 ]
+
+const nav = navSections.flatMap((section) => section.items)
 
 export function DashboardSidebar() {
   const pathname = usePathname()
@@ -70,28 +87,43 @@ export function DashboardSidebar() {
           </button>
         )}
       </div>
-      <nav className="flex flex-1 flex-col gap-1 p-3" aria-label="Main navigation">
-        {nav.map((item) => {
-          const active = pathname === item.href
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={active ? 'page' : undefined}
-              className={cn(
-                'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
-                isCollapsed && 'justify-center px-2',
-                active
-                  ? 'bg-sidebar-primary font-medium text-sidebar-primary-foreground'
-                  : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
-              )}
-              title={isCollapsed ? item.label : undefined}
-            >
-              <item.icon className="size-4 flex-shrink-0" aria-hidden="true" />
-              {!isCollapsed && item.label}
-            </Link>
-          )
-        })}
+      <nav className="flex flex-1 flex-col gap-4 p-3" aria-label="Main navigation">
+        {navSections.map((section, sectionIndex) => (
+          <div
+            key={section.label}
+            className={cn(
+              'flex flex-col gap-1',
+              isCollapsed && sectionIndex > 0 && 'border-t border-sidebar-border pt-3',
+            )}
+          >
+            {!isCollapsed && (
+              <span className="px-3 pb-1 text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                {section.label}
+              </span>
+            )}
+            {section.items.map((item) => {
+              const active = pathname === item.href
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? 'page' : undefined}
+                  className={cn(
+                    'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
+                    isCollapsed && 'justify-center px-2',
+                    active
+                      ? 'bg-sidebar-primary font-medium text-sidebar-primary-foreground'
+                      : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+                  )}
+                  title={isCollapsed ? item.label : undefined}
+                >
+                  <item.icon className="size-4 flex-shrink-0" aria-hidden="true" />
+                  {!isCollapsed && item.label}
+                </Link>
+              )
+            })}
+          </div>
+        ))}
       </nav>
       {!isCollapsed && (
         <>
@@ -128,26 +160,36 @@ export function MobileNav() {
   const pathname = usePathname()
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-30 flex justify-around border-t border-border bg-sidebar py-2 md:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 flex justify-around overflow-x-auto border-t border-border bg-sidebar py-2 md:hidden"
       aria-label="Main navigation"
     >
-      {nav.map((item) => {
-        const active = pathname === item.href
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-current={active ? 'page' : undefined}
-            className={cn(
-              'flex flex-col items-center gap-0.5 rounded-md px-2 py-1 text-[10px]',
-              active ? 'text-sidebar-primary' : 'text-sidebar-foreground/70',
-            )}
-          >
-            <item.icon className="size-5" aria-hidden="true" />
-            <span className="sr-only sm:not-sr-only">{item.label}</span>
-          </Link>
-        )
-      })}
+      {navSections.map((section, sectionIndex) => (
+        <div
+          key={section.label}
+          className={cn(
+            'flex items-center justify-around',
+            sectionIndex > 0 && 'ml-1 border-l border-sidebar-border pl-1',
+          )}
+        >
+          {section.items.map((item) => {
+            const active = pathname === item.href
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? 'page' : undefined}
+                className={cn(
+                  'flex flex-col items-center gap-0.5 rounded-md px-2 py-1 text-[10px]',
+                  active ? 'text-sidebar-primary' : 'text-sidebar-foreground/70',
+                )}
+              >
+                <item.icon className="size-5" aria-hidden="true" />
+                <span className="sr-only sm:not-sr-only">{item.label}</span>
+              </Link>
+            )
+          })}
+        </div>
+      ))}
     </nav>
   )
 }

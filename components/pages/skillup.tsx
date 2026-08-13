@@ -28,6 +28,7 @@ import {
   type ChartConfig,
 } from '@/components/ui/chart'
 import { ChartCard, KpiTile, PageHeader } from '@/components/dashboard/shared'
+import { ScopeBadge } from '@/components/dashboard/scope-badge'
 import { cn } from '@/lib/utils'
 import {
   kpis as rawKpis,
@@ -375,6 +376,7 @@ export function SkillupPage() {
       <PageHeader
         title="SkillUP E-Learning Journeys"
         description="Assignment progress across GROW, MOBILISE, MULTIPLY and STEER journeys for both business units."
+        badge={<ScopeBadge>SkillUp journeys</ScopeBadge>}
       />
 
       {/* ── Filter bar ─────────────────────────────────────────────────────── */}

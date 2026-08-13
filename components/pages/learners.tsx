@@ -20,6 +20,7 @@ import {
   type ChartConfig,
 } from '@/components/ui/chart'
 import { ChartCard, KpiTile, PageHeader } from '@/components/dashboard/shared'
+import { ScopeBadge } from '@/components/dashboard/scope-badge'
 import { filterHours, filterReach, formatNumber, groupSum, sumBy } from '@/lib/aggregate'
 import { useFilters } from '@/lib/filters-context'
 
@@ -119,6 +120,7 @@ export function LearnersPage() {
       <PageHeader
         title="Learners & Reach"
         description="Who are we reaching? Distinct learner counts from the PII-free learnerReach grain — filterable by every field."
+        badge={<ScopeBadge>Curated programmes</ScopeBadge>}
       />
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:gap-4 xl:gap-5" aria-label="Reach KPIs">

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { MetricHelp } from '@/components/dashboard/metric-help'
 import { PageHeader } from '@/components/dashboard/shared'
+import { ScopeBadge } from '@/components/dashboard/scope-badge'
 import { ProgramDrawer } from '@/components/pages/program-drawer'
 import { avgBy, filterHours, formatNumber, normalizedAvgSat, sumBy } from '@/lib/aggregate'
 import { completion, feedback, programs } from '@/lib/dashboard-data'
@@ -31,6 +32,7 @@ export function ProgramsPage() {
       <PageHeader
         title="Programs"
         description="All programs with delivery, feedback, eligibility, and extras signals. Click a card for the full drill-down."
+        badge={<ScopeBadge>Curated programmes</ScopeBadge>}
       />
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-5 xl:grid-cols-3 xl:gap-6">

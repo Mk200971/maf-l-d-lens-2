@@ -27,6 +27,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { ChartCard, InfoBanner, KpiTile, PageHeader } from '@/components/dashboard/shared'
+import { ScopeBadge } from '@/components/dashboard/scope-badge'
 import { cn } from '@/lib/utils'
 import {
   businessEntityToBU,
@@ -289,6 +290,7 @@ export function MandatoryPage() {
       <PageHeader
         title="Mandatory Learning Compliance"
         description="Completions vs pending for mandatory courses across AMBU and DBU."
+        badge={<ScopeBadge>Compliance</ScopeBadge>}
       />
 
       {meta.isSampleData && (

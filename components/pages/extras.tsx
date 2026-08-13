@@ -13,6 +13,7 @@ import { Progress } from '@/components/ui/progress'
 import { useFilters } from '@/lib/filters-context'
 import { filterExtras, programName } from '@/lib/aggregate'
 import { ChartCard, InfoBanner, KpiTile, PageHeader } from '@/components/dashboard/shared'
+import { ScopeBadge } from '@/components/dashboard/scope-badge'
 import { VoiceOfLearnerSection } from '@/components/quality-signals/voice-of-learner-section'
 
 const likertConfig = {
@@ -70,6 +71,7 @@ export function ExtrasPage() {
       <PageHeader
         title="Quality Signals"
         description="Extra survey metrics beyond core satisfaction — skill uplift, logistics, and knowledge transfer."
+        badge={<ScopeBadge>Curated programmes</ScopeBadge>}
       />
 
       <InfoBanner>

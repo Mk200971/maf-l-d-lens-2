@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/chart'
 import { Card, CardContent } from '@/components/ui/card'
 import { ChartCard, InfoBanner, KpiTile, PageHeader } from '@/components/dashboard/shared'
+import { ScopeBadge } from '@/components/dashboard/scope-badge'
 import {
   avgBy,
   avgSatRatePct,
@@ -146,8 +147,9 @@ export function OverviewPage() {
   return (
     <>
       <PageHeader
-        title="Executive Overview"
-        description="Learning hours, completions, reach, and satisfaction across all MAF programs."
+        title="Programme Overview"
+        description="Facilitated programmes L&D designs and delivers — with feedback, NPS and eligibility tracking."
+        badge={<ScopeBadge>Curated programmes</ScopeBadge>}
       />
 
       {feedbackFiltersActive && <InfoBanner>{meta.grainNote}</InfoBanner>}
@@ -159,7 +161,7 @@ export function OverviewPage() {
       >
         {/* Row 1 — Delivery */}
         <KpiTile
-          label="Learning Hours"
+          label="Programme Hours"
           docId="learning-hours"
           value={formatNumber(adjustedTotalHours)}
           sub={
