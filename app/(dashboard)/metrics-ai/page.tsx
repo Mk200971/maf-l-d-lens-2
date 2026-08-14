@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Send, Loader2, BarChart3 } from 'lucide-react';
 import MetricsChart from '@/components/MetricsChart';
+import { AIChatInput } from '@/components/ui/ai-chat-input';
 
 interface Message {
   id: string;
@@ -12,7 +13,6 @@ interface Message {
 }
 
 export default function MetricsAIPage() {
-  const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -38,7 +38,6 @@ export default function MetricsAIPage() {
 
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
-    setInputValue('');
     setIsLoading(true);
 
     try {
@@ -53,21 +52,34 @@ export default function MetricsAIPage() {
         }),
       });
 
-      if (!response.ok) {
-        console.error('[v0] API error:', response.status, response.statusText);
+      if (!response.ok || !response.body) {
+        console.error('[chat] API error:', response.status, response.statusText);
         throw new Error(`API error: ${response.status}`);
       }
 
-      const text = await response.text();
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: text || 'No response received',
-      };
+      const assistantId = (Date.now() + 1).toString();
+      setMessages((prev) => [...prev, { id: assistantId, role: 'assistant', content: '' }]);
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulated = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        accumulated += decoder.decode(value, { stream: true });
+        setMessages((prev) =>
+          prev.map((m) => (m.id === assistantId ? { ...m, content: accumulated } : m))
+        );
+      }
+
+      if (!accumulated) {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === assistantId ? { ...m, content: 'No response received' } : m))
+        );
+      }
     } catch (error) {
-      console.error('[v0] Error sending message:', error);
+      console.error('[chat] Error sending message:', error);
       const errorMessage: Message = {
         id: (Date.now() + 2).toString(),
         role: 'assistant',
@@ -155,31 +167,15 @@ export default function MetricsAIPage() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Area */}
-        <div className="border-t border-border p-4 bg-card">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              sendMessage(inputValue);
+        {/* Input Area - New AIChatInput Component */}
+        <div className="border-t border-border p-6 bg-card">
+          <AIChatInput 
+            onSendMessage={(message, options) => {
+              console.log('Think:', options?.think, 'Deep Search:', options?.deepSearch);
+              sendMessage(message);
             }}
-            className="flex gap-2"
-          >
-            <input
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Ask about metrics, calculations, or findings..."
-              className="flex-1 px-4 py-2 rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-              disabled={isLoading}
-            />
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="gap-2"
-            >
-              <Send className="w-4 h-4" />
-              Send
-            </Button>
-          </form>
+            disabled={isLoading}
+          />
         </div>
       </div>
 
