@@ -1,6 +1,61 @@
-import { streamText } from 'ai';
+import { streamText, tool, stepCountIs } from 'ai';
+import { z } from 'zod';
 import { metricDocs, metricDocById } from '@/lib/metric-docs';
 import { kpis } from '@/lib/dashboard-data';
+import {
+  filterHours,
+  filterCompletion,
+  filterFeedback,
+  sumBy,
+  avgSatRatePct,
+  normalizedAvgSat,
+  avgNps,
+  ALL_COUNTRIES,
+  ALL_ROLES,
+} from '@/lib/aggregate';
+import { programs } from '@/lib/dashboard-data';
+import type { FilterState } from '@/lib/types';
+
+const queryMetrics = tool({
+  description:
+    'Compute learning metrics (hours, completions, satisfaction, NPS, feedback volume) filtered by year, business unit, country, role, or program. Use this whenever the question asks about a specific slice of the data rather than the org-wide totals.',
+  inputSchema: z.object({
+    years: z.array(z.number()).optional().describe('e.g. [2026]'),
+    bus: z.array(z.enum(['AMBU', 'DBU'])).optional(),
+    countries: z.array(z.string()).optional().describe(`One of: ${ALL_COUNTRIES.join(', ')}`),
+    roles: z.array(z.string()).optional().describe(`One of: ${ALL_ROLES.join(', ')}`),
+    programs: z
+      .array(z.string())
+      .optional()
+      .describe(`Program codes, one of: ${programs.map((p) => p.code).join(', ')}`),
+  }),
+  execute: async ({ years, bus, countries, roles, programs: programCodes }) => {
+    const f: FilterState = {
+      years: years ?? [],
+      bus: bus ?? [],
+      countries: countries ?? [],
+      roles: roles ?? [],
+      programs: programCodes ?? [],
+      sessionIds: [],
+      monthRange: null,
+    };
+
+    const hours = filterHours(f);
+    const completions = filterCompletion(f);
+    const fb = filterFeedback(f);
+
+    return {
+      matchingLearningHoursRows: hours.length,
+      totalLearningHours: Math.round(sumBy(hours, (r) => r.totalHours)),
+      totalCompletions: sumBy(hours, (r) => r.completions),
+      feedbackResponses: sumBy(fb, (r) => r.responses),
+      satisfactionRatePct: Number(avgSatRatePct(fb).toFixed(1)),
+      avgSatisfaction: Number(normalizedAvgSat(fb).toFixed(2)),
+      avgNps: avgNps(fb) != null ? Number((avgNps(fb) as number).toFixed(1)) : null,
+      eligibleCompletionRows: completions.length,
+    };
+  },
+});
 
 // System context with all metrics knowledge
 const METRICS_KNOWLEDGE = `
@@ -40,6 +95,7 @@ When answering:
 - If asked about trends or comparisons, use the available data
 - Clarify any ambiguities in how metrics are measured
 - Mention important caveats that affect interpretation
+- If the question asks about a specific year, business unit (AMBU/DBU), country, role, or program rather than the org-wide totals above, call the queryMetrics tool with those filters instead of guessing or reusing the org-wide numbers. Only use queryMetrics's numbers in your answer once you've called it — never invent a filtered number yourself.
 `;
 
 // Generate natural responses based on context
@@ -92,6 +148,8 @@ export async function POST(request: Request) {
           content: m.content,
         })),
         temperature: 0.8,
+        tools: { queryMetrics },
+        stopWhen: stepCountIs(4),
         providerOptions: {
           gateway: {
             models: ['meta/llama-3.1-8b'],
