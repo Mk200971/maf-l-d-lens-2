@@ -126,6 +126,21 @@ function generateNaturalResponse(query: string): string {
   return `I'd be happy to help you understand your learning metrics! Here's what your dashboard is currently showing:\n\n📊 Overall Performance\n• Total Learning Hours: ${kpis.totalLearningHours.toLocaleString()}\n• Unique Learners: ${kpis.uniqueLearners.toLocaleString()}\n• Total Completions: ${kpis.totalCompletions.toLocaleString()}\n• Active Programs: ${kpis.programsCount}\n\n✅ Quality Metrics\n• Completion Rate: ${kpis.completionRatePct.toFixed(1)}%\n• Average Satisfaction: ${kpis.avgSatisfaction.toFixed(2)}/5\n• Satisfaction Rate: ${kpis.satisfactionRatePct.toFixed(1)}%\n\nTry asking me about:\n• "What does completion rate mean?"\n• "Why do learning hours matter?"\n• "How should I interpret satisfaction scores?"\n• "Who are our learners?"\n• "How are we doing with completion and satisfaction?"\n\nI can provide context on any metric and help you understand what it means for your L&D strategy.`;
 }
 
+export const runtime = 'nodejs';
+export const maxDuration = 60;
+
+const TOOL_MODEL_CHAIN = [
+  'alibaba/qwen-3-235b',
+  'alibaba/qwen3.7-flash',
+];
+
+const TEXT_MODEL_CHAIN = [
+  'mistral/ministral-3b',
+  'meta/llama-3.1-8b',
+];
+
+const chatModel = process.env.CHAT_MODEL || 'alibaba/qwen3.7-flash';
+
 export async function POST(request: Request) {
   try {
     const { messages } = await request.json();
@@ -141,20 +156,16 @@ export async function POST(request: Request) {
 
     try {
       const result = streamText({
-        model: 'alibaba/qwen3.7-flash',
+        model: chatModel,
         system: METRICS_KNOWLEDGE,
         messages: messages.map((m: any) => ({
           role: m.role as 'user' | 'assistant',
           content: m.content,
         })),
-        temperature: 0.8,
+        temperature: 0.4,
         tools: { queryMetrics },
-        stopWhen: stepCountIs(4),
-        providerOptions: {
-          gateway: {
-            models: ['meta/llama-3.1-8b'],
-          },
-        },
+        stopWhen: stepCountIs(6),
+        maxRetries: 2,
         onError: ({ error }) => {
           console.error('[chat] streamText error:', error);
         },

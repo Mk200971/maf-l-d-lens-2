@@ -101,10 +101,10 @@ export default function MetricsAIPage() {
   ];
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-3 gap-0 bg-background">
+    <div className="grid h-full min-h-0 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] overflow-hidden">
       {/* Chat Interface */}
-      <div className="lg:col-span-2 flex flex-col bg-background border-r border-border min-h-screen lg:min-h-full">
-        <div className="border-b border-border p-4 bg-card">
+      <div className="flex h-full min-h-0 flex-col bg-background border-r border-border">
+        <div className="shrink-0 glass-panel border-x-0 border-t-0 rounded-none p-4">
           <div className="flex items-center gap-2 mb-2">
             <BarChart3 className="w-5 h-5 text-primary" />
             <h1 className="text-xl font-semibold">Metrics Assistant</h1>
@@ -115,9 +115,9 @@ export default function MetricsAIPage() {
         </div>
 
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-6">
           {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center flex-1 text-center py-12">
+            <div className="flex flex-col items-center justify-center h-full text-center">
               <BarChart3 className="w-12 h-12 text-muted-foreground mb-4" />
               <h2 className="text-lg font-semibold mb-2">Welcome to Metrics Assistant</h2>
               <p className="text-muted-foreground mb-6 max-w-sm">
@@ -125,11 +125,11 @@ export default function MetricsAIPage() {
               </p>
               <div className="space-y-2 w-full max-w-md">
                 <p className="text-xs font-semibold text-muted-foreground mb-3">Suggested questions:</p>
-                {suggestedQuestions.map((question, idx) => (
+                {suggestedQuestions.slice(0, 4).map((question, idx) => (
                   <button
                     key={idx}
                     onClick={() => sendMessage(question)}
-                    className="w-full text-left p-3 rounded-lg bg-card border border-border hover:bg-accent transition-colors text-sm"
+                    className="w-full text-left px-4 py-2 rounded-full glass-pill glass-hover text-xs transition-colors"
                   >
                     {question}
                   </button>
@@ -138,25 +138,25 @@ export default function MetricsAIPage() {
             </div>
           )}
           {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}
+            >
               <div
-                key={message.id}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`px-5 py-4 rounded-3xl ${
+                  message.role === 'user'
+                    ? 'max-w-[85%] rounded-br-lg bg-[var(--brand-burgundy)] text-white shadow-lg'
+                    : 'max-w-[46rem] rounded-bl-lg glass-panel'
+                }`}
               >
-                <div
-                  className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
-                    message.role === 'user'
-                      ? 'bg-primary text-primary-foreground rounded-br-none'
-                      : 'bg-card border border-border rounded-bl-none'
-                  }`}
-                >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                </div>
+                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
               </div>
-            ))}
+            </div>
+          ))}
 
           {isLoading && (
-            <div className="flex justify-start">
-              <div className="bg-card border border-border px-4 py-3 rounded-lg rounded-bl-none">
+            <div className="flex justify-start mb-4">
+              <div className="glass-panel px-5 py-4 rounded-3xl rounded-bl-lg">
                 <div className="flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span className="text-sm text-muted-foreground">Thinking...</span>
@@ -168,7 +168,7 @@ export default function MetricsAIPage() {
         </div>
 
         {/* Input Area - New AIChatInput Component */}
-        <div className="border-t border-border p-6 bg-card">
+        <div className="shrink-0 border-t border-border p-6 bg-card pb-[max(1rem,env(safe-area-inset-bottom))]">
           <AIChatInput 
             onSendMessage={(message, options) => {
               console.log('Think:', options?.think, 'Deep Search:', options?.deepSearch);
@@ -180,14 +180,14 @@ export default function MetricsAIPage() {
       </div>
 
       {/* Metrics Visualization */}
-      <div className="hidden lg:flex flex-col bg-card border-l border-border min-h-screen">
-        <div className="border-b border-border p-4">
+      <div className="hidden lg:flex h-full min-h-0 flex-col bg-card border-l border-border">
+        <div className="shrink-0 border-b border-border p-4">
           <h2 className="font-semibold mb-2">Key Metrics</h2>
           <p className="text-xs text-muted-foreground">
             Your current dashboard metrics
           </p>
         </div>
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 min-h-0 overflow-y-auto p-4">
           <MetricsChart />
         </div>
       </div>
