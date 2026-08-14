@@ -140,7 +140,7 @@ export function FilterBar() {
   // only the Metric guide.
   if (pathname.startsWith('/skillup') || pathname.startsWith('/mandatory')) {
     return (
-      <div className="glass-panel sticky top-0 z-20 rounded-none border-x-0 border-t-0">
+      <div className="glass-panel sticky top-[68px] z-20 rounded-none border-x-0 border-t-0">
         <div className="flex items-center px-4 py-2.5 md:px-6">
           <div className="ml-auto">
             <MetricGuide />
@@ -178,7 +178,7 @@ export function FilterBar() {
 
   return (
     <TooltipProvider delay={200}>
-      <div className="glass-panel sticky top-0 z-20 rounded-none border-x-0 border-t-0">
+      <div className="glass-panel sticky top-[68px] z-20 rounded-none border-x-0 border-t-0">
         <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 md:px-6">
           {/* Year chips */}
           <DisabledWrap disabled={!allowed.has('year')}>

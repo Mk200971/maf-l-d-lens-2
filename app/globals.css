@@ -188,6 +188,79 @@
   }
 }
 
+/* ---------- Pill Nav (top floating capsule) ---------- */
+@layer components {
+  .pill-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 2.25rem;
+    padding: 0 0.875rem;
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: rgba(241, 236, 224, 0.78);
+    overflow: hidden;
+    isolation: isolate;
+    transition: color 0.25s ease, transform 0.2s ease;
+    cursor: pointer;
+  }
+
+  .pill-link:hover {
+    color: #ffffff;
+  }
+
+  .pill-link.is-active {
+    color: #ffffff;
+  }
+
+  /* Hover circle that scales up from bottom (GSAP-style effect, pure CSS) */
+  .pill-fill {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 220%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--brand-gold);
+    opacity: 0;
+    transform: translateX(-50%) scale(0.2);
+    transform-origin: center bottom;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.25s ease;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .pill-link.is-default:hover .pill-fill {
+    opacity: 0.22;
+    transform: translateX(-50%) scale(1);
+  }
+
+  .pill-link.is-active .pill-fill {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+
+  /* Tiny dot under active pill */
+  .pill-dot {
+    position: absolute;
+    bottom: -0.25rem;
+    left: 50%;
+    width: 0.25rem;
+    height: 0.25rem;
+    border-radius: 9999px;
+    background: var(--brand-sand);
+    transform: translateX(-50%);
+    box-shadow: 0 0 0 2px rgba(49, 37, 28, 0.85);
+    z-index: 4;
+  }
+}
+
 /* ---------- Preloader / logo reveal (preserved) ---------- */
 @keyframes preloader-reveal {
   0% {

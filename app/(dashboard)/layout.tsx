@@ -1,10 +1,8 @@
 import { Suspense } from 'react'
 import { FilterBar } from '@/components/dashboard/filter-bar'
-import { DashboardSidebar, MobileNav } from '@/components/dashboard/sidebar'
+import { PillNav } from '@/components/dashboard/pill-nav'
 import { DashboardPageSkeleton } from '@/components/dashboard/page-loading'
 import { FiltersProvider } from '@/lib/filters-context'
-import { SidebarProvider } from '@/lib/sidebar-context'
-import { SidebarLayoutWrapper } from '@/components/dashboard/sidebar-layout'
 
 export default function DashboardLayout({
   children,
@@ -13,20 +11,15 @@ export default function DashboardLayout({
 }) {
   return (
     <FiltersProvider>
-      <SidebarProvider>
-        <div className="min-h-svh">
-          <DashboardSidebar />
-          <SidebarLayoutWrapper>
-            <FilterBar />
-            <main className="flex flex-1 flex-col gap-6 p-4 md:p-8 lg:p-10">
-              <Suspense fallback={<DashboardPageSkeleton />}>
-                {children}
-              </Suspense>
-            </main>
-          </SidebarLayoutWrapper>
-          <MobileNav />
-        </div>
-      </SidebarProvider>
+      <div className="min-h-svh">
+        <PillNav />
+        <FilterBar />
+        <main className="flex flex-1 flex-col gap-6 p-4 md:p-8 lg:p-10">
+          <Suspense fallback={<DashboardPageSkeleton />}>
+            {children}
+          </Suspense>
+        </main>
+      </div>
     </FiltersProvider>
   )
 }
