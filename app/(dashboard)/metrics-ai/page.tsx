@@ -53,21 +53,35 @@ export default function MetricsAIPage() {
         }),
       });
 
-      if (!response.ok) {
-        console.error('[v0] API error:', response.status, response.statusText);
+      if (!response.ok || !response.body) {
+        console.error('[chat] API error:', response.status, response.statusText);
         throw new Error(`API error: ${response.status}`);
       }
 
-      const text = await response.text();
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: text || 'No response received',
-      };
+      const assistantId = (Date.now() + 1).toString();
+      setMessages((prev) => [...prev, { id: assistantId, role: 'assistant', content: '' }]);
+      setIsLoading(false);
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulated = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        accumulated += decoder.decode(value, { stream: true });
+        setMessages((prev) =>
+          prev.map((m) => (m.id === assistantId ? { ...m, content: accumulated } : m))
+        );
+      }
+
+      if (!accumulated) {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === assistantId ? { ...m, content: 'No response received' } : m))
+        );
+      }
     } catch (error) {
-      console.error('[v0] Error sending message:', error);
+      console.error('[chat] Error sending message:', error);
       const errorMessage: Message = {
         id: (Date.now() + 2).toString(),
         role: 'assistant',
