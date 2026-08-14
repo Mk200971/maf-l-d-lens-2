@@ -17,6 +17,7 @@ node_modules
 # Build artifacts
 tsconfig.tsbuildinfo
 package-lock.json
+next-env.d.ts
 
 # Stray v0 exports
 --full-page
