@@ -54,7 +54,7 @@ export function DashboardSidebar() {
 
   return (
     <aside className={cn(
-      'glass-dark fixed inset-y-0 left-0 z-30 hidden flex-col text-sidebar-foreground transition-all duration-300 ease-in-out md:flex',
+      'fixed inset-y-0 left-0 z-30 hidden flex-col bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out md:flex',
       isCollapsed ? 'w-20' : 'w-56'
     )}>
       <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-3">
@@ -109,11 +109,11 @@ export function DashboardSidebar() {
                   href={item.href}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-200',
+                    'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
                     isCollapsed && 'justify-center px-2',
                     active
-                      ? 'glass-pill font-medium text-white'
-                      : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-white hover:-translate-y-px',
+                      ? 'bg-sidebar-primary font-medium text-sidebar-primary-foreground'
+                      : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
                   )}
                   title={isCollapsed ? item.label : undefined}
                 >
@@ -160,7 +160,7 @@ export function MobileNav() {
   const pathname = usePathname()
   return (
     <nav
-      className="glass-dark fixed inset-x-0 bottom-0 z-30 flex justify-around overflow-x-auto py-2 md:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 flex justify-around overflow-x-auto border-t border-border bg-sidebar py-2 md:hidden"
       aria-label="Main navigation"
     >
       {navSections.map((section, sectionIndex) => (
