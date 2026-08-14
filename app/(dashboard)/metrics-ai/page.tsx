@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Send, Loader2, BarChart3 } from 'lucide-react';
 import MetricsChart from '@/components/MetricsChart';
+import { AIChatInput } from '@/components/ui/ai-chat-input';
 
 interface Message {
   id: string;
@@ -12,7 +13,6 @@ interface Message {
 }
 
 export default function MetricsAIPage() {
-  const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -38,7 +38,6 @@ export default function MetricsAIPage() {
 
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
-    setInputValue('');
     setIsLoading(true);
 
     try {
@@ -60,7 +59,6 @@ export default function MetricsAIPage() {
 
       const assistantId = (Date.now() + 1).toString();
       setMessages((prev) => [...prev, { id: assistantId, role: 'assistant', content: '' }]);
-      setIsLoading(false);
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -169,31 +167,15 @@ export default function MetricsAIPage() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Area */}
-        <div className="border-t border-border p-4 bg-card">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              sendMessage(inputValue);
+        {/* Input Area - New AIChatInput Component */}
+        <div className="border-t border-border p-6 bg-card">
+          <AIChatInput 
+            onSendMessage={(message, options) => {
+              console.log('Think:', options?.think, 'Deep Search:', options?.deepSearch);
+              sendMessage(message);
             }}
-            className="flex gap-2"
-          >
-            <input
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Ask about metrics, calculations, or findings..."
-              className="flex-1 px-4 py-2 rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-              disabled={isLoading}
-            />
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="gap-2"
-            >
-              <Send className="w-4 h-4" />
-              Send
-            </Button>
-          </form>
+            disabled={isLoading}
+          />
         </div>
       </div>
 
