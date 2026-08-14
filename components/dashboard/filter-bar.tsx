@@ -105,12 +105,12 @@ function MultiSelect({
           )}
           <ChevronDown className="size-3.5 opacity-60" aria-hidden="true" />
         </PopoverTrigger>
-        <PopoverContent align="start" className="max-h-80 w-80 overflow-y-auto p-2">
+        <PopoverContent align="start" className="glass-panel max-h-80 w-80 overflow-y-auto p-2">
           <div className="flex flex-col gap-1">
             {options.map((opt) => (
               <label
                 key={opt}
-                className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-muted"
+                className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-white/50"
               >
                 <Checkbox
                   checked={selected.includes(opt)}
@@ -140,7 +140,7 @@ export function FilterBar() {
   // only the Metric guide.
   if (pathname.startsWith('/skillup') || pathname.startsWith('/mandatory')) {
     return (
-      <div className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
+      <div className="glass-panel sticky top-[68px] z-20 rounded-none border-x-0 border-t-0">
         <div className="flex items-center px-4 py-2.5 md:px-6">
           <div className="ml-auto">
             <MetricGuide />
@@ -178,7 +178,7 @@ export function FilterBar() {
 
   return (
     <TooltipProvider delay={200}>
-      <div className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
+      <div className="glass-panel sticky top-[68px] z-20 rounded-none border-x-0 border-t-0">
         <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 md:px-6">
           {/* Year chips */}
           <DisabledWrap disabled={!allowed.has('year')}>
@@ -190,10 +190,10 @@ export function FilterBar() {
                   onClick={() => toggle('years', y)}
                   aria-pressed={filters.years.includes(y)}
                   className={cn(
-                    'rounded-full border px-2.5 py-1 text-xs font-medium transition-colors',
+                    'glass-pill rounded-full px-2.5 py-1 text-xs font-medium transition-all duration-200 hover:-translate-y-px',
                     filters.years.includes(y)
-                      ? 'border-primary bg-primary text-primary-foreground'
-                      : 'border-border bg-card text-foreground hover:border-primary',
+                      ? 'bg-primary/90 text-primary-foreground border-primary/80 shadow-md shadow-primary/20'
+                      : 'text-foreground hover:bg-white/70',
                   )}
                 >
                   {y}
@@ -212,10 +212,10 @@ export function FilterBar() {
                   onClick={() => toggle('bus', bu)}
                   aria-pressed={filters.bus.includes(bu)}
                   className={cn(
-                    'rounded-full border px-2.5 py-1 text-xs font-medium transition-colors',
+                    'glass-pill rounded-full px-2.5 py-1 text-xs font-medium transition-all duration-200 hover:-translate-y-px',
                     filters.bus.includes(bu)
-                      ? 'border-accent bg-accent text-accent-foreground'
-                      : 'border-border bg-card text-foreground hover:border-accent',
+                      ? 'bg-accent/90 text-accent-foreground border-accent/80 shadow-md shadow-accent/20'
+                      : 'text-foreground hover:bg-white/70',
                   )}
                 >
                   {bu}

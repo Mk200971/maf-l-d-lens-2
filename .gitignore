@@ -13,3 +13,11 @@ __v0_jsx-dev-runtime.ts
 node_modules
 .next/
 .DS_Store
+
+# Build artifacts
+tsconfig.tsbuildinfo
+package-lock.json
+next-env.d.ts
+
+# Stray v0 exports
+--full-page
