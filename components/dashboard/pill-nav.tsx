@@ -156,12 +156,12 @@ export function PillNav() {
                       href={item.href}
                       role="menuitem"
                       className={cn(
-                        'pill-link w-full',
-                        active ? 'is-active' : 'is-default'
+                        'flex h-9 w-full items-center gap-2 rounded-full px-3 text-xs font-semibold uppercase tracking-wide transition-all duration-200',
+                        active
+                          ? 'bg-brand-gold text-white shadow-md shadow-brand-gold/30'
+                          : 'text-foreground hover:bg-white/60 hover:-translate-y-px'
                       )}
-                      style={{ justifyContent: 'flex-start' }}
                     >
-                      <span className="pill-fill" aria-hidden="true" />
                       <span className="relative z-10">{item.label}</span>
                     </Link>
                   )
