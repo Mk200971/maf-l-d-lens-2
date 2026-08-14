@@ -2,8 +2,8 @@ import Image from 'next/image'
 
 export default function Loading() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="flex flex-col items-center gap-4">
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="glass-card flex flex-col items-center gap-6 rounded-3xl p-10">
         <div className="flex items-center gap-3">
           <Image
             src="/logo.png"
@@ -14,12 +14,12 @@ export default function Loading() {
             priority
           />
           <div className="flex flex-col">
-            <h1 className="text-xl font-semibold text-accent">MAF Learning</h1>
+            <h1 className="text-xl font-semibold text-foreground">MAF Learning</h1>
             <p className="text-xs text-muted-foreground">L&D DASHBOARD</p>
           </div>
         </div>
         
-        <div className="mt-8 flex flex-col items-center gap-3">
+        <div className="mt-2 flex flex-col items-center gap-3">
           <div className="space-y-2 text-center">
             <p className="text-sm font-medium text-foreground">Loading dashboard</p>
             <p className="text-xs text-muted-foreground">Please wait while we prepare your data...</p>
