@@ -146,7 +146,7 @@ export function PillNav() {
             {moreOpen && (
               <div
                 role="menu"
-                className="glass-panel absolute right-0 top-full mt-2 w-56 rounded-2xl p-1.5"
+                className="glass-panel absolute right-0 top-full mt-2 w-56 rounded-2xl p-1.5 shadow-xl z-100"
               >
                 {moreNav.map((item) => {
                   const active = isActive(item.href)
@@ -159,7 +159,7 @@ export function PillNav() {
                         'flex h-9 w-full items-center gap-2 rounded-full px-3 text-xs font-semibold uppercase tracking-wide transition-all duration-200',
                         active
                           ? 'bg-brand-gold text-white shadow-md shadow-brand-gold/30'
-                          : 'text-foreground hover:bg-white/60 hover:-translate-y-px'
+                          : 'text-foreground hover:bg-white/80 hover:-translate-y-px'
                       )}
                     >
                       <span className="relative z-10">{item.label}</span>
