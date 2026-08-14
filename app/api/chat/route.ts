@@ -1,4 +1,4 @@
-import { generateText } from 'ai';
+import { streamText } from 'ai';
 import { metricDocs, metricDocById } from '@/lib/metric-docs';
 import { kpis } from '@/lib/dashboard-data';
 
@@ -83,27 +83,31 @@ export async function POST(request: Request) {
 
     const lastMessage = messages[messages.length - 1]?.content || '';
 
-    // First try AI Gateway if available
     try {
-      const response = await generateText({
-        model: 'meta/llama-3.3-70b',
+      const result = streamText({
+        model: 'alibaba/qwen3.7-flash',
         system: METRICS_KNOWLEDGE,
         messages: messages.map((m: any) => ({
           role: m.role as 'user' | 'assistant',
           content: m.content,
         })),
         temperature: 0.8,
-        max_tokens: 1500,
-      });
-
-      return new Response(response.text, {
-        headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
+        providerOptions: {
+          gateway: {
+            models: ['meta/llama-3.1-8b'],
+          },
+        },
+        onError: ({ error }) => {
+          console.error('[chat] streamText error:', error);
         },
       });
+
+      return result.toTextStreamResponse();
     } catch (aiError) {
-      // Fallback to natural responses when AI Gateway isn't available
-      console.log('[v0] AI Gateway unavailable, using intelligent fallback');
+      console.error(
+        '[chat] AI Gateway call failed, using keyword-matched fallback:',
+        aiError instanceof Error ? aiError.stack ?? aiError.message : String(aiError)
+      );
       const response = generateNaturalResponse(lastMessage);
       return new Response(response, {
         headers: {
@@ -112,7 +116,7 @@ export async function POST(request: Request) {
       });
     }
   } catch (error) {
-    console.error('[v0] Chat API Error:', error instanceof Error ? error.message : String(error));
+    console.error('[chat] Chat API Error:', error instanceof Error ? error.stack ?? error.message : String(error));
     return Response.json(
       { error: 'Failed to process your question.' },
       { status: 500 }
