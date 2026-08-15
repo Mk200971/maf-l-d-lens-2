@@ -12,9 +12,13 @@ import {
   avgNps,
   ALL_COUNTRIES,
   ALL_ROLES,
+  emptyFilters,
+  programName,
 } from '@/lib/aggregate';
 import { programs } from '@/lib/dashboard-data';
 import type { FilterState } from '@/lib/types';
+import { buildChart } from '@/lib/chart-builder';
+import type { ChartSpec } from '@/lib/chart-spec';
 
 // In-memory rate limiting map: IP -> { timestamps: number[] }
 const rateLimitMap = new Map<string, { timestamps: number[] }>();
@@ -54,30 +58,68 @@ const queryMetrics = tool({
       .describe(`Program codes, one of: ${programs.map((p) => p.code).join(', ')}`),
   }),
   execute: async ({ years, bus, countries, roles, programs: programCodes }) => {
-    const f: FilterState = {
-      years: years ?? [],
-      bus: bus ?? [],
-      countries: countries ?? [],
-      roles: roles ?? [],
-      programs: programCodes ?? [],
-      sessionIds: [],
-      monthRange: null,
-    };
+    try {
+      const f: FilterState = {
+        years: years ?? [],
+        bus: bus ?? [],
+        countries: countries ?? [],
+        roles: roles ?? [],
+        programs: programCodes ?? [],
+        sessionIds: [],
+        monthRange: null,
+      };
 
-    const hours = filterHours(f);
-    const completions = filterCompletion(f);
-    const fb = filterFeedback(f);
+      const hours = filterHours(f);
+      const completions = filterCompletion(f);
+      const fb = filterFeedback(f);
 
-    return {
-      matchingLearningHoursRows: hours.length,
-      totalLearningHours: Math.round(sumBy(hours, (r) => r.totalHours)),
-      totalCompletions: sumBy(hours, (r) => r.completions),
-      feedbackResponses: sumBy(fb, (r) => r.responses),
-      satisfactionRatePct: Number(avgSatRatePct(fb).toFixed(1)),
-      avgSatisfaction: Number(normalizedAvgSat(fb).toFixed(2)),
-      avgNps: avgNps(fb) != null ? Number((avgNps(fb) as number).toFixed(1)) : null,
-      eligibleCompletionRows: completions.length,
-    };
+      return {
+        matchingLearningHoursRows: hours.length,
+        totalLearningHours: Math.round(sumBy(hours, (r) => r.totalHours)),
+        totalCompletions: sumBy(hours, (r) => r.completions),
+        feedbackResponses: sumBy(fb, (r) => r.responses),
+        satisfactionRatePct: Number(avgSatRatePct(fb).toFixed(1)),
+        avgSatisfaction: Number(normalizedAvgSat(fb).toFixed(2)),
+        avgNps: avgNps(fb) != null ? Number((avgNps(fb) as number).toFixed(1)) : null,
+        eligibleCompletionRows: completions.length,
+      };
+    } catch (e) {
+      console.error('[queryMetrics] Tool execution failed:', e);
+      return { error: 'query failed', reason: String(e) };
+    }
+  },
+});
+
+const visualize = tool({
+  description:
+    'Call this whenever a chart, trend, breakdown, comparison, ranking, or "by country / by program / by month" view would answer the question better than prose. You may call it alongside queryMetrics. Never fabricate the data — this tool computes it.',
+  inputSchema: z.object({
+    kind: z.enum(['bar', 'line', 'pie', 'kpi']),
+    measure: z.enum(['hours', 'completions', 'satisfaction', 'satisfactionRate', 'nps', 'responses', 'completionRate', 'uniqueLearners']),
+    dimension: z.enum(['bu', 'country', 'role', 'program', 'month', 'year']),
+    filters: z.object({
+      years: z.array(z.number()).optional(),
+      bus: z.array(z.enum(['AMBU', 'DBU'])).optional(),
+      countries: z.array(z.string()).optional(),
+      roles: z.array(z.string()).optional(),
+      programs: z.array(z.string()).optional(),
+    }).optional(),
+    topN: z.number().optional(),
+  }),
+  execute: async ({ kind, measure, dimension, filters, topN }) => {
+    try {
+      const chartSpec = buildChart({
+        kind,
+        measure,
+        dimension,
+        filters: filters || {},
+        topN,
+      });
+      return chartSpec;
+    } catch (e) {
+      console.error('[visualize] Tool execution failed:', e);
+      return { error: 'chart generation failed', reason: String(e) };
+    }
   },
 });
 
@@ -119,7 +161,6 @@ When answering:
 - If asked about trends or comparisons, use the available data
 - Clarify any ambiguities in how metrics are measured
 - Mention important caveats that affect interpretation
-- If the question asks about a specific year, business unit (AMBU/DBU), country, role, or program rather than the org-wide totals above, call the queryMetrics tool with those filters instead of guessing or reusing the org-wide numbers. Only use queryMetrics's numbers in your answer once you've called it — never invent a filtered number yourself.
 `;
 
 // Generate natural responses based on context
@@ -164,6 +205,110 @@ const TEXT_MODEL_CHAIN = [
 ];
 
 const chatModel = process.env.CHAT_MODEL || 'alibaba/qwen3.7-flash';
+
+// Helper function to stream with fallback across model chains
+async function streamWithFallback(
+  messages: Array<{ role: string; content: string }>,
+  systemPrompt: string,
+  useToolModel: boolean,
+  overrideModel?: string
+): Promise<Response> {
+  const modelChain = useToolModel ? [...TOOL_MODEL_CHAIN, ...TEXT_MODEL_CHAIN] : TEXT_MODEL_CHAIN;
+  const modelsToTry = overrideModel ? [overrideModel, ...modelChain] : modelChain;
+
+  for (const model of modelsToTry) {
+    const isToolModel = TOOL_MODEL_CHAIN.includes(model);
+    const shouldUseTools = useToolModel && isToolModel;
+
+    try {
+      console.log(`[chat] Trying model: ${model}${shouldUseTools ? ' (with tools)' : ' (no tools)'}`);
+
+      let modelSystemPrompt = systemPrompt;
+      if (!shouldUseTools && !TOOL_MODEL_CHAIN.includes(model)) {
+        modelSystemPrompt += '\n\nYou have no data tools available. Answer only from the org-wide KPI figures given above, and say plainly that you cannot break the numbers down further.';
+      }
+
+      const result = streamText({
+        model: model,
+        system: modelSystemPrompt,
+        messages: messages.map((m) => ({
+          role: m.role as 'user' | 'assistant',
+          content: m.content,
+        })),
+        temperature: 0.4,
+        tools: shouldUseTools ? { queryMetrics, visualize } : undefined,
+        stopWhen: stepCountIs(6),
+        maxRetries: 2,
+        maxOutputTokens: 1500,
+        abortSignal: AbortSignal.timeout(45_000),
+        onError: ({ error }) => {
+          console.error(`[chat] streamText error for ${model}:`, error);
+        },
+      });
+
+      // Pull the first event to verify the stream works before committing
+      const iterator = result.fullStream[Symbol.asyncIterator]();
+      const firstEvent = await iterator.next();
+
+      if (firstEvent.done || !firstEvent.value) {
+        console.warn(`[chat] Model ${model} returned empty stream, trying next`);
+        continue;
+      }
+
+      // Create a ReadableStream that emits the first event then pipes the rest
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            // Emit first event
+            const event = firstEvent.value;
+            if (event.type === 'text-delta') {
+              controller.enqueue(JSON.stringify({ type: 'text', value: event.text }) + '\n');
+            } else if (event.type === 'tool-call') {
+              // Tool calls will be handled in subsequent iterations
+            }
+
+            // Pipe the rest of the stream
+            while (true) {
+              const { done, value } = await iterator.next();
+              if (done) break;
+
+              if (value.type === 'text-delta') {
+                controller.enqueue(JSON.stringify({ type: 'text', value: value.text }) + '\n');
+              } else if (value.type === 'tool-result' && value.toolName === 'visualize') {
+                const chartResult = (value as any).output as ChartSpec | { error: string; reason: string };
+                if ('error' in chartResult) {
+                  controller.enqueue(JSON.stringify({ type: 'error', value: chartResult.reason }) + '\n');
+                } else {
+                  controller.enqueue(JSON.stringify({ type: 'chart', value: chartResult }) + '\n');
+                }
+              }
+            }
+
+            controller.enqueue(JSON.stringify({ type: 'done' }) + '\n');
+            controller.close();
+          } catch (e) {
+            console.error(`[chat] Stream error for ${model}:`, e);
+            controller.error(e);
+          }
+        },
+      });
+
+      console.log(`[chat] Successfully streaming from model: ${model}`);
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'application/x-ndjson',
+          'X-Accel-Buffering': 'no',
+        },
+      });
+    } catch (e) {
+      console.error(`[chat] Model ${model} failed:`, e instanceof Error ? e.message : String(e));
+      // Continue to next model
+    }
+  }
+
+  // All models failed
+  throw new Error('All models in chain failed');
+}
 
 export async function POST(request: Request) {
   // Origin check for CSRF protection
@@ -216,29 +361,21 @@ export async function POST(request: Request) {
     const useToolModel = TOOL_MODEL_CHAIN.includes(chatModel);
     const activeModel = chatModel;
 
-    try {
-      const result = streamText({
-        model: activeModel,
-        system: METRICS_KNOWLEDGE,
-        messages: messages.map((m) => ({
-          role: m.role,
-          content: m.content,
-        })),
-        temperature: 0.4,
-        tools: useToolModel ? { queryMetrics } : undefined,
-        stopWhen: stepCountIs(2),
-        maxRetries: 2,
-        maxOutputTokens: 1500,
-        abortSignal: AbortSignal.timeout(45_000),
-        onError: ({ error }) => {
-          console.error('[chat] streamText error:', error);
-        },
-      });
+    // Build system prompt with scope context if provided
+    let systemPrompt = METRICS_KNOWLEDGE;
+    if (scope && Object.keys(scope).length > 0) {
+      systemPrompt += `\n\nThe user's current dashboard scope is: ${JSON.stringify(scope)}. Treat it as the default filter for every tool call unless the user explicitly names a different slice in their question.`;
+    }
 
-      return result.toTextStreamResponse();
+    // Strengthen system prompt with hard rule about tool usage
+    systemPrompt += `\n\nAfter calling any tool you MUST produce a final natural-language answer that states the numbers the tool returned. Never end your turn on a tool call. Never state a filtered number you did not obtain from a tool.`;
+
+    try {
+      const result = await streamWithFallback(messages, systemPrompt, useToolModel, activeModel);
+      return result;
     } catch (aiError) {
       console.error(
-        '[chat] AI Gateway call failed, using keyword-matched fallback:',
+        '[chat] All models failed, using keyword-matched fallback:',
         aiError instanceof Error ? aiError.stack ?? aiError.message : String(aiError)
       );
       const response = generateNaturalResponse(lastMessage);
