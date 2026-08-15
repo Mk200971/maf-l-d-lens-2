@@ -99,14 +99,18 @@ export const AIChatInput: React.FC<AIChatInputProps> = ({
     }
   }
 
+  // When chips are present, we always need extra vertical room and we should
+  // never collapse below what fits the chips row + input row.
+  const hasChips = activeScopeCount > 0 && !!onScopeChange
+
   const containerVariants = {
     collapsed: {
-      height: 68,
+      height: hasChips ? "auto" : 68,
       boxShadow: "0 2px 8px 0 rgba(0,0,0,0.08)",
       transition: { type: "spring" as const, stiffness: 120, damping: 18 },
     },
     expanded: {
-      height: 128,
+      height: hasChips ? "auto" : 128,
       boxShadow: "0 8px 32px 0 rgba(0,0,0,0.16)",
       transition: { type: "spring" as const, stiffness: 120, damping: 18 },
     },
@@ -152,9 +156,9 @@ export const AIChatInput: React.FC<AIChatInputProps> = ({
         ref={wrapperRef}
         className="w-full max-w-3xl"
         variants={containerVariants}
-        animate={isActive || inputValue ? "expanded" : "collapsed"}
+        animate={isActive || inputValue || hasChips ? "expanded" : "collapsed"}
         initial="collapsed"
-        style={{ overflow: "hidden", borderRadius: 32, background: "#fff" }}
+        style={{ overflow: "visible", borderRadius: 32, background: "#fff" }}
         onClick={handleActivate}
       >
         <div className="flex flex-col items-stretch w-full h-full">
