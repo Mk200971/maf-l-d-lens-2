@@ -37,7 +37,7 @@ export function buildChart(input: {
       const grouped = groupSum(hoursData, (r) => r.programCode, (r) => r.totalHours);
       data = Array.from(grouped.entries()).map(([code, value]) => ({ label: programName(code), value: Number(value.toFixed(1)) }));
     } else if (dimension === 'month') {
-      const grouped = groupSum(hoursData, (r) => r.month, (r) => r.totalHours);
+      const grouped = groupSum(hoursData, (r) => r.month || 'Unknown', (r) => r.totalHours);
       data = Array.from(grouped.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([label, value]) => ({ label, value: Number(value.toFixed(1)) }));
     } else if (dimension === 'year') {
       const grouped = groupSum(hoursData, (r) => String(r.year), (r) => r.totalHours);
