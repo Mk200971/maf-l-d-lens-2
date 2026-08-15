@@ -16,6 +16,30 @@ import {
 import { programs } from '@/lib/dashboard-data';
 import type { FilterState } from '@/lib/types';
 
+// In-memory rate limiting map: IP -> { timestamps: number[] }
+const rateLimitMap = new Map<string, { timestamps: number[] }>();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 60 seconds
+const RATE_LIMIT_MAX_REQUESTS = 10;
+
+// Cleanup old entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, data] of rateLimitMap.entries()) {
+    data.timestamps = data.timestamps.filter(t => now - t < RATE_LIMIT_WINDOW_MS);
+    if (data.timestamps.length === 0) {
+      rateLimitMap.delete(ip);
+    }
+  }
+}, 5 * 60 * 1000);
+
+const bodySchema = z.object({
+  messages: z.array(z.object({
+    role: z.enum(['user', 'assistant']),
+    content: z.string().min(1).max(2000),
+  })).min(1).max(20),
+  scope: z.record(z.unknown()).optional(),
+});
+
 const queryMetrics = tool({
   description:
     'Compute learning metrics (hours, completions, satisfaction, NPS, feedback volume) filtered by year, business unit, country, role, or program. Use this whenever the question asks about a specific slice of the data rather than the org-wide totals.',
@@ -126,35 +150,86 @@ function generateNaturalResponse(query: string): string {
   return `I'd be happy to help you understand your learning metrics! Here's what your dashboard is currently showing:\n\n📊 Overall Performance\n• Total Learning Hours: ${kpis.totalLearningHours.toLocaleString()}\n• Unique Learners: ${kpis.uniqueLearners.toLocaleString()}\n• Total Completions: ${kpis.totalCompletions.toLocaleString()}\n• Active Programs: ${kpis.programsCount}\n\n✅ Quality Metrics\n• Completion Rate: ${kpis.completionRatePct.toFixed(1)}%\n• Average Satisfaction: ${kpis.avgSatisfaction.toFixed(2)}/5\n• Satisfaction Rate: ${kpis.satisfactionRatePct.toFixed(1)}%\n\nTry asking me about:\n• "What does completion rate mean?"\n• "Why do learning hours matter?"\n• "How should I interpret satisfaction scores?"\n• "Who are our learners?"\n• "How are we doing with completion and satisfaction?"\n\nI can provide context on any metric and help you understand what it means for your L&D strategy.`;
 }
 
-export async function POST(request: Request) {
-  try {
-    const { messages } = await request.json();
+export const runtime = 'nodejs';
+export const maxDuration = 60;
 
-    if (!messages || !Array.isArray(messages)) {
+const TOOL_MODEL_CHAIN = [
+  'alibaba/qwen-3-235b',
+  'alibaba/qwen3.7-flash',
+];
+
+const TEXT_MODEL_CHAIN = [
+  'mistral/ministral-3b',
+  'meta/llama-3.1-8b',
+];
+
+const chatModel = process.env.CHAT_MODEL || 'alibaba/qwen3.7-flash';
+
+export async function POST(request: Request) {
+  // Origin check for CSRF protection
+  const origin = request.headers.get('origin');
+  const host = request.headers.get('host') || 'localhost:3000';
+  const isDev = process.env.NODE_ENV !== 'production';
+  
+  if (origin && !isDev) {
+    const originUrl = new URL(origin);
+    if (originUrl.host !== host) {
+      return new Response('Forbidden', { status: 403 });
+    }
+  }
+
+  // Rate limiting by IP
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : 'unknown';
+  const now = Date.now();
+  
+  const rateLimitData = rateLimitMap.get(ip) || { timestamps: [] };
+  rateLimitData.timestamps = rateLimitData.timestamps.filter(t => now - t < RATE_LIMIT_WINDOW_MS);
+  
+  if (rateLimitData.timestamps.length >= RATE_LIMIT_MAX_REQUESTS) {
+    rateLimitMap.set(ip, rateLimitData);
+    return new Response('Too Many Requests', { 
+      status: 429,
+      headers: { 'Retry-After': '60' }
+    });
+  }
+  
+  rateLimitData.timestamps.push(now);
+  rateLimitMap.set(ip, rateLimitData);
+
+  try {
+    const rawBody = await request.json();
+    
+    const parseResult = bodySchema.safeParse(rawBody);
+    if (!parseResult.success) {
       return Response.json(
-        { error: 'Invalid messages format' },
+        { error: 'Invalid request' },
         { status: 400 }
       );
     }
+    
+    const { messages, scope } = parseResult.data;
 
     const lastMessage = messages[messages.length - 1]?.content || '';
+    
+    // Determine which model chain to use
+    const useToolModel = TOOL_MODEL_CHAIN.includes(chatModel);
+    const activeModel = chatModel;
 
     try {
       const result = streamText({
-        model: 'alibaba/qwen3.7-flash',
+        model: activeModel,
         system: METRICS_KNOWLEDGE,
-        messages: messages.map((m: any) => ({
-          role: m.role as 'user' | 'assistant',
+        messages: messages.map((m) => ({
+          role: m.role,
           content: m.content,
         })),
-        temperature: 0.8,
-        tools: { queryMetrics },
-        stopWhen: stepCountIs(4),
-        providerOptions: {
-          gateway: {
-            models: ['meta/llama-3.1-8b'],
-          },
-        },
+        temperature: 0.4,
+        tools: useToolModel ? { queryMetrics } : undefined,
+        stopWhen: stepCountIs(2),
+        maxRetries: 2,
+        maxOutputTokens: 1500,
+        abortSignal: AbortSignal.timeout(45_000),
         onError: ({ error }) => {
           console.error('[chat] streamText error:', error);
         },

@@ -68,7 +68,7 @@ export function OverviewPage() {
   const totalHours = sumBy(hours, (r) => r.totalHours)
 
   // SkillUp hours — BU-aware, excluded when a month/program drill-down is active, or user toggled off
-  const hasMonthOrProgramFilter = filters.months?.length > 0 || filters.programs?.length > 0
+  const hasMonthOrProgramFilter = filters.monthRange != null || filters.programs?.length > 0
   const skillupHoursBase = (() => {
     if (hasMonthOrProgramFilter) return 0
     if (filters.bus.length === 1 && filters.bus[0] === 'AMBU') return skillupKpis.learningHoursByBU.AMBU

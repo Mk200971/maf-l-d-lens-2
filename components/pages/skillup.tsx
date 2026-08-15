@@ -603,7 +603,7 @@ export function SkillupPage() {
                     dataKey="value"
                     position="inside"
                     className="fill-white text-xs font-semibold"
-                    formatter={(v: number) => (v > 20 ? v : '')}
+                    formatter={(v) => (typeof v === 'number' && v > 20 ? v : '')}
                   />
                 </Pie>
               </PieChart>

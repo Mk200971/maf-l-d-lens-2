@@ -62,6 +62,9 @@
   --brand-orange: #f89715;
   --brand-amber: #d9b300;
   --brand-coral: #d64550;
+  /* Sticky chrome heights */
+  --nav-h: 68px;
+  --filterbar-h: 46px;
 
   /* Liquid Glass: semi-transparent surfaces over a vibrant gradient mesh */
   --background: #faf8f3;
