@@ -41,87 +41,163 @@ const bodySchema = z.object({
     role: z.enum(['user', 'assistant']),
     content: z.string().min(1).max(2000),
   })).min(1).max(20),
-  scope: z.record(z.unknown()).optional(),
+  scope: z.object({
+    years: z.array(z.number()).optional(),
+    bus: z.array(z.string()).optional(),
+    countries: z.array(z.string()).optional(),
+    roles: z.array(z.string()).optional(),
+    programs: z.array(z.string()).optional(),
+  }).optional(),
+  // When true, the model MUST call the visualize tool to produce at least
+  // one chart before giving its final answer.
+  forceChart: z.boolean().optional(),
 });
 
-const queryMetrics = tool({
-  description:
-    'Compute learning metrics (hours, completions, satisfaction, NPS, feedback volume) filtered by year, business unit, country, role, or program. Use this whenever the question asks about a specific slice of the data rather than the org-wide totals.',
-  inputSchema: z.object({
-    years: z.array(z.number()).optional().describe('e.g. [2026]'),
-    bus: z.array(z.enum(['AMBU', 'DBU'])).optional(),
-    countries: z.array(z.string()).optional().describe(`One of: ${ALL_COUNTRIES.join(', ')}`),
-    roles: z.array(z.string()).optional().describe(`One of: ${ALL_ROLES.join(', ')}`),
-    programs: z
-      .array(z.string())
-      .optional()
-      .describe(`Program codes, one of: ${programs.map((p) => p.code).join(', ')}`),
-  }),
-  execute: async ({ years, bus, countries, roles, programs: programCodes }) => {
-    try {
-      const f: FilterState = {
-        years: years ?? [],
-        bus: bus ?? [],
-        countries: countries ?? [],
-        roles: roles ?? [],
-        programs: programCodes ?? [],
-        sessionIds: [],
-        monthRange: null,
-      };
+type ChatScope = z.infer<typeof bodySchema>['scope'];
 
-      const hours = filterHours(f);
-      const completions = filterCompletion(f);
-      const fb = filterFeedback(f);
-
-      return {
-        matchingLearningHoursRows: hours.length,
-        totalLearningHours: Math.round(sumBy(hours, (r) => r.totalHours)),
-        totalCompletions: sumBy(hours, (r) => r.completions),
-        feedbackResponses: sumBy(fb, (r) => r.responses),
-        satisfactionRatePct: Number(avgSatRatePct(fb).toFixed(1)),
-        avgSatisfaction: Number(normalizedAvgSat(fb).toFixed(2)),
-        avgNps: avgNps(fb) != null ? Number((avgNps(fb) as number).toFixed(1)) : null,
-        eligibleCompletionRows: completions.length,
-      };
-    } catch (e) {
-      console.error('[queryMetrics] Tool execution failed:', e);
-      return { error: 'query failed', reason: String(e) };
-    }
+/**
+ * Merge user-selected scope with explicit tool args. Explicit args always win
+ * — if the user typed "show me 2025 data" while scope has years=[2024,2026],
+ * the explicit 2025 wins. If explicit is empty/undefined, fall back to scope.
+ */
+function mergeScopeAndArgs(
+  scope: ChatScope,
+  args: {
+    years?: number[];
+    bus?: string[];
+    countries?: string[];
+    roles?: string[];
+    programs?: string[];
   },
-});
+): { years: number[]; bus: string[]; countries: string[]; roles: string[]; programs: string[] } {
+  const pick = <T,>(explicit: T[] | undefined, scoped: T[] | undefined): T[] =>
+    explicit && explicit.length > 0 ? explicit : (scoped ?? []);
+  return {
+    years: pick(args.years, scope?.years),
+    bus: pick(args.bus, scope?.bus),
+    countries: pick(args.countries, scope?.countries),
+    roles: pick(args.roles, scope?.roles),
+    programs: pick(args.programs, scope?.programs),
+  };
+}
 
-const visualize = tool({
-  description:
-    'Call this whenever a chart, trend, breakdown, comparison, ranking, or "by country / by program / by month" view would answer the question better than prose. You may call it alongside queryMetrics. Never fabricate the data — this tool computes it.',
-  inputSchema: z.object({
-    kind: z.enum(['bar', 'line', 'pie', 'kpi']),
-    measure: z.enum(['hours', 'completions', 'satisfaction', 'satisfactionRate', 'nps', 'responses', 'completionRate', 'uniqueLearners']),
-    dimension: z.enum(['bu', 'country', 'role', 'program', 'month', 'year']),
-    filters: z.object({
-      years: z.array(z.number()).optional(),
+/**
+ * Build the queryMetrics and visualize tools bound to a specific request's scope.
+ * Tools are defined inside this factory so each POST gets its own isolated
+ * closure — no race conditions between concurrent requests sharing a module-
+ * level mutable.
+ */
+function buildTools(scope: ChatScope) {
+  const queryMetrics = tool({
+    description:
+      'Compute learning metrics (hours, completions, satisfaction, NPS, feedback volume) filtered by year, business unit, country, role, or program. Use this whenever the question asks about a specific slice of the data rather than the org-wide totals.',
+    inputSchema: z.object({
+      years: z.array(z.number()).optional().describe('e.g. [2026]'),
       bus: z.array(z.enum(['AMBU', 'DBU'])).optional(),
-      countries: z.array(z.string()).optional(),
-      roles: z.array(z.string()).optional(),
-      programs: z.array(z.string()).optional(),
-    }).optional(),
-    topN: z.number().optional(),
-  }),
-  execute: async ({ kind, measure, dimension, filters, topN }) => {
-    try {
-      const chartSpec = buildChart({
-        kind,
-        measure,
-        dimension,
-        filters: filters || {},
-        topN,
+      countries: z.array(z.string()).optional().describe(`One of: ${ALL_COUNTRIES.join(', ')}`),
+      roles: z.array(z.string()).optional().describe(`One of: ${ALL_ROLES.join(', ')}`),
+      programs: z
+        .array(z.string())
+        .optional()
+        .describe(`Program codes, one of: ${programs.map((p) => p.code).join(', ')}`),
+    }),
+    execute: async ({ years, bus, countries, roles, programs: programCodes }) => {
+      const merged = mergeScopeAndArgs(scope, {
+        years,
+        bus,
+        countries,
+        roles,
+        programs: programCodes,
       });
-      return chartSpec;
-    } catch (e) {
-      console.error('[visualize] Tool execution failed:', e);
-      return { error: 'chart generation failed', reason: String(e) };
-    }
-  },
-});
+      try {
+        const f: FilterState = {
+          years: merged.years,
+          bus: merged.bus,
+          countries: merged.countries,
+          roles: merged.roles,
+          programs: merged.programs,
+          sessionIds: [],
+          monthRange: null,
+        };
+
+        const hours = filterHours(f);
+        const completions = filterCompletion(f);
+        const fb = filterFeedback(f);
+
+        return {
+          matchingLearningHoursRows: hours.length,
+          totalLearningHours: Math.round(sumBy(hours, (r) => r.totalHours)),
+          totalCompletions: sumBy(hours, (r) => r.completions),
+          feedbackResponses: sumBy(fb, (r) => r.responses),
+          satisfactionRatePct: Number(avgSatRatePct(fb).toFixed(1)),
+          avgSatisfaction: Number(normalizedAvgSat(fb).toFixed(2)),
+          avgNps: avgNps(fb) != null ? Number((avgNps(fb) as number).toFixed(1)) : null,
+          eligibleCompletionRows: completions.length,
+          appliedScope: {
+            years: merged.years,
+            bus: merged.bus,
+            countries: merged.countries,
+            roles: merged.roles,
+            programs: merged.programs,
+          },
+        };
+      } catch (e) {
+        console.error('[queryMetrics] Tool execution failed:', e);
+        return { error: 'query failed', reason: String(e) };
+      }
+    },
+  });
+
+  const visualize = tool({
+    description:
+      'Call this whenever a chart, trend, breakdown, comparison, ranking, or "by country / by program / by month" view would answer the question better than prose. You may call it alongside queryMetrics. Never fabricate the data — this tool computes it.',
+    inputSchema: z.object({
+      kind: z.enum(['bar', 'line', 'pie', 'kpi']),
+      measure: z.enum(['hours', 'completions', 'satisfaction', 'satisfactionRate', 'nps', 'responses', 'completionRate', 'uniqueLearners']),
+      dimension: z.enum(['bu', 'country', 'role', 'program', 'month', 'year']),
+      filters: z.object({
+        years: z.array(z.number()).optional(),
+        bus: z.array(z.enum(['AMBU', 'DBU'])).optional(),
+        countries: z.array(z.string()).optional(),
+        roles: z.array(z.string()).optional(),
+        programs: z.array(z.string()).optional(),
+      }).optional(),
+      topN: z.number().optional(),
+    }),
+    execute: async ({ kind, measure, dimension, filters, topN }) => {
+      const merged = mergeScopeAndArgs(scope, {
+        years: filters?.years,
+        bus: filters?.bus,
+        countries: filters?.countries,
+        roles: filters?.roles,
+        programs: filters?.programs,
+      });
+      try {
+        const chartSpec = buildChart({
+          kind,
+          measure,
+          dimension,
+          filters: {
+            years: merged.years,
+            bus: merged.bus,
+            countries: merged.countries,
+            roles: merged.roles,
+            programs: merged.programs,
+            sessionIds: [],
+            monthRange: null,
+          },
+          topN,
+        });
+        return chartSpec;
+      } catch (e) {
+        console.error('[visualize] Tool execution failed:', e);
+        return { error: 'chart generation failed', reason: String(e) };
+      }
+    },
+  });
+
+  return { queryMetrics, visualize };
+}
 
 // System context with all metrics knowledge
 const METRICS_KNOWLEDGE = `
@@ -211,7 +287,9 @@ async function streamWithFallback(
   messages: Array<{ role: string; content: string }>,
   systemPrompt: string,
   useToolModel: boolean,
-  overrideModel?: string
+  overrideModel: string | undefined,
+  tools: NonNullable<Parameters<typeof streamText>[0]['tools']>,
+  forceChart: boolean,
 ): Promise<Response> {
   const modelChain = useToolModel ? [...TOOL_MODEL_CHAIN, ...TEXT_MODEL_CHAIN] : TEXT_MODEL_CHAIN;
   const modelsToTry = overrideModel ? [overrideModel, ...modelChain] : modelChain;
@@ -236,8 +314,8 @@ async function streamWithFallback(
           content: m.content,
         })),
         temperature: 0.4,
-        tools: shouldUseTools ? { queryMetrics, visualize } : undefined,
-        stopWhen: stepCountIs(6),
+        tools: shouldUseTools ? tools : undefined,
+        stopWhen: stepCountIs(forceChart ? 8 : 6),
         maxRetries: 2,
         maxOutputTokens: 1500,
         abortSignal: AbortSignal.timeout(45_000),
@@ -256,13 +334,14 @@ async function streamWithFallback(
       }
 
       // Create a ReadableStream that emits the first event then pipes the rest
+      const encoder = new TextEncoder();
       const stream = new ReadableStream({
         async start(controller) {
           try {
             // Emit first event
             const event = firstEvent.value;
             if (event.type === 'text-delta') {
-              controller.enqueue(JSON.stringify({ type: 'text', value: event.text }) + '\n');
+              controller.enqueue(encoder.encode(JSON.stringify({ type: 'text', value: event.text }) + '\n'));
             } else if (event.type === 'tool-call') {
               // Tool calls will be handled in subsequent iterations
             }
@@ -273,18 +352,21 @@ async function streamWithFallback(
               if (done) break;
 
               if (value.type === 'text-delta') {
-                controller.enqueue(JSON.stringify({ type: 'text', value: value.text }) + '\n');
+                controller.enqueue(encoder.encode(JSON.stringify({ type: 'text', value: value.text }) + '\n'));
               } else if (value.type === 'tool-result' && value.toolName === 'visualize') {
                 const chartResult = (value as any).output as ChartSpec | { error: string; reason: string };
                 if ('error' in chartResult) {
-                  controller.enqueue(JSON.stringify({ type: 'error', value: chartResult.reason }) + '\n');
+                  controller.enqueue(encoder.encode(JSON.stringify({ type: 'error', value: chartResult.reason }) + '\n'));
                 } else {
-                  controller.enqueue(JSON.stringify({ type: 'chart', value: chartResult }) + '\n');
+                  controller.enqueue(encoder.encode(JSON.stringify({ type: 'chart', value: chartResult }) + '\n'));
                 }
+              } else if (value.type === 'error') {
+                controller.enqueue(encoder.encode(JSON.stringify({ type: 'error', value: value.error }) + '\n'));
+                break;
               }
             }
 
-            controller.enqueue(JSON.stringify({ type: 'done' }) + '\n');
+            controller.enqueue(encoder.encode(JSON.stringify({ type: 'done' }) + '\n'));
             controller.close();
           } catch (e) {
             console.error(`[chat] Stream error for ${model}:`, e);
@@ -353,25 +435,34 @@ export async function POST(request: Request) {
       );
     }
     
-    const { messages, scope } = parseResult.data;
+    const { messages, scope, forceChart } = parseResult.data;
 
     const lastMessage = messages[messages.length - 1]?.content || '';
-    
+
     // Determine which model chain to use
     const useToolModel = TOOL_MODEL_CHAIN.includes(chatModel);
     const activeModel = chatModel;
 
+    // Build per-request tools bound to this user's scope.
+    const tools = buildTools(scope);
+
     // Build system prompt with scope context if provided
     let systemPrompt = METRICS_KNOWLEDGE;
     if (scope && Object.keys(scope).length > 0) {
-      systemPrompt += `\n\nThe user's current dashboard scope is: ${JSON.stringify(scope)}. Treat it as the default filter for every tool call unless the user explicitly names a different slice in their question.`;
+      systemPrompt += `\n\nThe user's current scope is: ${JSON.stringify(scope)}. Apply it as the default filter for every tool call unless they explicitly name a different slice in their question, and mention the applied scope in your answer.`;
     }
 
     // Strengthen system prompt with hard rule about tool usage
     systemPrompt += `\n\nAfter calling any tool you MUST produce a final natural-language answer that states the numbers the tool returned. Never end your turn on a tool call. Never state a filtered number you did not obtain from a tool.`;
 
+    // "Chart it" mode: force the model to call visualize at least once.
+    // Pick a sensible measure + dimension if the user's question doesn't name one.
+    if (forceChart) {
+      systemPrompt += `\n\nThe user has enabled 'Chart it' mode. You MUST call the visualize tool at least once before giving your final answer, even if the question seems purely textual. If the user did not name a specific measure or dimension, default to measure='hours' and dimension='bu'. Never skip the visualize call in this mode.`;
+    }
+
     try {
-      const result = await streamWithFallback(messages, systemPrompt, useToolModel, activeModel);
+      const result = await streamWithFallback(messages, systemPrompt, useToolModel, activeModel, tools, forceChart === true);
       return result;
     } catch (aiError) {
       console.error(

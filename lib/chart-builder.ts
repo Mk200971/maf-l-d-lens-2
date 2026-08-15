@@ -3,6 +3,16 @@ import { type FilterState } from './types';
 import { emptyFilters, filterHours, filterFeedback, filterCompletion, filterReach, groupSum, avgSatRatePct, normalizedAvgSat, avgNps, programName } from './aggregate';
 import { MIN_CELL_SIZE } from './privacy';
 
+function scopeSummary(filters: FilterState): string | undefined {
+  const parts: string[] = [];
+  if (filters.years?.length) parts.push(filters.years.map(String).join('/'));
+  if (filters.bus?.length) parts.push(filters.bus.join('/'));
+  if (filters.countries?.length) parts.push(filters.countries.join('/'));
+  if (filters.roles?.length) parts.push(filters.roles.join('/'));
+  if (filters.programs?.length) parts.push(`${filters.programs.length} program${filters.programs.length > 1 ? 's' : ''}`);
+  return parts.length > 0 ? parts.join(' · ') : undefined;
+}
+
 export function buildChart(input: {
   kind: 'bar' | 'line' | 'pie' | 'kpi';
   measure: ChartSpec['measure'];
@@ -37,33 +47,35 @@ export function buildChart(input: {
       const grouped = groupSum(hoursData, (r) => r.programCode, (r) => r.totalHours);
       data = Array.from(grouped.entries()).map(([code, value]) => ({ label: programName(code), value: Number(value.toFixed(1)) }));
     } else if (dimension === 'month') {
-      const grouped = groupSum(hoursData, (r) => r.month, (r) => r.totalHours);
+      const grouped = groupSum(hoursData, (r) => r.month || 'Unknown', (r) => r.totalHours);
       data = Array.from(grouped.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([label, value]) => ({ label, value: Number(value.toFixed(1)) }));
     } else if (dimension === 'year') {
       const grouped = groupSum(hoursData, (r) => String(r.year), (r) => r.totalHours);
       data = Array.from(grouped.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([label, value]) => ({ label, value: Number(value.toFixed(1)) }));
     }
   } else if (measure === 'completions') {
-    const completionsData = filterCompletion(fullFilters);
-    if (dimension === 'bu') {
-      const grouped = groupSum(completionsData, (r) => r.businessUnit, (r) => r.completions);
-      data = Array.from(grouped.entries()).map(([label, value]) => ({ label: label || 'Unknown', value }));
-    } else if (dimension === 'country') {
-      const grouped = groupSum(completionsData, (r) => r.country, (r) => r.completions);
-      data = Array.from(grouped.entries()).map(([label, value]) => ({ label: label || 'Unknown', value }));
-    } else if (dimension === 'role') {
-      const grouped = groupSum(completionsData, (r) => r.roleFamily, (r) => r.completions);
-      data = Array.from(grouped.entries()).map(([label, value]) => ({ label: label || 'Unknown', value }));
-    } else if (dimension === 'program') {
-      const grouped = groupSum(completionsData, (r) => r.programCode, (r) => r.completions);
+    // CompletionRow only has programCode/eligible/completedEligible — no bu/country/role.
+    // For dimensions other than 'program', use learningHours (which has all dimensions
+    // plus a `completions` field) so we can group correctly.
+    if (dimension === 'program') {
+      const completionsData = filterCompletion(fullFilters);
+      const grouped = groupSum(completionsData, (r) => r.programCode, (r) => r.completedEligible);
       data = Array.from(grouped.entries()).map(([code, value]) => ({ label: programName(code), value }));
+    } else {
+      const hoursData = filterHours(fullFilters);
+      const keyFn = dimension === 'bu' ? (r: typeof hoursData[number]) => r.bu
+        : dimension === 'country' ? (r: typeof hoursData[number]) => r.country
+        : dimension === 'role' ? (r: typeof hoursData[number]) => r.role
+        : (r: typeof hoursData[number]) => r.programCode;
+      const grouped = groupSum(hoursData, keyFn, (r) => r.completions);
+      data = Array.from(grouped.entries()).map(([label, value]) => ({ label: label || 'Unknown', value }));
     }
   } else if (measure === 'satisfaction' || measure === 'satisfactionRate') {
     const feedbackData = filterFeedback(fullFilters);
     if (dimension === 'bu') {
-      const grouped = groupSum(feedbackData, (r) => r.businessUnit, (r) => r.responses);
+      const grouped = groupSum(feedbackData, (r) => r.bu, (r) => r.responses);
       data = Array.from(grouped.entries()).map(([bu, responses]) => {
-        const subset = feedbackData.filter(f => f.businessUnit === bu);
+        const subset = feedbackData.filter(f => f.bu === bu);
         const rate = measure === 'satisfactionRate' ? avgSatRatePct(subset) : normalizedAvgSat(subset);
         return { label: bu || 'Unknown', value: Number(rate.toFixed(1)) };
       });
@@ -85,9 +97,9 @@ export function buildChart(input: {
   } else if (measure === 'nps') {
     const feedbackData = filterFeedback(fullFilters);
     if (dimension === 'bu') {
-      const grouped = groupSum(feedbackData, (r) => r.businessUnit, (r) => r.responses);
+      const grouped = groupSum(feedbackData, (r) => r.bu, (r) => r.responses);
       data = Array.from(grouped.entries()).map(([bu, responses]) => {
-        const subset = feedbackData.filter(f => f.businessUnit === bu);
+        const subset = feedbackData.filter(f => f.bu === bu);
         const npsVal = avgNps(subset);
         return { label: bu || 'Unknown', value: npsVal != null ? Number(npsVal.toFixed(1)) : 0 };
       });
@@ -102,7 +114,7 @@ export function buildChart(input: {
   } else if (measure === 'responses') {
     const feedbackData = filterFeedback(fullFilters);
     if (dimension === 'bu') {
-      const grouped = groupSum(feedbackData, (r) => r.businessUnit, (r) => r.responses);
+      const grouped = groupSum(feedbackData, (r) => r.bu, (r) => r.responses);
       data = Array.from(grouped.entries()).map(([label, value]) => ({ label: label || 'Unknown', value }));
     } else if (dimension === 'country') {
       const grouped = groupSum(feedbackData, (r) => r.country, (r) => r.responses);
@@ -111,7 +123,7 @@ export function buildChart(input: {
   } else if (measure === 'uniqueLearners') {
     const reachData = filterReach(fullFilters);
     if (dimension === 'bu') {
-      const grouped = groupSum(reachData, (r) => r.businessUnit, (r) => r.uniqueLearners);
+      const grouped = groupSum(reachData, (r) => r.bu, (r) => r.uniqueLearners);
       data = Array.from(grouped.entries()).map(([label, value]) => ({ label: label || 'Unknown', value }));
     } else if (dimension === 'country') {
       const grouped = groupSum(reachData, (r) => r.country, (r) => r.uniqueLearners);
@@ -162,11 +174,11 @@ export function buildChart(input: {
     id: `${measure}-${dimension}-${Date.now()}`,
     kind,
     title,
-    subtitle: fullFilters.years?.length ? `Year(s): ${fullFilters.years.join(', ')}` : undefined,
+    subtitle: scopeSummary(fullFilters),
     dimension,
     measure,
     data,
     note,
-    filtersApplied: fullFilters,
+    filtersApplied: fullFilters as unknown as Record<string, unknown>,
   };
 }

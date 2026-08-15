@@ -76,3 +76,13 @@ htmlcov/
 *.tar.xz
 *.tar.zst
 ```
+# Next.js build output
+.next/
+out/
+
+# TypeScript build info
+*.tsbuildinfo
+next-env.d.ts
+
+# OS files
+.DS_Store

@@ -2,8 +2,11 @@
 
 import * as React from "react"
 import { useState, useEffect, useRef } from "react"
-import { Lightbulb, Mic, Globe, Paperclip, Send } from "lucide-react"
+import { Lightbulb, Mic, Globe, Send } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
+import { ScopeFilter, ScopeChips } from "@/components/chat/scope-filter"
+import type { ChatScope } from "@/lib/chat-scope"
+import { scopeCount } from "@/lib/chat-scope"
 
 const PLACEHOLDERS = [
   "Ask about learning metrics",
@@ -15,21 +18,29 @@ const PLACEHOLDERS = [
 ]
 
 interface AIChatInputProps {
-  onSendMessage?: (message: string, options?: { think?: boolean; deepSearch?: boolean }) => void
+  onSendMessage?: (message: string, options?: { think?: boolean; forceChart?: boolean }) => void
   disabled?: boolean
+  /** Active scope — persists across messages for the session. */
+  scope?: ChatScope
+  /** Called when the user changes the scope via the popover. */
+  onScopeChange?: (scope: ChatScope) => void
 }
 
-export const AIChatInput: React.FC<AIChatInputProps> = ({ 
+export const AIChatInput: React.FC<AIChatInputProps> = ({
   onSendMessage,
-  disabled = false 
+  disabled = false,
+  scope = { years: [], bus: [], countries: [], roles: [], programs: [] },
+  onScopeChange,
 }) => {
   const [placeholderIndex, setPlaceholderIndex] = useState(0)
   const [showPlaceholder, setShowPlaceholder] = useState(true)
   const [isActive, setIsActive] = useState(false)
   const [thinkActive, setThinkActive] = useState(false)
-  const [deepSearchActive, setDeepSearchActive] = useState(false)
+  const [chartItActive, setChartItActive] = useState(false)
   const [inputValue, setInputValue] = useState("")
   const wrapperRef = useRef<HTMLDivElement>(null)
+
+  const activeScopeCount = scopeCount(scope)
 
   // Cycle placeholder text when input is inactive
   useEffect(() => {
@@ -71,14 +82,14 @@ export const AIChatInput: React.FC<AIChatInputProps> = ({
     if (onSendMessage) {
       onSendMessage(inputValue.trim(), {
         think: thinkActive,
-        deepSearch: deepSearchActive,
+        forceChart: chartItActive,
       })
     }
     
     setInputValue("")
     setIsActive(false)
     setThinkActive(false)
-    setDeepSearchActive(false)
+    setChartItActive(false)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -88,14 +99,18 @@ export const AIChatInput: React.FC<AIChatInputProps> = ({
     }
   }
 
+  // When chips are present, we always need extra vertical room and we should
+  // never collapse below what fits the chips row + input row.
+  const hasChips = activeScopeCount > 0 && !!onScopeChange
+
   const containerVariants = {
     collapsed: {
-      height: 68,
+      height: hasChips ? "auto" : 68,
       boxShadow: "0 2px 8px 0 rgba(0,0,0,0.08)",
       transition: { type: "spring" as const, stiffness: 120, damping: 18 },
     },
     expanded: {
-      height: 128,
+      height: hasChips ? "auto" : 128,
       boxShadow: "0 8px 32px 0 rgba(0,0,0,0.16)",
       transition: { type: "spring" as const, stiffness: 120, damping: 18 },
     },
@@ -141,24 +156,28 @@ export const AIChatInput: React.FC<AIChatInputProps> = ({
         ref={wrapperRef}
         className="w-full max-w-3xl"
         variants={containerVariants}
-        animate={isActive || inputValue ? "expanded" : "collapsed"}
+        animate={isActive || inputValue || hasChips ? "expanded" : "collapsed"}
         initial="collapsed"
-        style={{ overflow: "hidden", borderRadius: 32, background: "#fff" }}
+        style={{ overflow: "visible", borderRadius: 32, background: "#fff" }}
         onClick={handleActivate}
       >
         <div className="flex flex-col items-stretch w-full h-full">
+          {/* Active scope chips row — shows above the input when scope has selections */}
+          {activeScopeCount > 0 && onScopeChange && (
+            <div className="px-4 pt-3">
+              <ScopeChips scope={scope} onScopeChange={onScopeChange} />
+            </div>
+          )}
+
           {/* Input Row */}
           <div className="flex items-center gap-2 p-3 rounded-full bg-white max-w-3xl w-full">
-            <button
-              className="p-3 rounded-full hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Attach file"
-              type="button"
-              tabIndex={-1}
+            <ScopeFilter
+              scope={scope}
+              onScopeChange={(next) => onScopeChange?.(next)}
+              badgeCount={activeScopeCount}
               disabled={disabled}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Paperclip size={20} className="text-gray-600" />
-            </button>
+              triggerClassName="text-gray-600"
+            />
 
             {/* Text Input & Placeholder */}
             <div className="relative flex-1">
@@ -275,24 +294,24 @@ export const AIChatInput: React.FC<AIChatInputProps> = ({
                 Think
               </button>
 
-              {/* Deep Search Toggle */}
+              {/* Chart it Toggle — forces the model to call the visualize tool */}
               <motion.button
                 className={`flex items-center px-4 gap-1 py-2 rounded-full transition font-medium whitespace-nowrap overflow-hidden justify-start disabled:opacity-50 disabled:cursor-not-allowed ${
-                  deepSearchActive
-                    ? "bg-blue-600/10 outline outline-blue-600/60 text-blue-950"
+                  chartItActive
+                    ? "bg-[var(--brand-gold)]/15 outline outline-[var(--brand-gold)]/60 text-[var(--brand-burgundy)]"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
-                title="Search across all data sources"
+                title="Force the assistant to produce a chart"
                 type="button"
                 disabled={disabled}
                 onClick={(e) => {
                   e.stopPropagation()
-                  setDeepSearchActive((a) => !a)
+                  setChartItActive((a) => !a)
                 }}
                 initial={false}
                 animate={{
-                  width: deepSearchActive ? 125 : 36,
-                  paddingLeft: deepSearchActive ? 8 : 9,
+                  width: chartItActive ? 100 : 36,
+                  paddingLeft: chartItActive ? 8 : 9,
                 }}
               >
                 <div className="flex-1">
@@ -302,10 +321,10 @@ export const AIChatInput: React.FC<AIChatInputProps> = ({
                   className="pb-[2px]"
                   initial={false}
                   animate={{
-                    opacity: deepSearchActive ? 1 : 0,
+                    opacity: chartItActive ? 1 : 0,
                   }}
                 >
-                  Deep Search
+                  Chart it
                 </motion.span>
               </motion.button>
             </div>
