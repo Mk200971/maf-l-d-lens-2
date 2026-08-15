@@ -256,13 +256,14 @@ async function streamWithFallback(
       }
 
       // Create a ReadableStream that emits the first event then pipes the rest
+      const encoder = new TextEncoder();
       const stream = new ReadableStream({
         async start(controller) {
           try {
             // Emit first event
             const event = firstEvent.value;
             if (event.type === 'text-delta') {
-              controller.enqueue(JSON.stringify({ type: 'text', value: event.text }) + '\n');
+              controller.enqueue(encoder.encode(JSON.stringify({ type: 'text', value: event.text }) + '\n'));
             } else if (event.type === 'tool-call') {
               // Tool calls will be handled in subsequent iterations
             }
@@ -273,18 +274,21 @@ async function streamWithFallback(
               if (done) break;
 
               if (value.type === 'text-delta') {
-                controller.enqueue(JSON.stringify({ type: 'text', value: value.text }) + '\n');
+                controller.enqueue(encoder.encode(JSON.stringify({ type: 'text', value: value.text }) + '\n'));
               } else if (value.type === 'tool-result' && value.toolName === 'visualize') {
                 const chartResult = (value as any).output as ChartSpec | { error: string; reason: string };
                 if ('error' in chartResult) {
-                  controller.enqueue(JSON.stringify({ type: 'error', value: chartResult.reason }) + '\n');
+                  controller.enqueue(encoder.encode(JSON.stringify({ type: 'error', value: chartResult.reason }) + '\n'));
                 } else {
-                  controller.enqueue(JSON.stringify({ type: 'chart', value: chartResult }) + '\n');
+                  controller.enqueue(encoder.encode(JSON.stringify({ type: 'chart', value: chartResult }) + '\n'));
                 }
+              } else if (value.type === 'error') {
+                controller.enqueue(encoder.encode(JSON.stringify({ type: 'error', value: value.error }) + '\n'));
+                break;
               }
             }
 
-            controller.enqueue(JSON.stringify({ type: 'done' }) + '\n');
+            controller.enqueue(encoder.encode(JSON.stringify({ type: 'done' }) + '\n'));
             controller.close();
           } catch (e) {
             console.error(`[chat] Stream error for ${model}:`, e);
