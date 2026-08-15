@@ -61,9 +61,9 @@ export function buildChart(input: {
   } else if (measure === 'satisfaction' || measure === 'satisfactionRate') {
     const feedbackData = filterFeedback(fullFilters);
     if (dimension === 'bu') {
-      const grouped = groupSum(feedbackData, (r) => r.businessUnit, (r) => r.responses);
+      const grouped = groupSum(feedbackData, (r) => r.bu, (r) => r.responses);
       data = Array.from(grouped.entries()).map(([bu, responses]) => {
-        const subset = feedbackData.filter(f => f.businessUnit === bu);
+        const subset = feedbackData.filter(f => f.bu === bu);
         const rate = measure === 'satisfactionRate' ? avgSatRatePct(subset) : normalizedAvgSat(subset);
         return { label: bu || 'Unknown', value: Number(rate.toFixed(1)) };
       });
@@ -85,9 +85,9 @@ export function buildChart(input: {
   } else if (measure === 'nps') {
     const feedbackData = filterFeedback(fullFilters);
     if (dimension === 'bu') {
-      const grouped = groupSum(feedbackData, (r) => r.businessUnit, (r) => r.responses);
+      const grouped = groupSum(feedbackData, (r) => r.bu, (r) => r.responses);
       data = Array.from(grouped.entries()).map(([bu, responses]) => {
-        const subset = feedbackData.filter(f => f.businessUnit === bu);
+        const subset = feedbackData.filter(f => f.bu === bu);
         const npsVal = avgNps(subset);
         return { label: bu || 'Unknown', value: npsVal != null ? Number(npsVal.toFixed(1)) : 0 };
       });
@@ -102,7 +102,7 @@ export function buildChart(input: {
   } else if (measure === 'responses') {
     const feedbackData = filterFeedback(fullFilters);
     if (dimension === 'bu') {
-      const grouped = groupSum(feedbackData, (r) => r.businessUnit, (r) => r.responses);
+      const grouped = groupSum(feedbackData, (r) => r.bu, (r) => r.responses);
       data = Array.from(grouped.entries()).map(([label, value]) => ({ label: label || 'Unknown', value }));
     } else if (dimension === 'country') {
       const grouped = groupSum(feedbackData, (r) => r.country, (r) => r.responses);
@@ -111,7 +111,7 @@ export function buildChart(input: {
   } else if (measure === 'uniqueLearners') {
     const reachData = filterReach(fullFilters);
     if (dimension === 'bu') {
-      const grouped = groupSum(reachData, (r) => r.businessUnit, (r) => r.uniqueLearners);
+      const grouped = groupSum(reachData, (r) => r.bu, (r) => r.uniqueLearners);
       data = Array.from(grouped.entries()).map(([label, value]) => ({ label: label || 'Unknown', value }));
     } else if (dimension === 'country') {
       const grouped = groupSum(reachData, (r) => r.country, (r) => r.uniqueLearners);
