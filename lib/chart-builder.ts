@@ -46,13 +46,13 @@ export function buildChart(input: {
   } else if (measure === 'completions') {
     const completionsData = filterCompletion(fullFilters);
     if (dimension === 'bu') {
-      const grouped = groupSum(completionsData, (r) => r.businessUnit, (r) => r.completions);
+      const grouped = groupSum(completionsData, (r) => r.bu, (r) => r.completions);
       data = Array.from(grouped.entries()).map(([label, value]) => ({ label: label || 'Unknown', value }));
     } else if (dimension === 'country') {
       const grouped = groupSum(completionsData, (r) => r.country, (r) => r.completions);
       data = Array.from(grouped.entries()).map(([label, value]) => ({ label: label || 'Unknown', value }));
     } else if (dimension === 'role') {
-      const grouped = groupSum(completionsData, (r) => r.roleFamily, (r) => r.completions);
+      const grouped = groupSum(completionsData, (r) => r.role, (r) => r.completions);
       data = Array.from(grouped.entries()).map(([label, value]) => ({ label: label || 'Unknown', value }));
     } else if (dimension === 'program') {
       const grouped = groupSum(completionsData, (r) => r.programCode, (r) => r.completions);
