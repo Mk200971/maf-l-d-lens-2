@@ -2,8 +2,11 @@
 
 import * as React from "react"
 import { useState, useEffect, useRef } from "react"
-import { Lightbulb, Mic, Globe, Paperclip, Send } from "lucide-react"
+import { Lightbulb, Mic, Globe, Send } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
+import { ScopeFilter, ScopeChips } from "@/components/chat/scope-filter"
+import type { ChatScope } from "@/lib/chat-scope"
+import { scopeCount } from "@/lib/chat-scope"
 
 const PLACEHOLDERS = [
   "Ask about learning metrics",
@@ -17,11 +20,17 @@ const PLACEHOLDERS = [
 interface AIChatInputProps {
   onSendMessage?: (message: string, options?: { think?: boolean; deepSearch?: boolean }) => void
   disabled?: boolean
+  /** Active scope — persists across messages for the session. */
+  scope?: ChatScope
+  /** Called when the user changes the scope via the popover. */
+  onScopeChange?: (scope: ChatScope) => void
 }
 
-export const AIChatInput: React.FC<AIChatInputProps> = ({ 
+export const AIChatInput: React.FC<AIChatInputProps> = ({
   onSendMessage,
-  disabled = false 
+  disabled = false,
+  scope = { years: [], bus: [], countries: [], roles: [], programs: [] },
+  onScopeChange,
 }) => {
   const [placeholderIndex, setPlaceholderIndex] = useState(0)
   const [showPlaceholder, setShowPlaceholder] = useState(true)
@@ -30,6 +39,8 @@ export const AIChatInput: React.FC<AIChatInputProps> = ({
   const [deepSearchActive, setDeepSearchActive] = useState(false)
   const [inputValue, setInputValue] = useState("")
   const wrapperRef = useRef<HTMLDivElement>(null)
+
+  const activeScopeCount = scopeCount(scope)
 
   // Cycle placeholder text when input is inactive
   useEffect(() => {
@@ -147,18 +158,22 @@ export const AIChatInput: React.FC<AIChatInputProps> = ({
         onClick={handleActivate}
       >
         <div className="flex flex-col items-stretch w-full h-full">
+          {/* Active scope chips row — shows above the input when scope has selections */}
+          {activeScopeCount > 0 && onScopeChange && (
+            <div className="px-4 pt-3">
+              <ScopeChips scope={scope} onScopeChange={onScopeChange} />
+            </div>
+          )}
+
           {/* Input Row */}
           <div className="flex items-center gap-2 p-3 rounded-full bg-white max-w-3xl w-full">
-            <button
-              className="p-3 rounded-full hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Attach file"
-              type="button"
-              tabIndex={-1}
+            <ScopeFilter
+              scope={scope}
+              onScopeChange={(next) => onScopeChange?.(next)}
+              badgeCount={activeScopeCount}
               disabled={disabled}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Paperclip size={20} className="text-gray-600" />
-            </button>
+              triggerClassName="text-gray-600"
+            />
 
             {/* Text Input & Placeholder */}
             <div className="relative flex-1">

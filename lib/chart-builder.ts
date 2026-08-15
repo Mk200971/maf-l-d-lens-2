@@ -3,6 +3,16 @@ import { type FilterState } from './types';
 import { emptyFilters, filterHours, filterFeedback, filterCompletion, filterReach, groupSum, avgSatRatePct, normalizedAvgSat, avgNps, programName } from './aggregate';
 import { MIN_CELL_SIZE } from './privacy';
 
+function scopeSummary(filters: FilterState): string | undefined {
+  const parts: string[] = [];
+  if (filters.years?.length) parts.push(filters.years.map(String).join('/'));
+  if (filters.bus?.length) parts.push(filters.bus.join('/'));
+  if (filters.countries?.length) parts.push(filters.countries.join('/'));
+  if (filters.roles?.length) parts.push(filters.roles.join('/'));
+  if (filters.programs?.length) parts.push(`${filters.programs.length} program${filters.programs.length > 1 ? 's' : ''}`);
+  return parts.length > 0 ? parts.join(' · ') : undefined;
+}
+
 export function buildChart(input: {
   kind: 'bar' | 'line' | 'pie' | 'kpi';
   measure: ChartSpec['measure'];
@@ -164,7 +174,7 @@ export function buildChart(input: {
     id: `${measure}-${dimension}-${Date.now()}`,
     kind,
     title,
-    subtitle: fullFilters.years?.length ? `Year(s): ${fullFilters.years.join(', ')}` : undefined,
+    subtitle: scopeSummary(fullFilters),
     dimension,
     measure,
     data,

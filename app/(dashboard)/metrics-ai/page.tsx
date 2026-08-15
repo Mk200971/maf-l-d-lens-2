@@ -6,6 +6,7 @@ import { AIChatInput } from '@/components/ui/ai-chat-input';
 import { MarkdownMessage } from '@/components/chat/markdown-message';
 import { DynamicChart } from '@/components/chat/dynamic-chart';
 import type { ChartSpec } from '@/lib/chart-spec';
+import type { ChatScope } from '@/lib/chat-scope';
 
 interface Message {
   id: string;
@@ -18,6 +19,14 @@ interface Message {
 export default function MetricsAIPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  // Persistent scope for the chat session — survives multiple messages.
+  const [scope, setScope] = useState<ChatScope>({
+    years: [],
+    bus: [],
+    countries: [],
+    roles: [],
+    programs: [],
+  });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -51,6 +60,10 @@ export default function MetricsAIPage() {
             role: m.role,
             content: m.content,
           })),
+          // Include the user's selected scope so the server can apply it
+          // as the default filter for every tool call (unless the user
+          // explicitly names a different slice in their question).
+          scope,
         }),
       });
 
@@ -241,6 +254,8 @@ export default function MetricsAIPage() {
               sendMessage(message);
             }}
             disabled={isLoading}
+            scope={scope}
+            onScopeChange={setScope}
           />
         </div>
       </div>
