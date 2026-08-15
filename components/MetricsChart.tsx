@@ -126,7 +126,7 @@ export default function MetricsChart() {
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip formatter={(value) => value.toLocaleString()} />
+            <Tooltip formatter={(value) => String(value).toLocaleString()} />
           </PieChart>
         </ResponsiveContainer>
         <div className="mt-3 space-y-1">

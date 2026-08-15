@@ -1,30 +1,56 @@
-# v0 sandbox internal files
-__v0_runtime_loader.js
-__v0_devtools.tsx
-__v0_jsx-dev-runtime.ts
-.snowflake/
-.v0-trash/
-.vercel/
-
 # Environment variables
 .env*
 !.env.example
-
-# Common ignores
-node_modules
-.next/
-.DS_Store
-
-# Build artifacts
-tsconfig.tsbuildinfo
-package-lock.json
-next-env.d.ts
-
-# Stray v0 exports
---full-page
 
 # Raw HR/LMS exports - contain employee PII, never commit
 data/
 *.xlsx
 *.xls
 *.csv
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.ENV
+.ENV.local
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Temporary files
+*.tmp
+*.temp
