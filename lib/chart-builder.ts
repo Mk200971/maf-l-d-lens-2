@@ -44,19 +44,21 @@ export function buildChart(input: {
       data = Array.from(grouped.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([label, value]) => ({ label, value: Number(value.toFixed(1)) }));
     }
   } else if (measure === 'completions') {
-    const completionsData = filterCompletion(fullFilters);
-    if (dimension === 'bu') {
-      const grouped = groupSum(completionsData, (r) => r.bu, (r) => r.completions);
-      data = Array.from(grouped.entries()).map(([label, value]) => ({ label: label || 'Unknown', value }));
-    } else if (dimension === 'country') {
-      const grouped = groupSum(completionsData, (r) => r.country, (r) => r.completions);
-      data = Array.from(grouped.entries()).map(([label, value]) => ({ label: label || 'Unknown', value }));
-    } else if (dimension === 'role') {
-      const grouped = groupSum(completionsData, (r) => r.role, (r) => r.completions);
-      data = Array.from(grouped.entries()).map(([label, value]) => ({ label: label || 'Unknown', value }));
-    } else if (dimension === 'program') {
-      const grouped = groupSum(completionsData, (r) => r.programCode, (r) => r.completions);
+    // CompletionRow only has programCode/eligible/completedEligible — no bu/country/role.
+    // For dimensions other than 'program', use learningHours (which has all dimensions
+    // plus a `completions` field) so we can group correctly.
+    if (dimension === 'program') {
+      const completionsData = filterCompletion(fullFilters);
+      const grouped = groupSum(completionsData, (r) => r.programCode, (r) => r.completedEligible);
       data = Array.from(grouped.entries()).map(([code, value]) => ({ label: programName(code), value }));
+    } else {
+      const hoursData = filterHours(fullFilters);
+      const keyFn = dimension === 'bu' ? (r: typeof hoursData[number]) => r.bu
+        : dimension === 'country' ? (r: typeof hoursData[number]) => r.country
+        : dimension === 'role' ? (r: typeof hoursData[number]) => r.role
+        : (r: typeof hoursData[number]) => r.programCode;
+      const grouped = groupSum(hoursData, keyFn, (r) => r.completions);
+      data = Array.from(grouped.entries()).map(([label, value]) => ({ label: label || 'Unknown', value }));
     }
   } else if (measure === 'satisfaction' || measure === 'satisfactionRate') {
     const feedbackData = filterFeedback(fullFilters);
@@ -167,6 +169,6 @@ export function buildChart(input: {
     measure,
     data,
     note,
-    filtersApplied: fullFilters,
+    filtersApplied: fullFilters as unknown as Record<string, unknown>,
   };
 }
