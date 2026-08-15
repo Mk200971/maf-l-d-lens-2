@@ -174,6 +174,24 @@
       0 2px 8px rgba(49, 37, 28, 0.06);
   }
 
+  /*
+   * Glass bar — sticky horizontal strip (filter bar). Distinct from
+   * .glass-panel which is near-opaque (0.95 alpha) and reads as a solid
+   * white slab. .glass-bar uses a low-alpha gradient + heavy blur so the
+   * page content scrolling under it shows through blurred, not blocked.
+   */
+  .glass-bar {
+    background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.42),
+      rgba(255, 255, 255, 0.28));
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border-bottom: 1px solid rgba(180, 151, 90, 0.18);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.5) inset,
+      0 8px 24px rgba(49, 37, 28, 0.05);
+  }
+
   /* Subtle hover lift — gives glass that "catching light" feel */
   .glass-hover {
     transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),

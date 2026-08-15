@@ -305,7 +305,18 @@ export function buildChart(input: {
   const suppressedCount = buckets.filter((b) => isSuppressed(b.n)).length;
   let note: string | undefined;
   if (suppressedCount > 0) {
-    note = `Cells with fewer than ${MIN_CELL_SIZE} respondents have been hidden for privacy.`;
+    // Noun depends on what `n` counts for this measure:
+    //   - feedback measures (satisfaction, satisfactionRate, nps, responses)
+    //     → n is the sum of `responses` (people who filled in feedback)
+    //   - learning measures (hours, completions, completionRate, uniqueLearners)
+    //     → n is the sum of completions / unique learners
+    const isFeedbackMeasure =
+      measure === 'satisfaction' ||
+      measure === 'satisfactionRate' ||
+      measure === 'nps' ||
+      measure === 'responses';
+    const noun = isFeedbackMeasure ? 'respondents' : 'learners';
+    note = `Cells with fewer than ${MIN_CELL_SIZE} ${noun} have been hidden for privacy.`;
     buckets = buckets.filter((b) => !isSuppressed(b.n));
   }
 
