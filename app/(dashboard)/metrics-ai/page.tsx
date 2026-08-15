@@ -14,6 +14,7 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   charts?: ChartSpec[];
+  _retryContent?: string;
 }
 
 export default function MetricsAIPage() {
