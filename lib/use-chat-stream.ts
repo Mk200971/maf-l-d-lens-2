@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ChartSpec } from '@/lib/chart-spec'
 import type { ChatScope } from '@/lib/chat-scope'
 
@@ -57,6 +57,20 @@ export function useChatStream({ scope, onResponseComplete }: UseChatStreamOption
       abortRef.current = null
     }
     setIsLoading(false)
+  }, [])
+
+  // B5: Abort any in-flight stream when the consuming component unmounts.
+  // Without this, navigating to /metrics-ai unmounts FloatingAssistant mid-stream
+  // — the fetch and reader loop keep running and keep calling setMessages on a
+  // dead component, raising React warnings ("setState on unmounted component")
+  // and leaking the connection.
+  useEffect(() => {
+    return () => {
+      if (abortRef.current) {
+        abortRef.current.abort()
+        abortRef.current = null
+      }
+    }
   }, [])
 
   const reset = useCallback(() => {
@@ -214,10 +228,14 @@ export function useChatStream({ scope, onResponseComplete }: UseChatStreamOption
         }
         setMessages((prev) => [...prev, errorMessage])
       } finally {
+        // B4: only clear loading IF we still own the abortRef. If a second
+        // sendMessage has started since this one began, it set up its own
+        // controller and set isLoading(true) — clearing loading here would
+        // wipe the spinner for the in-flight second request.
         if (abortRef.current === controller) {
           abortRef.current = null
+          setIsLoading(false)
         }
-        setIsLoading(false)
       }
     },
     [scope, onResponseComplete]

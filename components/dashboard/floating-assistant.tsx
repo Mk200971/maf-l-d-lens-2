@@ -12,12 +12,13 @@ import {
   Send,
   Loader2,
   SlidersHorizontal,
+  RotateCcw,
 } from 'lucide-react'
-import { Bar, BarChart, Line, LineChart, Pie, PieChart, ResponsiveContainer, Cell, Tooltip } from 'recharts'
 import { mainNav, moreNav } from '@/components/dashboard/pill-nav'
 import { useFilters } from '@/lib/filters-context'
 import { useChatStream } from '@/lib/use-chat-stream'
 import { MarkdownMessage } from '@/components/chat/markdown-message'
+import { DynamicChart } from '@/components/chat/dynamic-chart'
 import type { ChartSpec } from '@/lib/chart-spec'
 import type { ChatScope } from '@/lib/chat-scope'
 import { isScopeEmpty, scopeSummary } from '@/lib/chat-scope'
@@ -122,9 +123,33 @@ export function FloatingAssistant() {
   const [usePageFilters, setUsePageFilters] = useState(true)
   const effectiveScope: ChatScope | undefined = usePageFilters ? pageScope : undefined
 
-  // Position + mode
-  const [pos, setPos] = useState<Pos>(() => loadSavedPos() ?? defaultPos())
+  // C1: SSR-safe orb init.
+  // The previous implementation called loadSavedPos() (which reads localStorage)
+  // and defaultPos() (which reads window.innerWidth) inside the useState lazy
+  // initializer — so server HTML and client HTML always differed and React
+  // raised a hydration error on every page load.
+  // Fix: render the orb at a fixed SSR-safe position initially, then set the
+  // real position in a useEffect after mount. The orb is briefly at the
+  // bottom-right fallback position before snapping to the saved/custom spot —
+  // acceptable because nothing else depends on its position during SSR.
+  const SSR_INITIAL_POS: Pos = { x: 100, y: 100 }
+  const [pos, setPos] = useState<Pos>(SSR_INITIAL_POS)
+  const [mounted, setMounted] = useState(false)
+
+  // After mount: restore the saved (or default) position. This runs once.
+  useEffect(() => {
+    setPos(loadSavedPos() ?? defaultPos())
+    setMounted(true)
+  }, [])
+
   const [mode, setMode] = useState<Mode>('orb')
+
+  // C4: drive orb position via ref + direct transform during drag,
+  // committing to React state only on pointerup. setPos on every pointermove
+  // re-renders the whole tree (including every ResponsiveContainer in the
+  // open chat transcript) at pointer frequency.
+  // We reuse orbRef for the direct-transform writes — a single ref serves both
+  // focus management and drag-time style mutation.
 
   // Dragging state
   const dragState = useRef<{
@@ -135,6 +160,14 @@ export function FloatingAssistant() {
     moved: boolean
   } | null>(null)
   const [isDragging, setIsDragging] = useState(false)
+  // C2: a "just finished dragging" flag that survives past pointerup so the
+  // subsequent click event can detect a drag-just-ended and skip the toggle.
+  // PointerEvent order on a tap is: pointerdown → pointerup → click.
+  // On a drag: pointerdown → (pointermove × N) → pointerup → click.
+  // pointerup sets dragState.current = null, so by click-time we'd have no
+  // way to know whether the gesture was a drag. So we set this flag in
+  // pointerup, and clear it after the click fires.
+  const justDraggedRef = useRef(false)
 
   // Orb pulse when a response arrives while closed
   const [pulse, setPulse] = useState(false)
@@ -228,9 +261,18 @@ export function FloatingAssistant() {
       moved: false,
     }
     // Capture so we keep getting move events even if pointer leaves the orb
-    ;(e.target as Element).setPointerCapture?.(e.pointerId)
+    try {
+      ;(e.target as Element).setPointerCapture?.(e.pointerId)
+    } catch {
+      // setPointerCapture can throw if the pointer is no longer active —
+      // a real risk on touch at pointerup. We catch and continue; capture
+      // releases implicitly on pointerup anyway.
+    }
   }
 
+  // C4: write transforms directly to the DOM during the drag instead of
+  // calling setPos on every pointermove. This avoids re-rendering the chat
+  // transcript at pointer frequency.
   const onPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
     const ds = dragState.current
     if (!ds || ds.pointerId !== e.pointerId) return
@@ -245,21 +287,122 @@ export function FloatingAssistant() {
       setIsDragging(true)
       // Suspend idle float while dragging
     }
-    setPos(clampToViewport({ x: ds.startPos.x + dx, y: ds.startPos.y + dy }))
+    const next = clampToViewport({ x: ds.startPos.x + dx, y: ds.startPos.y + dy })
+    // Direct DOM write — no React re-render.
+    if (orbRef.current) {
+      orbRef.current.style.left = `${next.x}px`
+      orbRef.current.style.top = `${next.y}px`
+    }
+    // Stash the latest position so pointerup can commit it.
+    ds.startPos = next
   }
 
   const onPointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
     const ds = dragState.current
     if (!ds) return
     const wasDrag = ds.moved
+    const finalPos = ds.startPos
+    dragState.current = null
+    // Set justDraggedRef so the subsequent click handler can suppress the
+    // toggle. Cleared in onOrbClick.
+    if (wasDrag) {
+      justDraggedRef.current = true
+    }
+    // C3: do NOT toggle mode here — the click handler is responsible for the
+    // toggle. The previous implementation toggled here AND let click fire,
+    // which double-toggled on a tap. We let click be the single source of
+    // truth for the open/close decision so keyboard activation works too.
+    setIsDragging(false)
+    // C4: commit the final position to React state once.
+    if (wasDrag) {
+      setPos(finalPos)
+    }
+    try {
+      ;(e.target as Element).releasePointerCapture?.(e.pointerId)
+    } catch {
+      // releasePointerCapture can throw NotFoundError when the pointer id
+      // is no longer active (a real risk for touch at pointerup, certain
+      // after pointercancel). Optional chaining above guards a missing
+      // method, not a thrown exception — so we wrap in try/catch.
+    }
+  }
+
+  // C3: a cancelled gesture (e.g. touch interrupted by a scroll, or a
+  // browser gesture taking over) must NOT trigger a click. onPointerCancel
+  // resets drag state and commits any mid-drag position, then sets the
+  // justDraggedRef so the (sometimes dispatched) click event that follows
+  // a pointercancel is suppressed.
+  const onPointerCancel = (e: React.PointerEvent<HTMLButtonElement>) => {
+    const ds = dragState.current
+    if (!ds) return
+    // If we were mid-drag, commit the last-known position so the orb doesn't
+    // snap back to its pre-drag spot. Also set justDraggedRef so the click
+    // event that some browsers dispatch after a pointercancel is suppressed.
+    if (ds.moved) {
+      setPos(ds.startPos)
+      justDraggedRef.current = true
+    }
     dragState.current = null
     setIsDragging(false)
-    ;(e.target as Element).releasePointerCapture?.(e.pointerId)
-    // If it was a drag, don't also toggle the panel open.
-    if (wasDrag) return
-    // It was a tap — open the panel.
+    try {
+      ;(e.target as Element).releasePointerCapture?.(e.pointerId)
+    } catch {
+      /* see onPointerUp */
+    }
+  }
+
+  // C2: keyboard support. Enter / Space on a focused <button> fires a click
+  // event and NO pointer events — so without an onClick handler, keyboard
+  // and screen-reader users could focus the orb but never open it.
+  // For mouse/touch taps, the click event ALSO fires — so this handler is
+  // the single source of truth for the open/close toggle. onPointerUp only
+  // commits drag position, never toggles mode — so we don't double-toggle.
+  // We DO suppress the click after a drag (so dragging doesn't open the panel).
+  const onOrbClick = () => {
+    // Suppress click after a drag — otherwise dragging the orb would open it.
+    if (justDraggedRef.current) {
+      justDraggedRef.current = false
+      return
+    }
     setMode((m) => (m === 'orb' ? 'panel' : 'orb'))
   }
+
+  // C2: focus management — move focus into the dialog when it opens, and
+  // return focus to the orb when it closes. Trap focus inside the dialog
+  // while open.
+  useEffect(() => {
+    if (mode === 'orb') return
+    const container = mode === 'panel' ? panelRef.current : chatRef.current
+    if (!container) return
+    // Focus the first focusable child (or the container itself).
+    const focusables = container.querySelectorAll<HTMLElement>(
+      'button, [href], input, [tabindex]:not([tabindex="-1"])'
+    )
+    const first = focusables[0]
+    if (first) first.focus()
+    else container.focus()
+
+    // Focus trap: Tab on the last focusable wraps to the first; Shift+Tab on
+    // the first wraps to the last.
+    const onKeydown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const focusableEls = container.querySelectorAll<HTMLElement>(
+        'button, [href], input, [tabindex]:not([tabindex="-1"])'
+      )
+      if (focusableEls.length === 0) return
+      const firstEl = focusableEls[0]
+      const lastEl = focusableEls[focusableEls.length - 1]
+      if (e.shiftKey && document.activeElement === firstEl) {
+        e.preventDefault()
+        lastEl.focus()
+      } else if (!e.shiftKey && document.activeElement === lastEl) {
+        e.preventDefault()
+        firstEl.focus()
+      }
+    }
+    container.addEventListener('keydown', onKeydown)
+    return () => container.removeEventListener('keydown', onKeydown)
+  }, [mode])
 
   // ── Starter chips (page-aware) ────────────────────────────────────────────
   const pathname = usePathname()
@@ -274,7 +417,8 @@ export function FloatingAssistant() {
 
   return (
     <>
-      {/* ORB */}
+      {/* ORB — hidden until mounted to avoid hydration mismatch (C1) */}
+      {mounted && (
       <button
         ref={orbRef}
         type="button"
@@ -284,7 +428,8 @@ export function FloatingAssistant() {
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
+        onPointerCancel={onPointerCancel}
+        onClick={onOrbClick}
         className={cn(
           'fixed z-50 flex items-center justify-center rounded-full',
           'bg-gradient-to-br from-[var(--brand-gold)] to-[var(--brand-amber)]',
@@ -314,6 +459,7 @@ export function FloatingAssistant() {
           className="rounded-full object-cover pointer-events-none"
         />
       </button>
+      )}
 
       {/* PANEL */}
       {mode === 'panel' && (
@@ -498,7 +644,14 @@ export function FloatingAssistant() {
             ) : (
               <>
                 {messages.map((m) => (
-                  <MiniMessage key={m.id} role={m.role} content={m.content} charts={m.charts} />
+                  <MiniMessage
+                    key={m.id}
+                    role={m.role}
+                    content={m.content}
+                    charts={m.charts}
+                    retryContent={m._retryContent}
+                    onRetry={retryContent => sendMessage(retryContent)}
+                  />
                 ))}
                 {isLoading && (
                   <div className="mb-2 flex justify-start">
@@ -549,11 +702,20 @@ function MiniMessage({
   role,
   content,
   charts,
+  retryContent,
+  onRetry,
 }: {
   role: 'user' | 'assistant'
   content: string
   charts?: ChartSpec[]
+  retryContent?: string
+  onRetry?: (text: string) => void
 }) {
+  // Mirror the full-page retry affordance: when the assistant's content is the
+  // "I couldn't reach the analysis service" fallback, show a retry button.
+  // Previously this existed only on /metrics-ai — error recovery must not
+  // differ between two consumers of one hook.
+  const isRetry = role === 'assistant' && content.includes("I couldn't reach the analysis service")
   return (
     <div className={cn('mb-2 flex', role === 'user' ? 'justify-end' : 'justify-start')}>
       <div
@@ -564,7 +726,22 @@ function MiniMessage({
             : 'max-w-[92%] rounded-bl-sm bg-white/70 backdrop-blur-md',
         )}
       >
-        {role === 'assistant' ? (
+        {isRetry ? (
+          <div className="flex items-center gap-2">
+            <p className="text-xs">{content}</p>
+            {retryContent && onRetry && (
+              <button
+                type="button"
+                onClick={() => onRetry(retryContent)}
+                className="rounded-full p-1 hover:bg-white/40"
+                title="Retry"
+                aria-label="Retry"
+              >
+                <RotateCcw size={12} />
+              </button>
+            )}
+          </div>
+        ) : role === 'assistant' ? (
           <MarkdownMessage content={content} />
         ) : (
           <p className="whitespace-pre-wrap">{content}</p>
@@ -572,101 +749,13 @@ function MiniMessage({
         {charts && charts.length > 0 && (
           <div className="mt-2 space-y-2">
             {charts.map((c, i) => (
-              <CompactChart key={i} spec={c} />
+              <DynamicChart key={i} spec={c} compact />
             ))}
           </div>
         )}
       </div>
     </div>
   )
-}
-
-function CompactChart({ spec }: { spec: ChartSpec }) {
-  // Compact variant of DynamicChart — height 160 instead of 220.
-  // Inline implementation rather than prop-drilling into DynamicChart so
-  // we don't churn the full-page renderer's API.
-  const COLORS = ['var(--brand-gold)', 'var(--brand-burgundy)', 'var(--brand-amber)']
-  if (!spec.data || spec.data.length === 0) {
-    return (
-      <div className="rounded-xl bg-white/40 p-3 text-center text-[11px] text-muted-foreground">
-        No data for this slice
-      </div>
-    )
-  }
-  return (
-    <div className="rounded-xl bg-white/40 p-2 backdrop-blur-sm">
-      <p className="mb-0.5 text-[11px] font-semibold text-foreground">{spec.title}</p>
-      {spec.subtitle && (
-        <p className="mb-1 text-[10px] text-muted-foreground">{spec.subtitle}</p>
-      )}
-      <CompactChartRender spec={spec} colors={COLORS} />
-      {spec.note && (
-        <p className="mt-1 text-[10px] italic text-muted-foreground">{spec.note}</p>
-      )}
-    </div>
-  )
-}
-
-// Tiny inline recharts render — kept here so the mini chart doesn't drag
-// in the entire DynamicChart bundle path.
-function CompactChartRender({
-  spec,
-  colors,
-}: {
-  spec: ChartSpec
-  colors: string[]
-}) {
-  const H = 160
-  switch (spec.kind) {
-    case 'bar':
-      return (
-        <ResponsiveContainer width="100%" height={H}>
-          <BarChart data={spec.data}>
-            <Tooltip />
-            <Bar dataKey="value" name={spec.measure}>
-              {spec.data.map((_, i) => (
-                <Cell key={i} fill={colors[i % colors.length]} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      )
-    case 'line':
-      return (
-        <ResponsiveContainer width="100%" height={H}>
-          <LineChart data={spec.data}>
-            <Tooltip />
-            <Line type="monotone" dataKey="value" name={spec.measure} stroke={colors[0]} strokeWidth={2} />
-          </LineChart>
-        </ResponsiveContainer>
-      )
-    case 'pie':
-      return (
-        <ResponsiveContainer width="100%" height={H}>
-          <PieChart>
-            <Tooltip />
-            <Pie data={spec.data} dataKey="value" nameKey="label" cx="50%" cy="50%" outerRadius={60}>
-              {spec.data.map((_, i) => (
-                <Cell key={i} fill={colors[i % colors.length]} />
-              ))}
-            </Pie>
-          </PieChart>
-        </ResponsiveContainer>
-      )
-    case 'kpi':
-      return (
-        <div className="flex h-[160px] items-center justify-center">
-          <div className="text-center">
-            <p className="text-3xl font-bold" style={{ color: colors[0] }}>
-              {spec.data[0]?.value.toLocaleString()}
-            </p>
-            <p className="mt-1 text-[10px] text-muted-foreground">{spec.unit || spec.measure}</p>
-          </div>
-        </div>
-      )
-    default:
-      return null
-  }
 }
 
 function MiniComposer({

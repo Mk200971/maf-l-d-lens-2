@@ -292,7 +292,13 @@ async function streamWithFallback(
   forceChart: boolean,
 ): Promise<Response> {
   const modelChain = useToolModel ? [...TOOL_MODEL_CHAIN, ...TEXT_MODEL_CHAIN] : TEXT_MODEL_CHAIN;
-  const modelsToTry = overrideModel ? [overrideModel, ...modelChain] : modelChain;
+  // De-duplicate: if overrideModel is already in the chain, don't try it twice.
+  // The previous implementation always prepended overrideModel, so modelsToTry
+  // started with the same model twice (e.g. ['alibaba/qwen3.7-flash',
+  // 'alibaba/qwen3.7-flash', 'alibaba/qwen-3-235b', ...]).
+  const modelsToTry = overrideModel && !modelChain.includes(overrideModel)
+    ? [overrideModel, ...modelChain]
+    : modelChain;
 
   for (const model of modelsToTry) {
     const isToolModel = TOOL_MODEL_CHAIN.includes(model);
@@ -324,26 +330,59 @@ async function streamWithFallback(
         },
       });
 
-      // Pull the first event to verify the stream works before committing
+      // Probe: advance the iterator until we see a substantive event
+      // (text-delta, tool-call, tool-result, or error). The first element of
+      // result.fullStream in AI SDK v7 is a { type: 'start' } control event
+      // emitted BEFORE the provider is contacted — so the previous "first
+      // event check" always succeeded and a real provider failure surfaced
+      // as an in-stream error instead of falling through to the next model.
       const iterator = result.fullStream[Symbol.asyncIterator]();
-      const firstEvent = await iterator.next();
+      type SubstantiveEvent =
+        | { type: 'text-delta'; text: string }
+        | { type: 'tool-call' }
+        | { type: 'tool-result'; toolName: string; output: unknown }
+        | { type: 'error'; error: unknown };
+      let firstSubstantive: SubstantiveEvent | null = null;
+      while (true) {
+        const next = await iterator.next();
+        if (next.done) break;
+        const ev = next.value as { type: string } & Record<string, unknown>;
+        if (ev.type === 'text-delta' || ev.type === 'tool-call' || ev.type === 'tool-result' || ev.type === 'error') {
+          firstSubstantive = ev as unknown as SubstantiveEvent;
+          break;
+        }
+        // Skip 'start', 'step-start', 'step-finish', etc.
+      }
 
-      if (firstEvent.done || !firstEvent.value) {
-        console.warn(`[chat] Model ${model} returned empty stream, trying next`);
+      if (firstSubstantive === null) {
+        console.warn(`[chat] Model ${model} returned no substantive event, trying next`);
         continue;
       }
 
-      // Create a ReadableStream that emits the first event then pipes the rest
+      // If the first substantive event is an error, the provider failed —
+      // try the next model in the chain instead of committing to this one.
+      if (firstSubstantive.type === 'error') {
+        console.warn(`[chat] Model ${model} emitted an error event, trying next:`, firstSubstantive.error);
+        continue;
+      }
+
+      // Create a ReadableStream that emits the first substantive event then pipes the rest
       const encoder = new TextEncoder();
       const stream = new ReadableStream({
         async start(controller) {
           try {
-            // Emit first event
-            const event = firstEvent.value;
-            if (event.type === 'text-delta') {
-              controller.enqueue(encoder.encode(JSON.stringify({ type: 'text', value: event.text }) + '\n'));
-            } else if (event.type === 'tool-call') {
-              // Tool calls will be handled in subsequent iterations
+            // Emit the first substantive event (already pulled from the iterator).
+            // Tool-call events don't emit text — they're handled when the matching
+            // tool-result arrives.
+            if (firstSubstantive!.type === 'text-delta') {
+              controller.enqueue(encoder.encode(JSON.stringify({ type: 'text', value: (firstSubstantive as { type: 'text-delta'; text: string }).text }) + '\n'));
+            } else if (firstSubstantive!.type === 'tool-result' && firstSubstantive.toolName === 'visualize') {
+              const chartResult = (firstSubstantive as { output: ChartSpec | { error: string; reason: string } }).output;
+              if ('error' in chartResult) {
+                controller.enqueue(encoder.encode(JSON.stringify({ type: 'error', value: chartResult.reason }) + '\n'));
+              } else {
+                controller.enqueue(encoder.encode(JSON.stringify({ type: 'chart', value: chartResult }) + '\n'));
+              }
             }
 
             // Pipe the rest of the stream
@@ -354,14 +393,18 @@ async function streamWithFallback(
               if (value.type === 'text-delta') {
                 controller.enqueue(encoder.encode(JSON.stringify({ type: 'text', value: value.text }) + '\n'));
               } else if (value.type === 'tool-result' && value.toolName === 'visualize') {
-                const chartResult = (value as any).output as ChartSpec | { error: string; reason: string };
+                const chartResult = (value as { output: ChartSpec | { error: string; reason: string } }).output;
                 if ('error' in chartResult) {
                   controller.enqueue(encoder.encode(JSON.stringify({ type: 'error', value: chartResult.reason }) + '\n'));
                 } else {
                   controller.enqueue(encoder.encode(JSON.stringify({ type: 'chart', value: chartResult }) + '\n'));
                 }
               } else if (value.type === 'error') {
-                controller.enqueue(encoder.encode(JSON.stringify({ type: 'error', value: value.error }) + '\n'));
+                // B3: value.error is an Error instance, which JSON.stringify
+                // turns into {} — extract .message before serialising.
+                const errPayload = value.error;
+                const errMsg = errPayload instanceof Error ? errPayload.message : String(errPayload);
+                controller.enqueue(encoder.encode(JSON.stringify({ type: 'error', value: errMsg }) + '\n'));
                 break;
               }
             }
@@ -469,10 +512,30 @@ export async function POST(request: Request) {
         '[chat] All models failed, using keyword-matched fallback:',
         aiError instanceof Error ? aiError.stack ?? aiError.message : String(aiError)
       );
-      const response = generateNaturalResponse(lastMessage);
-      return new Response(response, {
+      // Emit the fallback as NDJSON so the client parser can decode it.
+      // The previous implementation returned plain text with Content-Type:
+      // text/plain, which the client parser silently discarded (every line
+      // failed JSON.parse) — so the user always saw "I couldn't reach the
+      // analysis service." ~120 lines of fallback content were dead code.
+      const fallbackText = generateNaturalResponse(lastMessage);
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        start(controller) {
+          // Split into reasonable chunks so the client streams progressively.
+          const sentences = fallbackText.match(/[^.!?]+[.!?]+|\S+$/g) ?? [fallbackText];
+          for (const sentence of sentences) {
+            controller.enqueue(
+              encoder.encode(JSON.stringify({ type: 'text', value: sentence }) + '\n')
+            );
+          }
+          controller.enqueue(encoder.encode(JSON.stringify({ type: 'done' }) + '\n'));
+          controller.close();
+        },
+      });
+      return new Response(stream, {
         headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
+          'Content-Type': 'application/x-ndjson',
+          'X-Accel-Buffering': 'no',
         },
       });
     }
