@@ -69,6 +69,11 @@ export default function MetricsAIPage() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
+      // Track what we actually received during streaming — don't read `messages` state
+      // (it's the snapshot captured when sendMessage started, so it never contains
+      // the assistant message we're streaming into).
+      let receivedText = '';
+      let receivedCharts = 0;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -83,14 +88,17 @@ export default function MetricsAIPage() {
           try {
             const event = JSON.parse(line);
             if (event.type === 'text') {
+              receivedText += event.value;
               setMessages((prev) =>
                 prev.map((m) => (m.id === assistantId ? { ...m, content: m.content + event.value } : m))
               );
             } else if (event.type === 'chart') {
+              receivedCharts += 1;
               setMessages((prev) =>
                 prev.map((m) => (m.id === assistantId ? { ...m, charts: [...(m.charts || []), event.value] } : m))
               );
             } else if (event.type === 'error') {
+              receivedText += `\n\n*Error: ${event.value}*`;
               setMessages((prev) =>
                 prev.map((m) => (m.id === assistantId ? { ...m, content: m.content + `\n\n*Error: ${event.value}*` } : m))
               );
@@ -103,9 +111,9 @@ export default function MetricsAIPage() {
         }
       }
 
-      // If no content and no charts, show error with retry
-      const finalMsg = messages.find(m => m.id === assistantId);
-      if (!finalMsg?.content && (!finalMsg?.charts || finalMsg.charts.length === 0)) {
+      // If nothing was streamed back, show a retry message.
+      // Use local counters, not `messages` state (which is stale here).
+      if (!receivedText && receivedCharts === 0) {
         setMessages((prev) =>
           prev.map((m) => (m.id === assistantId ? { 
             ...m, 
