@@ -1,9 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Send, Loader2, BarChart3, RotateCcw } from 'lucide-react';
-import MetricsChart from '@/components/MetricsChart';
+import { BarChart3, RotateCcw, Loader2 } from 'lucide-react';
 import { AIChatInput } from '@/components/ui/ai-chat-input';
 import { MarkdownMessage } from '@/components/chat/markdown-message';
 import { DynamicChart } from '@/components/chat/dynamic-chart';
@@ -22,7 +20,6 @@ export default function MetricsAIPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -145,9 +142,9 @@ export default function MetricsAIPage() {
   ];
 
   return (
-    <div className="grid h-full min-h-0 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] overflow-hidden">
+    <div className="flex h-full min-h-0 flex-col bg-background overflow-hidden">
       {/* Chat Interface */}
-      <div className="flex h-full min-h-0 flex-col bg-background border-r border-border">
+      <div className="flex h-full min-h-0 flex-col">
         <div className="shrink-0 glass-panel border-x-0 border-t-0 rounded-none p-4">
           <div className="flex items-center gap-2 mb-2">
             <BarChart3 className="w-5 h-5 text-primary" />
@@ -248,18 +245,6 @@ export default function MetricsAIPage() {
         </div>
       </div>
 
-      {/* Metrics Visualization */}
-      <div className="hidden lg:flex h-full min-h-0 flex-col bg-card border-l border-border">
-        <div className="shrink-0 border-b border-border p-4">
-          <h2 className="font-semibold mb-2">Key Metrics</h2>
-          <p className="text-xs text-muted-foreground">
-            Your current dashboard metrics
-          </p>
-        </div>
-        <div className="flex-1 min-h-0 overflow-y-auto p-4">
-          <MetricsChart />
-        </div>
-      </div>
     </div>
   );
 }
