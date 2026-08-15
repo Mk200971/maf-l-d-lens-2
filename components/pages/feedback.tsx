@@ -209,7 +209,7 @@ export function FeedbackPage() {
       </section>
 
       <ChartCard
-        title="Program Benchmark"
+        title="Programme Benchmark"
         docId="feedback-comparison"
         description="Average satisfaction per program with min–max whiskers."
       >

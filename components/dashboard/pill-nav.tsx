@@ -12,22 +12,25 @@ type NavItem = {
   label: string
 }
 
-// Main pills always visible on desktop
-const mainNav: NavItem[] = [
+// Main pills always visible on desktop.
+// EXPORTED so the floating assistant panel can reuse the real routes
+// instead of a duplicate list that would drift out of sync.
+export const mainNav: NavItem[] = [
   { href: '/', label: 'Overview' },
-  { href: '/programs', label: 'Programs' },
-  { href: '/learners', label: 'Learners' },
+  { href: '/programs', label: 'Programmes' },
+  { href: '/learners', label: 'Reach' },
   { href: '/feedback', label: 'Feedback' },
-  { href: '/eligibility', label: 'Eligibility' },
-  { href: '/extras', label: 'Quality' },
+  { href: '/eligibility', label: 'Completion' },
+  { href: '/extras', label: 'Quality Signals' },
 ]
 
-// Secondary pills collapsed into "More" dropdown
-const moreNav: NavItem[] = [
-  { href: '/all-learnings', label: 'All Learning' },
-  { href: '/mandatory', label: 'Mandatory' },
-  { href: '/skillup', label: 'SkillUp' },
-  { href: '/metrics-ai', label: 'Metrics AI' },
+// Secondary pills collapsed into "More" dropdown.
+// EXPORTED for the same reason as mainNav.
+export const moreNav: NavItem[] = [
+  { href: '/all-learnings', label: 'All Activity' },
+  { href: '/mandatory', label: 'Compliance' },
+  { href: '/skillup', label: 'SkillUP' },
+  { href: '/metrics-ai', label: 'Ask Lens' },
 ]
 
 const allNav = [...mainNav, ...moreNav]

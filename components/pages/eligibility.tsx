@@ -256,14 +256,14 @@ export function EligibilityPage() {
       </div>
 
       <ChartCard
-        title="Program detail"
+        title="Programme detail"
         docId="eligibility-breakdowns"
         description="Eligible, completed, and completion rate per program."
       >
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Program</TableHead>
+              <TableHead>Programme</TableHead>
               <TableHead className="text-right">Eligible</TableHead>
               <TableHead className="text-right">Completed</TableHead>
               <TableHead className="text-right">Rate</TableHead>
