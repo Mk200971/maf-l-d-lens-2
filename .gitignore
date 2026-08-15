@@ -7,7 +7,8 @@ __v0_jsx-dev-runtime.ts
 .vercel/
 
 # Environment variables
-.env*.local
+.env*
+!.env.example
 
 # Common ignores
 node_modules
@@ -21,3 +22,9 @@ next-env.d.ts
 
 # Stray v0 exports
 --full-page
+
+# Raw HR/LMS exports - contain employee PII, never commit
+data/
+*.xlsx
+*.xls
+*.csv
