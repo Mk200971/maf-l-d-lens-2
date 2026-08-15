@@ -18,7 +18,7 @@ const PLACEHOLDERS = [
 ]
 
 interface AIChatInputProps {
-  onSendMessage?: (message: string, options?: { think?: boolean; deepSearch?: boolean }) => void
+  onSendMessage?: (message: string, options?: { think?: boolean; forceChart?: boolean }) => void
   disabled?: boolean
   /** Active scope — persists across messages for the session. */
   scope?: ChatScope
@@ -36,7 +36,7 @@ export const AIChatInput: React.FC<AIChatInputProps> = ({
   const [showPlaceholder, setShowPlaceholder] = useState(true)
   const [isActive, setIsActive] = useState(false)
   const [thinkActive, setThinkActive] = useState(false)
-  const [deepSearchActive, setDeepSearchActive] = useState(false)
+  const [chartItActive, setChartItActive] = useState(false)
   const [inputValue, setInputValue] = useState("")
   const wrapperRef = useRef<HTMLDivElement>(null)
 
@@ -82,14 +82,14 @@ export const AIChatInput: React.FC<AIChatInputProps> = ({
     if (onSendMessage) {
       onSendMessage(inputValue.trim(), {
         think: thinkActive,
-        deepSearch: deepSearchActive,
+        forceChart: chartItActive,
       })
     }
     
     setInputValue("")
     setIsActive(false)
     setThinkActive(false)
-    setDeepSearchActive(false)
+    setChartItActive(false)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -294,24 +294,24 @@ export const AIChatInput: React.FC<AIChatInputProps> = ({
                 Think
               </button>
 
-              {/* Deep Search Toggle */}
+              {/* Chart it Toggle — forces the model to call the visualize tool */}
               <motion.button
                 className={`flex items-center px-4 gap-1 py-2 rounded-full transition font-medium whitespace-nowrap overflow-hidden justify-start disabled:opacity-50 disabled:cursor-not-allowed ${
-                  deepSearchActive
-                    ? "bg-blue-600/10 outline outline-blue-600/60 text-blue-950"
+                  chartItActive
+                    ? "bg-[var(--brand-gold)]/15 outline outline-[var(--brand-gold)]/60 text-[var(--brand-burgundy)]"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
-                title="Search across all data sources"
+                title="Force the assistant to produce a chart"
                 type="button"
                 disabled={disabled}
                 onClick={(e) => {
                   e.stopPropagation()
-                  setDeepSearchActive((a) => !a)
+                  setChartItActive((a) => !a)
                 }}
                 initial={false}
                 animate={{
-                  width: deepSearchActive ? 125 : 36,
-                  paddingLeft: deepSearchActive ? 8 : 9,
+                  width: chartItActive ? 100 : 36,
+                  paddingLeft: chartItActive ? 8 : 9,
                 }}
               >
                 <div className="flex-1">
@@ -321,10 +321,10 @@ export const AIChatInput: React.FC<AIChatInputProps> = ({
                   className="pb-[2px]"
                   initial={false}
                   animate={{
-                    opacity: deepSearchActive ? 1 : 0,
+                    opacity: chartItActive ? 1 : 0,
                   }}
                 >
-                  Deep Search
+                  Chart it
                 </motion.span>
               </motion.button>
             </div>

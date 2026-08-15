@@ -38,7 +38,7 @@ export default function MetricsAIPage() {
     scrollToBottom();
   }, [messages]);
 
-  const sendMessage = async (content: string) => {
+  const sendMessage = async (content: string, options?: { think?: boolean; forceChart?: boolean }) => {
     if (!content.trim()) return;
 
     const userMessage: Message = {
@@ -64,6 +64,8 @@ export default function MetricsAIPage() {
           // as the default filter for every tool call (unless the user
           // explicitly names a different slice in their question).
           scope,
+          // Pass the 'Chart it' toggle so the server can force a visualize call.
+          forceChart: options?.forceChart === true,
         }),
       });
 
@@ -249,10 +251,7 @@ export default function MetricsAIPage() {
         {/* Input Area - New AIChatInput Component */}
         <div className="shrink-0 border-t border-border p-6 bg-card pb-[max(1rem,env(safe-area-inset-bottom))]">
           <AIChatInput 
-            onSendMessage={(message, options) => {
-              console.log('Think:', options?.think, 'Deep Search:', options?.deepSearch);
-              sendMessage(message);
-            }}
+            onSendMessage={(message, options) => sendMessage(message, options)}
             disabled={isLoading}
             scope={scope}
             onScopeChange={setScope}

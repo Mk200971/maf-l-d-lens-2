@@ -48,6 +48,9 @@ const bodySchema = z.object({
     roles: z.array(z.string()).optional(),
     programs: z.array(z.string()).optional(),
   }).optional(),
+  // When true, the model MUST call the visualize tool to produce at least
+  // one chart before giving its final answer.
+  forceChart: z.boolean().optional(),
 });
 
 type ChatScope = z.infer<typeof bodySchema>['scope'];
@@ -286,6 +289,7 @@ async function streamWithFallback(
   useToolModel: boolean,
   overrideModel: string | undefined,
   tools: NonNullable<Parameters<typeof streamText>[0]['tools']>,
+  forceChart: boolean,
 ): Promise<Response> {
   const modelChain = useToolModel ? [...TOOL_MODEL_CHAIN, ...TEXT_MODEL_CHAIN] : TEXT_MODEL_CHAIN;
   const modelsToTry = overrideModel ? [overrideModel, ...modelChain] : modelChain;
@@ -311,7 +315,7 @@ async function streamWithFallback(
         })),
         temperature: 0.4,
         tools: shouldUseTools ? tools : undefined,
-        stopWhen: stepCountIs(6),
+        stopWhen: stepCountIs(forceChart ? 8 : 6),
         maxRetries: 2,
         maxOutputTokens: 1500,
         abortSignal: AbortSignal.timeout(45_000),
@@ -431,7 +435,7 @@ export async function POST(request: Request) {
       );
     }
     
-    const { messages, scope } = parseResult.data;
+    const { messages, scope, forceChart } = parseResult.data;
 
     const lastMessage = messages[messages.length - 1]?.content || '';
 
@@ -451,8 +455,14 @@ export async function POST(request: Request) {
     // Strengthen system prompt with hard rule about tool usage
     systemPrompt += `\n\nAfter calling any tool you MUST produce a final natural-language answer that states the numbers the tool returned. Never end your turn on a tool call. Never state a filtered number you did not obtain from a tool.`;
 
+    // "Chart it" mode: force the model to call visualize at least once.
+    // Pick a sensible measure + dimension if the user's question doesn't name one.
+    if (forceChart) {
+      systemPrompt += `\n\nThe user has enabled 'Chart it' mode. You MUST call the visualize tool at least once before giving your final answer, even if the question seems purely textual. If the user did not name a specific measure or dimension, default to measure='hours' and dimension='bu'. Never skip the visualize call in this mode.`;
+    }
+
     try {
-      const result = await streamWithFallback(messages, systemPrompt, useToolModel, activeModel, tools);
+      const result = await streamWithFallback(messages, systemPrompt, useToolModel, activeModel, tools, forceChart === true);
       return result;
     } catch (aiError) {
       console.error(
