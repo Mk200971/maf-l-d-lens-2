@@ -2,14 +2,18 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Send, Loader2, BarChart3 } from 'lucide-react';
+import { Send, Loader2, BarChart3, RotateCcw } from 'lucide-react';
 import MetricsChart from '@/components/MetricsChart';
 import { AIChatInput } from '@/components/ui/ai-chat-input';
+import { MarkdownMessage } from '@/components/chat/markdown-message';
+import { DynamicChart } from '@/components/chat/dynamic-chart';
+import type { ChartSpec } from '@/lib/chart-spec';
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  charts?: ChartSpec[];
 }
 
 export default function MetricsAIPage() {
@@ -58,24 +62,55 @@ export default function MetricsAIPage() {
       }
 
       const assistantId = (Date.now() + 1).toString();
-      setMessages((prev) => [...prev, { id: assistantId, role: 'assistant', content: '' }]);
+      setMessages((prev) => [...prev, { id: assistantId, role: 'assistant', content: '', charts: [] }]);
+      setIsLoading(false);
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let accumulated = '';
+      let buffer = '';
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        accumulated += decoder.decode(value, { stream: true });
-        setMessages((prev) =>
-          prev.map((m) => (m.id === assistantId ? { ...m, content: accumulated } : m))
-        );
+        
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || ''; // Keep partial line in buffer
+        
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          try {
+            const event = JSON.parse(line);
+            if (event.type === 'text') {
+              setMessages((prev) =>
+                prev.map((m) => (m.id === assistantId ? { ...m, content: m.content + event.value } : m))
+              );
+            } else if (event.type === 'chart') {
+              setMessages((prev) =>
+                prev.map((m) => (m.id === assistantId ? { ...m, charts: [...(m.charts || []), event.value] } : m))
+              );
+            } else if (event.type === 'error') {
+              setMessages((prev) =>
+                prev.map((m) => (m.id === assistantId ? { ...m, content: m.content + `\n\n*Error: ${event.value}*` } : m))
+              );
+            } else if (event.type === 'done') {
+              break;
+            }
+          } catch (e) {
+            // Silently skip malformed lines
+          }
+        }
       }
 
-      if (!accumulated) {
+      // If no content and no charts, show error with retry
+      const finalMsg = messages.find(m => m.id === assistantId);
+      if (!finalMsg?.content && (!finalMsg?.charts || finalMsg.charts.length === 0)) {
         setMessages((prev) =>
-          prev.map((m) => (m.id === assistantId ? { ...m, content: 'No response received' } : m))
+          prev.map((m) => (m.id === assistantId ? { 
+            ...m, 
+            content: 'I couldn\'t reach the analysis service.',
+            _retryContent: content 
+          } : m))
         );
       }
     } catch (error) {
@@ -149,7 +184,32 @@ export default function MetricsAIPage() {
                     : 'max-w-[46rem] rounded-bl-lg glass-panel'
                 }`}
               >
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                {message.role === 'assistant' && message.content.includes('I couldn\'t reach the analysis service') && (
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-sm">{message.content}</p>
+                    <button
+                      onClick={() => sendMessage(message._retryContent || '')}
+                      className="p-1 hover:bg-white/20 rounded-full transition"
+                      title="Retry"
+                    >
+                      <RotateCcw size={14} />
+                    </button>
+                  </div>
+                )}
+                {message.role !== 'assistant' || !message.content.includes('I couldn\'t reach the analysis service') ? (
+                  message.role === 'assistant' ? (
+                    <MarkdownMessage content={message.content} />
+                  ) : (
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  )
+                ) : null}
+                {message.charts && message.charts.length > 0 && (
+                  <div className="space-y-4 mt-4">
+                    {message.charts.map((chart, idx) => (
+                      <DynamicChart key={idx} spec={chart} />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ))}
