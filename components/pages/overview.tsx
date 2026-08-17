@@ -203,7 +203,7 @@ export function OverviewPage() {
           sub="distinct learners"
         />
         <KpiTile
-          label="Programs Active"
+          label="Programmes Active"
           docId="active-programs"
           value={String(activePrograms.length)}
           sub={`${kpis.programsCount} total across 2024–2026`}
@@ -327,7 +327,7 @@ export function OverviewPage() {
       </section>
 
       {/* Program contribution */}
-      <ChartCard title="Program Contribution" docId="program-contribution" description="Learning hours by program, sorted descending.">
+      <ChartCard title="Programme Contribution" docId="program-contribution" description="Learning hours by program, sorted descending.">
         <ChartContainer config={hoursConfig} className="h-56 w-full lg:h-72 xl:h-80">
           <BarChart data={programBars} layout="vertical" margin={{ left: 8, right: 16 }} onClick={(state: any) => {
             if (state?.activeTooltipIndex !== undefined && programBars[state.activeTooltipIndex]) {

@@ -25,24 +25,24 @@ const navSections = [
     label: 'Programmes',
     items: [
       { href: '/', label: 'Programme Overview', icon: LayoutDashboard },
-      { href: '/programs', label: 'Programs', icon: BookOpen },
-      { href: '/learners', label: 'Learners & Reach', icon: Users },
+      { href: '/programs', label: 'Programmes', icon: BookOpen },
+      { href: '/learners', label: 'Reach', icon: Users },
       { href: '/feedback', label: 'Feedback', icon: MessageSquare },
-      { href: '/eligibility', label: 'Eligibility', icon: Target },
+      { href: '/eligibility', label: 'Completion', icon: Target },
       { href: '/extras', label: 'Quality Signals', icon: Award },
     ],
   },
   {
     label: 'Enterprise Learning',
     items: [
-      { href: '/all-learnings', label: 'All Learning Activity', icon: Layers },
-      { href: '/mandatory', label: 'Mandatory Learnings', icon: ShieldCheck },
-      { href: '/skillup', label: 'SkillUp', icon: GraduationCap },
+      { href: '/all-learnings', label: 'All Activity', icon: Layers },
+      { href: '/mandatory', label: 'Compliance', icon: ShieldCheck },
+      { href: '/skillup', label: 'SkillUP', icon: GraduationCap },
     ],
   },
   {
     label: 'Tools',
-    items: [{ href: '/metrics-ai', label: 'Metrics AI', icon: Sparkles }],
+    items: [{ href: '/metrics-ai', label: 'Ask Lens', icon: Sparkles }],
   },
 ]
 

@@ -30,7 +30,7 @@ export function ProgramsPage() {
   return (
     <>
       <PageHeader
-        title="Programs"
+        title="Programmes"
         description="All programs with delivery, feedback, eligibility, and extras signals. Click a card for the full drill-down."
         badge={<ScopeBadge>Curated programmes</ScopeBadge>}
       />
